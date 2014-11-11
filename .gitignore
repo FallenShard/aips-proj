@@ -6,6 +6,8 @@ dist/
 nbdist/
 nbactions.xml
 nb-configuration.xml
+build.xml
+nbbuild.xml
 
 # Class Files #
 *.class
