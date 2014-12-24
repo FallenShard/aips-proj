@@ -3,19 +3,21 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
+
 package Test;
 
-import CH.ifa.draw.application.DrawApplication;
+import CH.ifa.draw.figures.LineConnection;
 
 /**
  *
  * @author FallenShard
  */
-public class Main
+public class AtomConnection extends LineConnection
 {
-    public static void main(String[] args)
+    AtomConnection()
     {
-        DrawApplication app = new ChemApp("Organic Chemistry");
-        app.open();
+        super();
+        setStartDecoration(null);
+        setEndDecoration(null);
     }
 }
