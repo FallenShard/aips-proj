@@ -21,7 +21,7 @@ import java.awt.Rectangle;
  */
 public class CarbonFigure extends AtomFigure
 {
-    int m_numElectrons = 8;
+    int m_numElectrons = 4;
     
     
     public CarbonFigure()
@@ -29,10 +29,11 @@ public class CarbonFigure extends AtomFigure
         super();
         
         m_nucleus = new EllipseFigure(new Point(20, 20), new Point(100,100));
-        m_nucleus.setAttribute("FillColor", Color.YELLOW);
+        m_nucleus.setAttribute("FillColor", Color.DARK_GRAY);
         
         m_name = new TextFigure();
         m_name.setFont(new Font("Calibri", Font.BOLD, 30));
+        m_name.setAttribute("TextColor", Color.WHITE);
         m_name.setText("C");
         Rectangle r = m_name.displayBox();
         m_name.basicDisplayBox(new Point(60 - r.width / 2, 60 - r.height / 2), null);
@@ -45,8 +46,9 @@ public class CarbonFigure extends AtomFigure
             int dX = (int)(55 * c + 60);
             int dY = (int)(55 * s + 60);
             
-            if (i % 2 == 1)
-                m_electrons.add(new ElectronFigure(new Point(dX, dY), 5));
+            //if (i % 2 == 1)
+            if (true)
+                m_electrons.add(new ElectronFigure(new Point(dX, dY), 5, this));
             else
                 m_electrons.add(new HoleFigure(new Point(dX, dY), 5));
         }

@@ -80,6 +80,21 @@ public class AtomFigure extends CompositeFigure
         
         return result;
     }
+    
+    public EllipseFigure getConnectableElectron(int x, int y)
+    {
+        EllipseFigure result = null;
+        for (EllipseFigure m_electron : m_electrons)
+        {
+            if (m_electron.canConnect() && m_electron.containsPoint(x, y))
+            {
+                result = m_electron;
+                break;
+            }
+        }
+        
+        return result;
+    }
 
     @Override
     public Rectangle displayBox()

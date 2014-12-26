@@ -7,6 +7,7 @@
 package Test.figures;
 
 import CH.ifa.draw.figures.EllipseFigure;
+import CH.ifa.draw.framework.Figure;
 import java.awt.Color;
 import java.awt.Point;
 
@@ -16,10 +17,15 @@ import java.awt.Point;
  */
 public class ElectronFigure extends EllipseFigure
 {
+    AtomFigure m_parent = null;
     
-    public ElectronFigure(Point center, int radius)
+    Figure m_otherElectron = null;
+    
+    public ElectronFigure(Point center, int radius, AtomFigure parent)
     {   
         setAttribute("FillColor", Color.GREEN);
+        
+        m_parent = parent;
         
         basicDisplayBox(new Point(center.x - radius, center.y - radius), new Point(center.x + radius, center.y + radius));
     }
@@ -27,6 +33,11 @@ public class ElectronFigure extends EllipseFigure
     @Override
     public boolean canConnect()
     {
-        return true;
+        return m_otherElectron == null;
+    }
+    
+    public void setCovalentBond(Figure electron)
+    {
+        m_otherElectron = electron;
     }
 }

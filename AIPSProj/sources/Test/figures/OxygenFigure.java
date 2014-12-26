@@ -19,7 +19,7 @@ import java.awt.Rectangle;
  */
 public class OxygenFigure extends AtomFigure
 {
-    int m_numElectrons = 8;
+    int m_numElectrons = 6;
     
     
     public OxygenFigure()
@@ -43,10 +43,11 @@ public class OxygenFigure extends AtomFigure
             int dX = (int)(55 * c + 60);
             int dY = (int)(55 * s + 60);
             
-            if (i == 2 || i == 6)
+            //if (i == 2 || i == 6)
+            if (false)
                 m_electrons.add(new HoleFigure(new Point(dX, dY), 5));
             else
-                m_electrons.add(new ElectronFigure(new Point(dX, dY), 5));
+                m_electrons.add(new ElectronFigure(new Point(dX, dY), 5, this));
         }
                
         super.add(m_nucleus);

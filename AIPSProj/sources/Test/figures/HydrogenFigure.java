@@ -19,7 +19,7 @@ import java.awt.Rectangle;
  */
 public class HydrogenFigure extends AtomFigure
 {
-    int m_numElectrons = 2;
+    int m_numElectrons = 1;
     
     
     public HydrogenFigure()
@@ -44,7 +44,7 @@ public class HydrogenFigure extends AtomFigure
             int dX = (int)(55 * c + 60);
             int dY = (int)(55 * s + 60);
             
-            EllipseFigure electron = new ElectronFigure(new Point(dX, dY), 5);
+            EllipseFigure electron = new ElectronFigure(new Point(dX, dY), 5, this);
             m_electrons.add(electron);
             
         }

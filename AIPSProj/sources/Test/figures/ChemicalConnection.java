@@ -8,6 +8,9 @@ package Test.figures;
 
 import CH.ifa.draw.figures.LineConnection;
 import CH.ifa.draw.framework.Figure;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Point;
 
 /**
  *
@@ -20,6 +23,18 @@ public class ChemicalConnection extends LineConnection
         super();
         setStartDecoration(null);
         setEndDecoration(null);
+    }
+    
+    @Override
+    public void draw(Graphics g) {
+        g.setColor(getFrameColor());
+        g.setColor(Color.RED);
+        Point p1, p2;
+        for (int i = 0; i < fPoints.size()-1; i++) {
+            p1 = (Point) fPoints.elementAt(i);
+            p2 = (Point) fPoints.elementAt(i+1);
+            g.drawLine(p1.x, p1.y, p2.x, p2.y);
+        }
     }
     
     @Override
