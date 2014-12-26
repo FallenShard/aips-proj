@@ -7,11 +7,9 @@
 package Test.figures;
 
 import CH.ifa.draw.figures.LineConnection;
-import static CH.ifa.draw.figures.PolyLineFigure.locator;
-import CH.ifa.draw.figures.PolyLineHandle;
 import CH.ifa.draw.framework.Figure;
-import CH.ifa.draw.standard.ChangeConnectionEndHandle;
-import CH.ifa.draw.standard.ChangeConnectionStartHandle;
+import Test.tools.ChangeBondEndHandle;
+import Test.tools.ChangeBondStartHandle;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -45,19 +43,26 @@ public class ChemicalBond extends LineConnection
         }
     }
     
-    public Vector handles() {
+    @Override
+    public Vector handles()
+    {
         Vector handles = new Vector(fPoints.size());
-        handles.addElement(new ChangeConnectionStartHandle(this));
-        for (int i = 1; i < fPoints.size()-1; i++)
-            handles.addElement(new PolyLineHandle(this, locator(i), i));
-        handles.addElement(new ChangeConnectionEndHandle(this));
+        handles.addElement(new ChangeBondStartHandle(this));
+        handles.addElement(new ChangeBondEndHandle(this));
         return handles;
     }
     
     @Override
     public boolean canConnect(Figure start, Figure end)
     {
-        return start instanceof ElectronFigure && end instanceof ElectronFigure;
+        if (start instanceof ElectronFigure && end instanceof ElectronFigure)
+        {
+            ElectronFigure el1 = (ElectronFigure)start;
+            ElectronFigure el2 = (ElectronFigure)end;
+            
+            return el1.getParent() != el2.getParent();
+        }
+        return false;
     }
     
     @Override

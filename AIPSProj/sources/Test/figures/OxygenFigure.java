@@ -26,11 +26,9 @@ public class OxygenFigure extends AtomFigure
     {
         super();
         
-        m_nucleus = new EllipseFigure(new Point(20, 20), new Point(100,100));
         m_nucleus.setAttribute("FillColor", Color.WHITE);
         
-        m_name = new TextFigure();
-        m_name.setFont(new Font("Calibri", Font.BOLD, 30));
+        
         m_name.setText("O");
         Rectangle r = m_name.displayBox();
         m_name.basicDisplayBox(new Point(60 - r.width / 2, 60 - r.height / 2), null);

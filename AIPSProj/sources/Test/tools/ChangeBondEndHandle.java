@@ -29,35 +29,40 @@ public class ChangeBondEndHandle extends ChangeConnectionHandle
     /**
      * Gets the end figure of a connection.
      */
-    protected Connector target() {
+    protected Connector target()
+    {
         return fConnection.end();
     }
 
     /**
      * Disconnects the end figure.
      */
-    protected void disconnect() {
+    protected void disconnect()
+    {
         fConnection.disconnectEnd();
     }
 
     /**
      * Sets the end of the connection.
      */
-    protected void connect(Connector c) {
+    protected void connect(Connector c)
+    {
         fConnection.connectEnd(c);
     }
 
     /**
      * Sets the end point of the connection.
      */
-    protected void setPoint(int x, int y) {
+    protected void setPoint(int x, int y)
+    {
         fConnection.endPoint(x, y);
     }
 
     /**
      * Returns the end point of the connection.
      */
-    public Point locate() {
+    public Point locate()
+    {
         return fConnection.endPoint();
     }
 }

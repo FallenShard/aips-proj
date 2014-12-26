@@ -40,4 +40,9 @@ public class ElectronFigure extends EllipseFigure
     {
         m_otherElectron = electron;
     }
+    
+    public AtomFigure getParent()
+    {
+        return m_parent;
+    }
 }

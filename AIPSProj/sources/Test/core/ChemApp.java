@@ -17,6 +17,7 @@ import CH.ifa.draw.standard.CreationTool;
 import CH.ifa.draw.standard.ToolButton;
 import CH.ifa.draw.util.Animatable;
 import Test.figures.AtomFactory;
+import Test.tools.AtomSelectionTool;
 import java.awt.Panel;
 
 /**
@@ -69,6 +70,12 @@ public class ChemApp extends DrawApplication
         
         tool = new CovalentBondTool(view(), new ChemicalBond());
         palette.add(new ToolButton(this, IMAGES + "LINE", "Covalent Bond Tool", tool));
+    }
+    
+    @Override
+    protected Tool createSelectionTool()
+    {
+        return new AtomSelectionTool(view());
     }
     
     @Override
