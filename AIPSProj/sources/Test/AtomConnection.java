@@ -6,7 +6,9 @@
 
 package Test;
 
+import CH.ifa.draw.figures.EllipseFigure;
 import CH.ifa.draw.figures.LineConnection;
+import CH.ifa.draw.framework.Figure;
 
 /**
  *
@@ -19,5 +21,11 @@ public class AtomConnection extends LineConnection
         super();
         setStartDecoration(null);
         setEndDecoration(null);
+    }
+    
+    @Override
+    public boolean canConnect(Figure start, Figure end)
+    {
+        return start instanceof EllipseFigure && end instanceof EllipseFigure;
     }
 }

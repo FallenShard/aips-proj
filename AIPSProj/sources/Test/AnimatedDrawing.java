@@ -29,8 +29,8 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable
     public synchronized Figure add(Figure figure) {
         if (figure instanceof AtomFigure)
         {
-            figure = new AnimationDecorator(figure);
-            elements.add((AnimationDecorator)figure);
+            //figure = new AnimationDecorator(figure);
+            //elements.add((AnimationDecorator)figure);
         }
         return super.add(figure);
     }
@@ -40,8 +40,8 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable
         Figure f = super.remove(figure);
         if (f instanceof AnimationDecorator)
         {
-            elements.remove((AnimationDecorator)f);
-            return ((AnimationDecorator) f).peelDecoration();
+            //elements.remove((AnimationDecorator)f);
+            //return ((AnimationDecorator) f).peelDecoration();
         }
             
         return f;
@@ -51,9 +51,9 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable
     public synchronized void replace(Figure figure, Figure replacement) {
         if (replacement instanceof AtomFigure)
         {
-            replacement = new AnimationDecorator(replacement);
-            elements.remove((AnimationDecorator)figure);
-            elements.add((AnimationDecorator)replacement);
+            //replacement = new AnimationDecorator(replacement);
+            //elements.remove((AnimationDecorator)figure);
+            //elements.add((AnimationDecorator)replacement);
         }
             
         super.replace(figure, replacement);

@@ -8,6 +8,7 @@ package Test;
 import CH.ifa.draw.application.DrawApplication;
 import static CH.ifa.draw.application.DrawApplication.IMAGES;
 import CH.ifa.draw.figures.ConnectedTextTool;
+import CH.ifa.draw.figures.LineConnection;
 import CH.ifa.draw.figures.TextFigure;
 import CH.ifa.draw.figures.TextTool;
 import CH.ifa.draw.framework.Drawing;
@@ -58,11 +59,11 @@ public class ChemApp extends DrawApplication
     {
         super.createTools(palette);
         
-        CreationTool ellipseTool = new CreationTool(view(), new AtomFigure()); //for example
-        ToolButton ellipseButton = new ToolButton(this, IMAGES + "ELLIPSE", "Atom Tool", ellipseTool);
+        CreationTool atomCreationTool = new CreationTool(view(), new AtomFigure());
+        ToolButton ellipseButton = new ToolButton(this, IMAGES + "ELLIPSE", "Atom Tool", atomCreationTool);
         palette.add(ellipseButton);
         
-        Tool tool = new AtomConnectionTool(view(), new AtomConnection());
+        Tool tool = new ElConnTool(view(), new LineConnection());
         ToolButton atomConnButton = new ToolButton(this, IMAGES + "LINE", "Atom Connection Tool", tool);
         palette.add(atomConnButton);
     }

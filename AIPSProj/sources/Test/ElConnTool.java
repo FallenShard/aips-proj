@@ -22,8 +22,7 @@ import java.util.Enumeration;
  *
  * @author FallenShard
  */
-public class AtomConnectionTool extends AbstractTool
-{
+public class ElConnTool extends AbstractTool {
 
     /**
      * the anchor point of the interaction
@@ -56,7 +55,7 @@ public class AtomConnectionTool extends AbstractTool
     private ConnectionFigure  fPrototype;
 
 
-    public AtomConnectionTool(DrawingView view, ConnectionFigure prototype) {
+    public ElConnTool(DrawingView view, ConnectionFigure prototype) {
         super(view);
         fPrototype = prototype;
     }
@@ -125,9 +124,7 @@ public class AtomConnectionTool extends AbstractTool
     public void mouseUp(MouseEvent e, int x, int y) {
         Figure c = null;
         if (fStartConnector != null)
-        {
             c = findTarget(e.getX(), e.getY(), drawing());
-        }
 
         if (c != null) {
             fEndConnector = findConnector(e.getX(), e.getY(), c);
@@ -147,7 +144,7 @@ public class AtomConnectionTool extends AbstractTool
     public void deactivate() {
         super.deactivate();
         if (fTarget != null)
-            fTarget.connectorVisibility(true);
+            fTarget.connectorVisibility(false);
     }
 
     /**
@@ -159,7 +156,7 @@ public class AtomConnectionTool extends AbstractTool
     }
 
     /**
-     * Finds a connectable figure target.
+     * Finds a connectable figure source.
      */
     protected Figure findSource(int x, int y, Drawing drawing) {
         return findConnectableFigure(x, y, drawing);
@@ -177,7 +174,11 @@ public class AtomConnectionTool extends AbstractTool
              && target.canConnect()
              && !target.includes(start)
              && fConnection.canConnect(start, target))
-            return target;
+            if (target instanceof AtomFigure)
+            {
+                AtomFigure faf = (AtomFigure)target;
+                return faf.e1;
+            }
         return null;
     }
 
@@ -213,10 +214,10 @@ public class AtomConnectionTool extends AbstractTool
         // track the figure containing the mouse
         if (c != fTarget) {
             if (fTarget != null)
-                fTarget.connectorVisibility(true);
+                fTarget.connectorVisibility(false);
             fTarget = c;
             if (fTarget != null)
-                fTarget.connectorVisibility(false);
+                fTarget.connectorVisibility(true);
         }
 
         Connector cc = null;
@@ -228,9 +229,7 @@ public class AtomConnectionTool extends AbstractTool
         view().checkDamage();
     }
 
-    private Connector findConnector(int x, int y, Figure f)
-    {
-        
+    private Connector findConnector(int x, int y, Figure f) {
         return f.connectorAt(x, y);
     }
 
@@ -239,8 +238,16 @@ public class AtomConnectionTool extends AbstractTool
      */
     protected Figure findConnectionStart(int x, int y, Drawing drawing) {
         Figure target = findConnectableFigure(x, y, drawing);
-        if ((target != null) && target.canConnect())
-            return target;
+        
+        if ((target != null) && target.canConnect()) 
+        {
+            if (target instanceof AtomFigure)
+            {
+                AtomFigure faf = (AtomFigure)target;
+                return faf.e1;
+            }
+            return null;
+        }
         return null;
     }
 
@@ -248,9 +255,9 @@ public class AtomConnectionTool extends AbstractTool
         FigureEnumeration k = drawing.figuresReverse();
         while (k.hasMoreElements()) {
             Figure figure = k.nextFigure();
-            if (/*!figure.includes(fConnection) && */figure.canConnect()) {
+            if (!figure.includes(fConnection) && figure.canConnect()) {
                 if (figure.containsPoint(x, y))
-                    return figure;     
+                    return figure;
             }
         }
         return null;
