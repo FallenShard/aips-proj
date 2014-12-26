@@ -4,8 +4,9 @@
  * and open the template in the editor.
  */
 
-package Test;
+package Test.tools;
 
+import Test.figures.AtomFigure;
 import CH.ifa.draw.framework.ConnectionFigure;
 import CH.ifa.draw.framework.Connector;
 import CH.ifa.draw.framework.Drawing;
@@ -87,17 +88,17 @@ public class ElConnTool extends AbstractTool {
                 view().add(fConnection);
             }
         }
-        else {
-            ConnectionFigure connection = findConnection(ex, ey, drawing());
-            if (connection != null) {
-                if (!connection.joinSegments(ex, ey)) {
-                    fSplitPoint = connection.splitSegment(ex, ey);
-                    fEditedConnection = connection;
-                } else {
-                    fEditedConnection = null;
-                }
-            }
-        }
+//        else {
+//            ConnectionFigure connection = findConnection(ex, ey, drawing());
+//            if (connection != null) {
+//                if (!connection.joinSegments(ex, ey)) {
+//                    fSplitPoint = connection.splitSegment(ex, ey);
+//                    fEditedConnection = connection;
+//                } else {
+//                    fEditedConnection = null;
+//                }
+//            }
+//        }
     }
 
     /**
@@ -177,7 +178,7 @@ public class ElConnTool extends AbstractTool {
             if (target instanceof AtomFigure)
             {
                 AtomFigure faf = (AtomFigure)target;
-                return faf.e1;
+                return faf.getConnectableElectron();
             }
         return null;
     }
@@ -244,7 +245,7 @@ public class ElConnTool extends AbstractTool {
             if (target instanceof AtomFigure)
             {
                 AtomFigure faf = (AtomFigure)target;
-                return faf.e1;
+                return faf.getConnectableElectron();
             }
             return null;
         }

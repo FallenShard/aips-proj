@@ -4,9 +4,8 @@
  * and open the template in the editor.
  */
 
-package Test;
+package Test.figures;
 
-import CH.ifa.draw.figures.EllipseFigure;
 import CH.ifa.draw.figures.LineConnection;
 import CH.ifa.draw.framework.Figure;
 
@@ -14,9 +13,9 @@ import CH.ifa.draw.framework.Figure;
  *
  * @author FallenShard
  */
-public class AtomConnection extends LineConnection
+public class ChemicalConnection extends LineConnection
 {
-    AtomConnection()
+    public ChemicalConnection()
     {
         super();
         setStartDecoration(null);
@@ -26,6 +25,10 @@ public class AtomConnection extends LineConnection
     @Override
     public boolean canConnect(Figure start, Figure end)
     {
-        return start instanceof EllipseFigure && end instanceof EllipseFigure;
+        return true;
+//        if (start instanceof ElectronFigure && end instanceof HoleFigure)
+//            return true;
+//        
+//        return start instanceof HoleFigure && end instanceof ElectronFigure;
     }
 }

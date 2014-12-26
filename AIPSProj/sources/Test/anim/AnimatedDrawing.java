@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Test;
+package Test.anim;
 
+import Test.figures.AtomFigure;
 import CH.ifa.draw.framework.Figure;
 import CH.ifa.draw.standard.StandardDrawing;
 import CH.ifa.draw.util.Animatable;

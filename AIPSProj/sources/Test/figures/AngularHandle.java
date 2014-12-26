@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package Test;
+package Test.figures;
 
 import CH.ifa.draw.framework.DrawingView;
 import CH.ifa.draw.framework.Figure;

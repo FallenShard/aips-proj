@@ -3,8 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Test;
+package Test.core;
 
+import Test.figures.CarbonFigure;
+import Test.anim.AnimatedDrawing;
+import Test.anim.Animator;
+import Test.figures.ChemicalConnection;
+import Test.tools.ElConnTool;
+import Test.figures.OxygenFigure;
 import CH.ifa.draw.application.DrawApplication;
 import static CH.ifa.draw.application.DrawApplication.IMAGES;
 import CH.ifa.draw.figures.ConnectedTextTool;
@@ -17,6 +23,7 @@ import CH.ifa.draw.standard.ConnectionTool;
 import CH.ifa.draw.standard.CreationTool;
 import CH.ifa.draw.standard.ToolButton;
 import CH.ifa.draw.util.Animatable;
+import Test.figures.HydrogenFigure;
 import java.awt.Panel;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,13 +66,17 @@ public class ChemApp extends DrawApplication
     {
         super.createTools(palette);
         
-        CreationTool atomCreationTool = new CreationTool(view(), new AtomFigure());
-        ToolButton ellipseButton = new ToolButton(this, IMAGES + "ELLIPSE", "Atom Tool", atomCreationTool);
-        palette.add(ellipseButton);
+        Tool tool = new CreationTool(view(), new CarbonFigure());
+        palette.add(new ToolButton(this, IMAGES + "ELLIPSE", "Carbon Creation Tool", tool));
         
-        Tool tool = new ElConnTool(view(), new LineConnection());
-        ToolButton atomConnButton = new ToolButton(this, IMAGES + "LINE", "Atom Connection Tool", tool);
-        palette.add(atomConnButton);
+        tool = new CreationTool(view(), new OxygenFigure());
+        palette.add(new ToolButton(this, IMAGES + "ELLIPSE", "Oxygen Creation Tool", tool));
+        
+        tool = new CreationTool(view(), new HydrogenFigure());
+        palette.add(new ToolButton(this, IMAGES + "ELLIPSE", "Hydrogen Creation Tool", tool));
+        
+        tool = new ElConnTool(view(), new ChemicalConnection());
+        palette.add(new ToolButton(this, IMAGES + "LINE", "Atom Connection Tool", tool));
     }
     
     @Override

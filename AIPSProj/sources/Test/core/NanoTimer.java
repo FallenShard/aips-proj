@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Test;
+package Test.core;
 
 /**
  *
@@ -11,14 +11,14 @@ package Test;
  */
 public class NanoTimer
 {
-    long accumulatedTime;
+    private long accumulatedTime;
 
-    NanoTimer()
+    public NanoTimer()
     {
         accumulatedTime = System.nanoTime();
     }
 
-    long getElapsedTime()
+    public long getElapsedTime()
     {
         long currentTime = System.nanoTime();
         long elapsedTime = currentTime - accumulatedTime;
@@ -26,7 +26,7 @@ public class NanoTimer
         return elapsedTime;
     }
 
-    long restart()
+    public long restart()
     {
         long currentTime = System.nanoTime();
         long elapsedTime = currentTime - accumulatedTime;
