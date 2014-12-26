@@ -5,28 +5,19 @@
  */
 package Test.core;
 
-import Test.figures.CarbonFigure;
 import Test.anim.AnimatedDrawing;
 import Test.anim.Animator;
-import Test.figures.ChemicalConnection;
-import Test.tools.ElConnTool;
-import Test.figures.OxygenFigure;
+import Test.figures.ChemicalBond;
+import Test.tools.CovalentBondTool;
 import CH.ifa.draw.application.DrawApplication;
 import static CH.ifa.draw.application.DrawApplication.IMAGES;
-import CH.ifa.draw.figures.ConnectedTextTool;
-import CH.ifa.draw.figures.LineConnection;
-import CH.ifa.draw.figures.TextFigure;
-import CH.ifa.draw.figures.TextTool;
 import CH.ifa.draw.framework.Drawing;
 import CH.ifa.draw.framework.Tool;
-import CH.ifa.draw.standard.ConnectionTool;
 import CH.ifa.draw.standard.CreationTool;
 import CH.ifa.draw.standard.ToolButton;
 import CH.ifa.draw.util.Animatable;
-import Test.figures.HydrogenFigure;
+import Test.figures.AtomFactory;
 import java.awt.Panel;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  *
@@ -36,13 +27,12 @@ public class ChemApp extends DrawApplication
 {
     private Animator animator;
     
-    private List<Animatable> electrons;
+    private static final String CUSTOM_IMAGES = "/Test/res/";
     
     ChemApp(String title)
     {
         super(title);
         
-        electrons = new LinkedList<>();
         //animator = new CircularAnimator((Animatable)drawing(), view());
     }
     
@@ -66,17 +56,19 @@ public class ChemApp extends DrawApplication
     {
         super.createTools(palette);
         
-        Tool tool = new CreationTool(view(), new CarbonFigure());
-        palette.add(new ToolButton(this, IMAGES + "ELLIPSE", "Carbon Creation Tool", tool));
+        AtomFactory atomFact = new AtomFactory();
         
-        tool = new CreationTool(view(), new OxygenFigure());
-        palette.add(new ToolButton(this, IMAGES + "ELLIPSE", "Oxygen Creation Tool", tool));
+        Tool tool = new CreationTool(view(), atomFact.createAtom(AtomFactory.Type.CARBON));
+        palette.add(new ToolButton(this, CUSTOM_IMAGES + "CARBON", "Carbon Creation Tool", tool));
         
-        tool = new CreationTool(view(), new HydrogenFigure());
-        palette.add(new ToolButton(this, IMAGES + "ELLIPSE", "Hydrogen Creation Tool", tool));
+        tool = new CreationTool(view(), atomFact.createAtom(AtomFactory.Type.OXYGEN));
+        palette.add(new ToolButton(this, CUSTOM_IMAGES + "OXYGEN", "Oxygen Creation Tool", tool));
         
-        tool = new ElConnTool(view(), new ChemicalConnection());
-        palette.add(new ToolButton(this, IMAGES + "LINE", "Atom Connection Tool", tool));
+        tool = new CreationTool(view(), atomFact.createAtom(AtomFactory.Type.HYDROGEN));
+        palette.add(new ToolButton(this, CUSTOM_IMAGES + "HYDROGEN", "Hydrogen Creation Tool", tool));
+        
+        tool = new CovalentBondTool(view(), new ChemicalBond());
+        palette.add(new ToolButton(this, IMAGES + "LINE", "Covalent Bond Tool", tool));
     }
     
     @Override

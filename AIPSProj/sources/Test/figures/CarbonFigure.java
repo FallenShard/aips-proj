@@ -41,16 +41,12 @@ public class CarbonFigure extends AtomFigure
         double angle = 2 * Math.PI / m_numElectrons;
         for (int i = 0; i < m_numElectrons; i++)
         {
-            double c = Math.cos(angle * i + Math.PI / 2);
-            double s = -Math.sin(angle * i + Math.PI / 2);
+            double c = Math.cos(angle * i);
+            double s = -Math.sin(angle * i);
             int dX = (int)(55 * c + 60);
             int dY = (int)(55 * s + 60);
-            
-            //if (i % 2 == 1)
-            if (true)
-                m_electrons.add(new ElectronFigure(new Point(dX, dY), 5, this));
-            else
-                m_electrons.add(new HoleFigure(new Point(dX, dY), 5));
+
+            m_electrons.add(new ElectronFigure(new Point(dX, dY), 5, this));
         }
                
         super.add(m_nucleus);

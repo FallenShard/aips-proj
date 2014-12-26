@@ -38,7 +38,6 @@ public class AtomFigure extends CompositeFigure
         super();
     }
 
-
     @Override
     public void basicDisplayBox(Point origin, Point corner)
     {

@@ -23,7 +23,7 @@ import java.util.Enumeration;
  *
  * @author FallenShard
  */
-public class ElConnTool extends AbstractTool
+public class CovalentBondTool extends AbstractTool
 {
     /**
      * Connector on the starting figure, a free electron
@@ -56,7 +56,7 @@ public class ElConnTool extends AbstractTool
     private final ConnectionFigure  m_connPrototype;
 
 
-    public ElConnTool(DrawingView view, ConnectionFigure prototype)
+    public CovalentBondTool(DrawingView view, ConnectionFigure prototype)
     {
         super(view);
         m_connPrototype = prototype;
