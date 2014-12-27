@@ -9,7 +9,6 @@ import chem.figures.AtomFigure;
 import CH.ifa.draw.framework.Figure;
 import CH.ifa.draw.framework.FigureEnumeration;
 import CH.ifa.draw.standard.StandardDrawing;
-import CH.ifa.draw.util.Animatable;
 import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -29,14 +28,13 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable
     private static final long serialVersionUID = -8566272817418441758L;
     private int bouncingDrawingSerializedDataVersion = 1;
     
-    List<AnimationDecorator> elements = new LinkedList<>();
+    List<Animatable> elements = new LinkedList<>();
 
     @Override
     public synchronized Figure add(Figure figure) {
-        if (figure instanceof AtomFigure)
+        if (figure instanceof Animatable)
         {
-            //figure = new AnimationDecorator(figure);
-            //elements.add((AnimationDecorator)figure);
+            elements.add((Animatable)figure);
         }
         return super.add(figure);
     }
@@ -65,7 +63,9 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable
         super.replace(figure, replacement);
     }
     
-    public void draw(Graphics g) {
+    @Override
+    public void draw(Graphics g)
+    {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setStroke(new BasicStroke(2));
@@ -75,10 +75,11 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable
     }
 
     @Override
-    public void animationStep() {
-        elements.stream().forEach((element) -> {
-            element.animationStep();
+    public void animationStep(float timeDelta)
+    {
+        elements.stream().forEach((element) ->
+        {
+            element.animationStep(timeDelta);
         });
-            
     }
 }

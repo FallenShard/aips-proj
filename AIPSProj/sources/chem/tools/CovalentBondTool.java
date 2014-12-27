@@ -15,9 +15,10 @@ import CH.ifa.draw.framework.Figure;
 import CH.ifa.draw.framework.FigureEnumeration;
 import CH.ifa.draw.standard.AbstractTool;
 import CH.ifa.draw.util.Geom;
+import chem.util.ProximitySeek;
+import chem.util.SeekStrategy;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
-import java.util.Enumeration;
 
 /**
  *
@@ -54,6 +55,8 @@ public class CovalentBondTool extends AbstractTool
      * Prototype for the connection figure
      */
     private final ConnectionFigure  m_connPrototype;
+    
+    private final SeekStrategy m_seekStrategy = new ProximitySeek();
 
 
     public CovalentBondTool(DrawingView view, ConnectionFigure prototype)
@@ -108,6 +111,7 @@ public class CovalentBondTool extends AbstractTool
      * Adjust the created connection or split segment.
      * This event is received when the connection is being edited
      */
+    @Override
     public void mouseDrag(MouseEvent e, int x, int y)
     {
         // Get the point where the mouse clicked
@@ -134,6 +138,7 @@ public class CovalentBondTool extends AbstractTool
     /**
      * Connects the figures if the mouse is released over another connectable electron.
      */
+    @Override
     public void mouseUp(MouseEvent e, int x, int y)
     {
         // The ending figure that will accept the connection
@@ -300,16 +305,12 @@ public class CovalentBondTool extends AbstractTool
         {
             Figure fig = figures.nextFigure();
 
-            // Only atoms can connect (or molecules)
-            if (fig.canConnect() && fig.containsPoint(x, y))
+            // Only atoms can connect with their electrons
+            if (fig.canConnect() && fig.containsPoint(x, y) && fig instanceof AtomFigure)
             {
-                // If the figure is an atom, find a free electron
-                if (fig instanceof AtomFigure)
-                {
-                    AtomFigure atom = (AtomFigure)fig;
-                    
-                    return atom.getConnectableElectron(x, y);
-                }
+                AtomFigure atom = (AtomFigure)fig;
+
+                return atom.getConnectableElectron(x, y, m_seekStrategy);
             }
         }
         return null;

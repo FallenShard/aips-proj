@@ -10,10 +10,13 @@ import CH.ifa.draw.figures.ChopEllipseConnector;
 import CH.ifa.draw.figures.EllipseFigure;
 import CH.ifa.draw.figures.TextFigure;
 import CH.ifa.draw.framework.Connector;
+import CH.ifa.draw.framework.Figure;
 import CH.ifa.draw.framework.FigureEnumeration;
 import CH.ifa.draw.framework.Handle;
 import CH.ifa.draw.standard.CompositeFigure;
 import CH.ifa.draw.standard.RelativeLocator;
+import chem.anim.Animatable;
+import chem.util.SeekStrategy;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -27,7 +30,7 @@ import java.util.Vector;
  *
  * @author FallenShard
  */
-public class AtomFigure extends CompositeFigure
+public abstract class AtomFigure extends CompositeFigure implements Animatable
 {
     protected EllipseFigure m_orbit = null;
     protected EllipseFigure m_nucleus = null;
@@ -37,13 +40,12 @@ public class AtomFigure extends CompositeFigure
     protected int m_lastOrbitEls;
     protected int m_lastOrbitMaxEls;
     
-    protected int m_valenceDiff;
-    
     protected Color m_orbitColor = Color.WHITE;
     
     public static final int MAX_BONDS = 3;
     
-    protected Vector<ElectronFigure> m_electrons = new Vector<>();
+    protected Vector<Figure> m_electrons = new Vector<>();
+    
     protected Map<ChemicalBond, AtomFigure> m_bonds = new HashMap<>();
 
     public AtomFigure()
@@ -62,7 +64,7 @@ public class AtomFigure extends CompositeFigure
         m_name = new TextFigure();
         m_name.setFont(new Font("Calibri", Font.BOLD, 30));
         
-        // This is the valence number (
+        // This is the valence number
         m_valence = new TextFigure();
         m_valence.setFont(new Font("Calibri", Font.BOLD, 12));
         
@@ -71,12 +73,15 @@ public class AtomFigure extends CompositeFigure
         super.add(m_name);
         super.add(m_valence);
     }
+    
+    public abstract String getAtomName();
 
     @Override
     public void basicDisplayBox(Point origin, Point corner)
     {
         Rectangle r = displayBox();
 
+        // FIX THIS CRAP
         basicMoveBy(origin.x - r.width / 2, origin.y - r.height / 2);
     }
     
@@ -91,7 +96,7 @@ public class AtomFigure extends CompositeFigure
     {
         Vector<Handle> handles = new Vector<>();
         
-        for (EllipseFigure fig : m_electrons)
+        for (Figure fig : m_electrons)
         {
             handles.add(new AngularHandle(fig, m_nucleus, RelativeLocator.center(), 15));
         }
@@ -99,34 +104,9 @@ public class AtomFigure extends CompositeFigure
         return handles;
     }
     
-    public EllipseFigure getConnectableElectron()
-    {
-        EllipseFigure result = null;
-        for (EllipseFigure m_electron : m_electrons)
-        {
-            if (m_electron.canConnect())
-            {
-                result = m_electron;
-                break;
-            }
-        }
-        
-        return result;
-    }
-    
-    public EllipseFigure getConnectableElectron(int x, int y)
-    {
-        EllipseFigure result = null;
-        for (EllipseFigure m_electron : m_electrons)
-        {
-            if (m_electron.canConnect() && m_electron.containsPoint(x, y))
-            {
-                result = m_electron;
-                break;
-            }
-        }
-        
-        return result;
+    public Figure getConnectableElectron(int x, int y, SeekStrategy seekStrategy)
+    {        
+        return seekStrategy.getConnectableFigure(x, y, m_electrons);
     }
 
     @Override
@@ -158,14 +138,13 @@ public class AtomFigure extends CompositeFigure
             m_orbit.setAttribute(name, m_orbitColor);
         }
         
-        for (ElectronFigure m_electron : m_electrons)
+        for (Map.Entry<ChemicalBond, AtomFigure> entry : m_bonds.entrySet())
         {
-            if (m_electron.getConnectedElectron() != null)
-            {
-                m_electron.getConnectedElectron().setAttribute(name, value);
-                m_electron.getCovalentBond().setAttribute(name, value);
-            }
-        }   
+            ChemicalBond bond = entry.getKey();
+            bond.setAttribute(name, value);
+            bond.startFigure().setAttribute(name, value);
+            bond.endFigure().setAttribute(name, value);
+        }
     }
     
     @Override
@@ -183,8 +162,7 @@ public class AtomFigure extends CompositeFigure
             m_lastOrbitEls++;
             m_bonds.put(bond, figure);
         }
-            
-        
+
         updateValenceText();
     }
     
@@ -217,10 +195,10 @@ public class AtomFigure extends CompositeFigure
         m_valence.basicDisplayBox(new Point(r.x + r.width / 2 - valR.width / 2, r.y + r.height / 2 - valR.height / 2 - m_name.displayBox().height / 2 - 5), null);
     }
     
-    protected boolean isFullLastOrbit()
-    {
-        return m_lastOrbitEls == m_lastOrbitMaxEls;
-    }
+//    protected boolean isFullLastOrbit()
+//    {
+//        return m_lastOrbitEls == m_lastOrbitMaxEls;
+//    }
     
     public int bondsWith(AtomFigure atom)
     {
@@ -232,5 +210,12 @@ public class AtomFigure extends CompositeFigure
         }
         
         return occurences;
+    }
+    
+    @Override
+    public void animationStep(float timeDelta)
+    {
+//        for (Figure electron : m_electrons)
+//            ((Animatable)electron).animationStep(timeDelta);
     }
 }

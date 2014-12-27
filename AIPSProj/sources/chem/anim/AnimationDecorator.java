@@ -52,7 +52,7 @@ public class AnimationDecorator extends DecoratorFigure {
         return new Point(fXVelocity, fYVelocity);
     }
 
-    public void animationStep() {
+    public void animationStep(float timeDelta) {
 	    //int xSpeed = fXVelocity;
 	    //int ySpeed = fYVelocity;
 	    //Rectangle box = displayBox();
@@ -68,7 +68,7 @@ public class AnimationDecorator extends DecoratorFigure {
 
         //if ((box.y < 0) && (ySpeed < 0))
         //    ySpeed = -ySpeed;
-        time += 1.0 / Animator.FPS;
+        time += 1.0 / AnimatorThread.FPS;
         double timeThroughLoop = time % loopDuration;
         double angle = timeThroughLoop * scale;
         

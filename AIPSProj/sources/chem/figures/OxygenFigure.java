@@ -8,6 +8,7 @@ package chem.figures;
 
 import CH.ifa.draw.figures.EllipseFigure;
 import CH.ifa.draw.figures.TextFigure;
+import CH.ifa.draw.framework.Figure;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Point;
@@ -47,7 +48,13 @@ public class OxygenFigure extends AtomFigure
             m_electrons.add(new ElectronFigure(new Point(dX, dY), 5, this));
         }
 
-        for (EllipseFigure fig : m_electrons)
+        for (Figure fig : m_electrons)
             super.add(fig);
+    }
+    
+    @Override
+    public String getAtomName()
+    {
+        return "O";
     }
 }

@@ -5,15 +5,14 @@
  */
 package chem.anim;
 
-import chem.core.NanoTimer;
+import chem.util.NanoTimer;
 import CH.ifa.draw.framework.DrawingView;
-import CH.ifa.draw.util.Animatable;
 
 /**
  *
  * @author FallenShard
  */
-public class Animator extends Thread
+public class AnimatorThread extends Thread
 {
     private final DrawingView     m_view;
     private final Animatable      m_animatable;
@@ -22,8 +21,9 @@ public class Animator extends Thread
     
     public  static final int    FPS = 60;
     private static final long   NanoTimePerFrame = 1000000000 / FPS;
+    private static final float  SecondsPerFrame = 1.f / FPS;
 
-    public Animator(Animatable animatable, DrawingView view)
+    public AnimatorThread(Animatable animatable, DrawingView view)
     {
         super("Animator");
         m_view = view;
@@ -56,7 +56,7 @@ public class Animator extends Thread
             while (timeSinceLastUpdate > NanoTimePerFrame)
             {
                 m_view.freezeView();
-                m_animatable.animationStep();
+                m_animatable.animationStep(SecondsPerFrame);
                 m_view.checkDamage();
                 m_view.unfreezeView();
                 

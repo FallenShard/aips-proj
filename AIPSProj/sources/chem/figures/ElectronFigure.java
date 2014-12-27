@@ -8,6 +8,7 @@ package chem.figures;
 
 import CH.ifa.draw.figures.EllipseFigure;
 import CH.ifa.draw.framework.Figure;
+import chem.anim.Animatable;
 import java.awt.Color;
 import java.awt.Point;
 
@@ -15,7 +16,7 @@ import java.awt.Point;
  *
  * @author FallenShard
  */
-public class ElectronFigure extends EllipseFigure
+public class ElectronFigure extends EllipseFigure implements Animatable
 {
     AtomFigure m_parent = null;
     
@@ -35,7 +36,7 @@ public class ElectronFigure extends EllipseFigure
     @Override
     public boolean canConnect()
     {
-        return m_otherElectron == null;// && !m_parent.isFullLastOrbit();
+        return m_otherElectron == null;
     }
     
     public void setCovalentBond(ChemicalBond bond, Figure electron)
@@ -62,5 +63,11 @@ public class ElectronFigure extends EllipseFigure
     public Figure getCovalentBond()
     {
         return m_covalentBond;
+    }
+
+    @Override
+    public void animationStep(float timeDelta)
+    {
+        moveBy((int) (100 * timeDelta + 0.5), 0);
     }
 }

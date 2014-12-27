@@ -6,7 +6,7 @@
 package chem.core;
 
 import chem.anim.AnimatedDrawing;
-import chem.anim.Animator;
+import chem.anim.AnimatorThread;
 import chem.figures.ChemicalBond;
 import chem.tools.CovalentBondTool;
 import CH.ifa.draw.application.DrawApplication;
@@ -15,7 +15,7 @@ import CH.ifa.draw.framework.Drawing;
 import CH.ifa.draw.framework.Tool;
 import CH.ifa.draw.standard.CreationTool;
 import CH.ifa.draw.standard.ToolButton;
-import CH.ifa.draw.util.Animatable;
+import chem.anim.Animatable;
 import chem.figures.AtomFactory;
 import chem.tools.AtomSelectionTool;
 import java.awt.Panel;
@@ -26,15 +26,13 @@ import java.awt.Panel;
  */
 public class ChemApp extends DrawApplication
 {
-    private Animator animator;
+    private AnimatorThread animator;
     
     private static final String CUSTOM_IMAGES = "/chem/res/";
     
     ChemApp(String title)
     {
         super(title);
-        
-        //animator = new CircularAnimator((Animatable)drawing(), view());
     }
     
     @Override
@@ -42,14 +40,14 @@ public class ChemApp extends DrawApplication
     {
         super.open();
         
-        //startAnimation();
+        startAnimation();
     }
     
     @Override
     public void destroy() {
         super.destroy();
         
-        //endAnimation();
+        endAnimation();
     }
     
     @Override
@@ -87,7 +85,7 @@ public class ChemApp extends DrawApplication
     public void startAnimation() {
         if (drawing() instanceof Animatable && animator == null)
         {
-            animator = new Animator((Animatable)drawing(), view());
+            animator = new AnimatorThread((Animatable)drawing(), view());
             animator.start();
         }
     }

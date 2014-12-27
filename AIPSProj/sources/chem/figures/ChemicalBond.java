@@ -10,9 +10,6 @@ import CH.ifa.draw.figures.LineConnection;
 import CH.ifa.draw.framework.Figure;
 import chem.tools.ChangeBondEndHandle;
 import chem.tools.ChangeBondStartHandle;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Point;
 import java.util.Vector;
 
 /**
@@ -51,10 +48,7 @@ public class ChemicalBond extends LineConnection
             AtomFigure p1 = el1.getParent();
             AtomFigure p2 = el2.getParent();
             
-            boolean checkParents = p1 != p2;
-            boolean checkTripleBond = p1.bondsWith(p2) < AtomFigure.MAX_BONDS;
-            
-            return checkParents && checkTripleBond;
+            return p1 != p2 && p1.bondsWith(p2) < AtomFigure.MAX_BONDS;
         }
         return false;
     }

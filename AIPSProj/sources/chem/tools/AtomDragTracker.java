@@ -43,6 +43,12 @@ public class AtomDragTracker extends AbstractTool
         if (e.isShiftDown())
         {
             view().toggleSelection(m_selectedFigure);
+            
+            if (view().selection().contains(m_selectedFigure))
+                m_selectedFigure.setAttribute("FrameColor", Color.RED);
+            else
+                m_selectedFigure.setAttribute("FrameColor", Color.BLACK);
+            
             m_selectedFigure = null;
             
             // Enumerate all selected figures and paint them red

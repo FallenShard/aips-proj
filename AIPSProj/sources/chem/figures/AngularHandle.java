@@ -20,8 +20,8 @@ import java.awt.Rectangle;
  */
 public class AngularHandle extends LocatorHandle
 {
-    private Figure m_centerFig;
-    private int surfaceOffset;
+    private final Figure m_centerFig;
+    private final int surfaceOffset;
     
     public AngularHandle(Figure owner, Figure centerFig, Locator l, int offset)
     {

@@ -10,6 +10,7 @@ import chem.figures.AtomFigure;
 import chem.figures.ElectronFigure;
 import CH.ifa.draw.figures.EllipseFigure;
 import CH.ifa.draw.figures.TextFigure;
+import CH.ifa.draw.framework.Figure;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Point;
@@ -37,7 +38,6 @@ public class CarbonFigure extends AtomFigure
         // Set valence text attributes
         m_lastOrbitEls = 4;
         m_lastOrbitMaxEls = 8;
-        m_valenceDiff = 0;
         m_valence.setAttribute("TextColor", Color.WHITE);
         updateValenceText();
         
@@ -53,7 +53,13 @@ public class CarbonFigure extends AtomFigure
             m_electrons.add(new ElectronFigure(new Point(dX, dY), 5, this));
         }
 
-        for (EllipseFigure fig : m_electrons)
+        for (Figure fig : m_electrons)
             super.add(fig);
+    }
+    
+    @Override
+    public String getAtomName()
+    {
+        return "C";
     }
 }

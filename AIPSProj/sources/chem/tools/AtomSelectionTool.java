@@ -10,9 +10,7 @@ import CH.ifa.draw.framework.DrawingView;
 import CH.ifa.draw.framework.Figure;
 import CH.ifa.draw.framework.Handle;
 import CH.ifa.draw.framework.Tool;
-import CH.ifa.draw.standard.DragTracker;
 import CH.ifa.draw.standard.HandleTracker;
-import CH.ifa.draw.standard.SelectAreaTracker;
 import CH.ifa.draw.standard.SelectionTool;
 import java.awt.Color;
 import java.awt.event.MouseEvent;
@@ -23,7 +21,7 @@ import java.awt.event.MouseEvent;
  */
 public class AtomSelectionTool extends SelectionTool
 {
-    private Tool fChild = null;
+    private Tool m_currentTool = null;
 
     public AtomSelectionTool(DrawingView view)
     {
@@ -33,12 +31,13 @@ public class AtomSelectionTool extends SelectionTool
     /**
      * Handles mouse down events and starts the corresponding tracker.
      */
+    @Override
     public void mouseDown(MouseEvent e, int x, int y)
     {
         // on Windows NT: AWT generates additional mouse down events
         // when the left button is down && right button is clicked.
         // To avoid dead locks we ignore such events
-        if (fChild != null)
+        if (m_currentTool != null)
             return;
 
         view().freezeView();
@@ -47,7 +46,7 @@ public class AtomSelectionTool extends SelectionTool
         Handle handle = view().findHandle(e.getX(), e.getY());
         if (handle != null)
         {
-            fChild = createHandleTracker(view(), handle);
+            m_currentTool = createHandleTracker(view(), handle);
         }
         else
         {
@@ -56,7 +55,7 @@ public class AtomSelectionTool extends SelectionTool
 
             if (selected != null)
             {
-                fChild = createDragTracker(view(), selected);
+                m_currentTool = createDragTracker(view(), selected);
             }
             else 
             {
@@ -67,10 +66,10 @@ public class AtomSelectionTool extends SelectionTool
                     
                     view().clearSelection();
                 }
-                fChild = createAreaTracker(view());
+                m_currentTool = createAreaTracker(view());
             }
         }
-        fChild.mouseDown(e, x, y);
+        m_currentTool.mouseDown(e, x, y);
     }
 
     /**
@@ -78,8 +77,8 @@ public class AtomSelectionTool extends SelectionTool
      * current tracker.
      */
     public void mouseDrag(MouseEvent e, int x, int y) {
-        if (fChild != null) // JDK1.1 doesn't guarantee mouseDown, mouseDrag, mouseUp
-            fChild.mouseDrag(e, x, y);
+        if (m_currentTool != null) // JDK1.1 doesn't guarantee mouseDown, mouseDrag, mouseUp
+            m_currentTool.mouseDrag(e, x, y);
     }
 
     /**
@@ -88,14 +87,15 @@ public class AtomSelectionTool extends SelectionTool
      */
     public void mouseUp(MouseEvent e, int x, int y) {
         view().unfreezeView();
-        if (fChild != null) // JDK1.1 doesn't guarantee mouseDown, mouseDrag, mouseUp
-            fChild.mouseUp(e, x, y);
-        fChild = null;
+        if (m_currentTool != null) // JDK1.1 doesn't guarantee mouseDown, mouseDrag, mouseUp
+            m_currentTool.mouseUp(e, x, y);
+        m_currentTool = null;
     }
 
     /**
      * Factory method to create a Handle tracker. It is used to track a handle.
      */
+    @Override
     protected Tool createHandleTracker(DrawingView view, Handle handle) {
         return new HandleTracker(view, handle);
     }
@@ -103,6 +103,7 @@ public class AtomSelectionTool extends SelectionTool
     /**
      * Factory method to create a Drag tracker. It is used to drag a figure.
      */
+    @Override
     protected Tool createDragTracker(DrawingView view, Figure f) {
         return new AtomDragTracker(view, f);
     }
@@ -111,6 +112,7 @@ public class AtomSelectionTool extends SelectionTool
      * Factory method to create an area tracker. It is used to select an
      * area.
      */
+    @Override
     protected Tool createAreaTracker(DrawingView view) {
         return new AtomAreaTracker(view);
     }

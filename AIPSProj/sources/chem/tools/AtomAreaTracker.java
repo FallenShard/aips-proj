@@ -100,8 +100,5 @@ public class AtomAreaTracker extends AbstractTool
                 } 
             }
         }
-        
-        //for (Object f : view().selection())
-        //        ((Figure)f).setAttribute("FrameColor", Color.RED);
     }
 }
