@@ -14,15 +14,11 @@ import CH.ifa.draw.framework.FigureEnumeration;
 import CH.ifa.draw.framework.Handle;
 import CH.ifa.draw.standard.CompositeFigure;
 import CH.ifa.draw.standard.RelativeLocator;
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.RadialGradientPaint;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 import java.util.Vector;
 
 /**
@@ -31,23 +27,46 @@ import java.util.Vector;
  */
 public class AtomFigure extends CompositeFigure
 {
+    protected EllipseFigure m_orbit = null;
     protected EllipseFigure m_nucleus = null;
     
     protected TextFigure m_name = null;
+    protected TextFigure m_valence = null;
+    protected int m_lastOrbitEls;
+    protected int m_lastOrbitMaxEls;
     
-    protected EllipseFigure m_orbit = null;
+    protected int m_valenceDiff;
     
-    protected Vector<EllipseFigure> m_electrons = new Vector<>();
+    protected Color m_orbitColor = Color.WHITE;
+    
+    public static final int MAX_BONDS = 3;
+    
+    protected Vector<ElectronFigure> m_electrons = new Vector<>();
 
     public AtomFigure()
     {
         super();
         
+        // Create nucleus here
         m_nucleus = new EllipseFigure(new Point(20, 20), new Point(100,100));
-        m_orbit = new EllipseFigure(new Point (5, 5), new Point(115, 115));
         
+        // Create a halo-like orbit
+        m_orbit = new EllipseFigure(new Point (5, 5), new Point(115, 115));
+        m_orbit.setAttribute("FillColor", new Color(0, 0, 0, 0));
+        m_orbit.setAttribute("FrameColor", Color.WHITE);
+        
+        // This is the central text, atom's name
         m_name = new TextFigure();
         m_name.setFont(new Font("Calibri", Font.BOLD, 30));
+        
+        // This is the valence number (
+        m_valence = new TextFigure();
+        m_valence.setFont(new Font("Calibri", Font.BOLD, 12));
+        
+        super.add(m_orbit);
+        super.add(m_nucleus);
+        super.add(m_name);
+        super.add(m_valence);
     }
 
     @Override
@@ -130,17 +149,65 @@ public class AtomFigure extends CompositeFigure
         FigureEnumeration k = figures();
         while (k.hasMoreElements())
             k.nextFigure().setAttribute(name, value);
+        
+        if (name.equalsIgnoreCase("FrameColor") && (Color)(value) == Color.BLACK)
+        {
+            m_orbit.setAttribute(name, m_orbitColor);
+        }
+        
+        for (ElectronFigure m_electron : m_electrons)
+        {
+            if (m_electron.getConnectedElectron() != null)
+            {
+                m_electron.getConnectedElectron().setAttribute(name, value);
+                m_electron.getCovalentBond().setAttribute(name, value);
+            }
+        }   
     }
     
     @Override
     public void draw(Graphics g)
-    {
-        Graphics2D g2 = (Graphics2D) g;
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setStroke(new BasicStroke(2));
-        
+    {   
         FigureEnumeration k = figures();
         while (k.hasMoreElements())
             k.nextFigure().draw(g);
+    }
+    
+    protected void increaseValence()
+    {
+        if (m_lastOrbitEls < m_lastOrbitMaxEls)
+            m_lastOrbitEls++;
+        
+        updateValenceText();
+    }
+    
+    protected void decreaseValence()
+    {
+        m_lastOrbitEls--;
+
+        updateValenceText();
+    }
+    
+    protected void updateValenceText()
+    {
+        m_valence.setText("" + m_lastOrbitEls);
+        
+        if (m_lastOrbitEls == m_lastOrbitMaxEls)
+        {
+            m_orbitColor = Color.GREEN;
+            m_orbit.setAttribute("FrameColor", m_orbitColor);
+            m_orbit.changed();
+        }
+        else
+        {
+            m_orbitColor = Color.WHITE;
+            m_orbit.setAttribute("FrameColor", m_orbitColor);
+            m_orbit.changed();
+        }
+    }
+    
+    protected boolean isFullLastOrbit()
+    {
+        return m_lastOrbitEls == m_lastOrbitMaxEls;
     }
 }

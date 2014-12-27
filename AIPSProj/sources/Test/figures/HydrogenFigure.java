@@ -18,40 +18,37 @@ import java.awt.Rectangle;
  * @author FallenShard
  */
 public class HydrogenFigure extends AtomFigure
-{
-    int m_numElectrons = 1;
-    
-    
+{    
     public HydrogenFigure()
     {
         super();
         
-        m_nucleus = new EllipseFigure(new Point(20, 20), new Point(100,100));
         m_nucleus.setAttribute("FillColor", Color.BLUE);
         
-        m_name = new TextFigure();
-        m_name.setFont(new Font("Calibri", Font.BOLD, 30));
-        m_name.setText("H");
         m_name.setAttribute("TextColor", Color.WHITE);
+        m_name.setText("H");
         Rectangle r = m_name.displayBox();
         m_name.basicDisplayBox(new Point(60 - r.width / 2, 60 - r.height / 2), null);
         
-        double angle = 2 * Math.PI / m_numElectrons;
-        for (int i = 0; i < m_numElectrons; i++)
+        // Set valence text attributes
+        m_lastOrbitEls = 1;
+        m_lastOrbitMaxEls = 2;
+        m_valence.setAttribute("TextColor", Color.WHITE);
+        m_valence.setText("" + m_lastOrbitEls);
+        Rectangle valR = m_valence.displayBox();
+        m_valence.basicDisplayBox(new Point(60 - valR.width / 2, 60 - valR.height / 2 - r.height / 2 - 5), null);
+        
+        double angle = 2 * Math.PI / m_lastOrbitEls;
+        for (int i = 0; i < m_lastOrbitEls; i++)
         {
             double c = Math.cos(angle * i);
             double s = -Math.sin(angle * i);
             int dX = (int)(55 * c + 60);
             int dY = (int)(55 * s + 60);
-            
-            EllipseFigure electron = new ElectronFigure(new Point(dX, dY), 5, this);
-            m_electrons.add(electron);
-            
+
+            m_electrons.add(new ElectronFigure(new Point(dX, dY), 5, this));            
         }
                
-        super.add(m_nucleus);
-        super.add(m_name);
-        
         for (EllipseFigure fig : m_electrons)
             super.add(fig);
     }

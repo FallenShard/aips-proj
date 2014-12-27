@@ -19,9 +19,6 @@ import java.awt.Rectangle;
  */
 public class OxygenFigure extends AtomFigure
 {
-    int m_numElectrons = 6;
-    
-    
     public OxygenFigure()
     {
         super();
@@ -33,8 +30,16 @@ public class OxygenFigure extends AtomFigure
         Rectangle r = m_name.displayBox();
         m_name.basicDisplayBox(new Point(60 - r.width / 2, 60 - r.height / 2), null);
         
-        double angle = 2 * Math.PI / m_numElectrons;
-        for (int i = 0; i < m_numElectrons; i++)
+        // Set valence text attributes
+        m_lastOrbitEls = 6;
+        m_lastOrbitMaxEls = 8;
+        m_valence.setAttribute("TextColor", Color.BLACK);
+        m_valence.setText("" + m_lastOrbitEls);
+        Rectangle valR = m_valence.displayBox();
+        m_valence.basicDisplayBox(new Point(60 - valR.width / 2, 60 - valR.height / 2 - r.height / 2 - 5), null);
+        
+        double angle = 2 * Math.PI / m_lastOrbitEls;
+        for (int i = 0; i < m_lastOrbitEls; i++)
         {
             double c = Math.cos(angle * i);
             double s = -Math.sin(angle * i);
@@ -43,10 +48,7 @@ public class OxygenFigure extends AtomFigure
             
             m_electrons.add(new ElectronFigure(new Point(dX, dY), 5, this));
         }
-               
-        super.add(m_nucleus);
-        super.add(m_name);
-        
+
         for (EllipseFigure fig : m_electrons)
             super.add(fig);
     }

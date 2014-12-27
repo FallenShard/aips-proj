@@ -21,6 +21,8 @@ public class ElectronFigure extends EllipseFigure
     
     Figure m_otherElectron = null;
     
+    ChemicalBond m_covalentBond = null;
+    
     public ElectronFigure(Point center, int radius, AtomFigure parent)
     {   
         setAttribute("FillColor", Color.GREEN);
@@ -33,16 +35,32 @@ public class ElectronFigure extends EllipseFigure
     @Override
     public boolean canConnect()
     {
-        return m_otherElectron == null;
+        return m_otherElectron == null && !m_parent.isFullLastOrbit();
     }
     
-    public void setCovalentBond(Figure electron)
+    public void setCovalentBond(ChemicalBond bond, Figure electron)
     {
+        m_covalentBond = bond;
         m_otherElectron = electron;
+        
+        if (bond == null)
+            m_parent.decreaseValence();
+        else
+            m_parent.increaseValence();
     }
     
     public AtomFigure getParent()
     {
         return m_parent;
+    }
+    
+    public Figure getConnectedElectron()
+    {
+        return m_otherElectron;
+    }
+    
+    public Figure getCovalentBond()
+    {
+        return m_covalentBond;
     }
 }

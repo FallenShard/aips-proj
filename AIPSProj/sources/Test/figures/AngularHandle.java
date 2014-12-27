@@ -10,6 +10,7 @@ import CH.ifa.draw.framework.DrawingView;
 import CH.ifa.draw.framework.Figure;
 import CH.ifa.draw.framework.Locator;
 import CH.ifa.draw.standard.LocatorHandle;
+import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 
@@ -51,5 +52,11 @@ public class AngularHandle extends LocatorHandle
         Point corner = new Point(newX + bounds.width / 2, newY + bounds.height / 2);
         
         owner().displayBox(origin, corner);
+    }
+    
+    @Override
+    public void draw(Graphics g)
+    {
+        
     }
 }

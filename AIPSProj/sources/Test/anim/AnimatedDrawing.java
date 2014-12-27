@@ -7,8 +7,13 @@ package Test.anim;
 
 import Test.figures.AtomFigure;
 import CH.ifa.draw.framework.Figure;
+import CH.ifa.draw.framework.FigureEnumeration;
 import CH.ifa.draw.standard.StandardDrawing;
 import CH.ifa.draw.util.Animatable;
+import java.awt.BasicStroke;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -58,6 +63,15 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable
         }
             
         super.replace(figure, replacement);
+    }
+    
+    public void draw(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setStroke(new BasicStroke(2));
+        FigureEnumeration k = figures();
+        while (k.hasMoreElements())
+            k.nextFigure().draw(g);
     }
 
     @Override

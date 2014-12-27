@@ -32,18 +32,6 @@ public class ChemicalBond extends LineConnection
     }
     
     @Override
-    public void draw(Graphics g) {
-        g.setColor(getFrameColor());
-        g.setColor(Color.RED);
-        Point p1, p2;
-        for (int i = 0; i < fPoints.size()-1; i++) {
-            p1 = (Point) fPoints.elementAt(i);
-            p2 = (Point) fPoints.elementAt(i+1);
-            g.drawLine(p1.x, p1.y, p2.x, p2.y);
-        }
-    }
-    
-    @Override
     public Vector handles()
     {
         Vector handles = new Vector(fPoints.size());
@@ -73,8 +61,8 @@ public class ChemicalBond extends LineConnection
             m_start = (ElectronFigure)start;
             m_end = (ElectronFigure)end;
             
-            m_start.setCovalentBond(m_end);
-            m_end.setCovalentBond(m_start);
+            m_start.setCovalentBond(this, end);
+            m_end.setCovalentBond(this, start);
         }
     }
     
@@ -84,11 +72,11 @@ public class ChemicalBond extends LineConnection
         if (start instanceof ElectronFigure && end instanceof ElectronFigure)
         {
             if (m_start != null)
-                m_start.setCovalentBond(null);
+                m_start.setCovalentBond(null, null);
             m_start = null;
             
             if (m_end != null)
-                m_end.setCovalentBond(null);
+                m_end.setCovalentBond(null, null);
             m_end = null;
         }
     }

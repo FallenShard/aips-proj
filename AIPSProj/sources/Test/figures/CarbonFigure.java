@@ -20,26 +20,32 @@ import java.awt.Rectangle;
  * @author FallenShard
  */
 public class CarbonFigure extends AtomFigure
-{
-    int m_numElectrons = 4;
-    
-    
+{    
     public CarbonFigure()
     {
         super();
-        
-        //m_nucleus = new EllipseFigure(new Point(20, 20), new Point(100,100));
+
+        // Set nucleus color
         m_nucleus.setAttribute("FillColor", Color.DARK_GRAY);
-        
-        //m_name = new TextFigure();
-        //m_name.setFont(new Font("Calibri", Font.BOLD, 30));
+
+        // Set name text attributes
         m_name.setAttribute("TextColor", Color.WHITE);
         m_name.setText("C");
         Rectangle r = m_name.displayBox();
         m_name.basicDisplayBox(new Point(60 - r.width / 2, 60 - r.height / 2), null);
         
-        double angle = 2 * Math.PI / m_numElectrons;
-        for (int i = 0; i < m_numElectrons; i++)
+        // Set valence text attributes
+        m_lastOrbitEls = 4;
+        m_lastOrbitMaxEls = 8;
+        m_valenceDiff = 0;
+        m_valence.setAttribute("TextColor", Color.WHITE);
+        m_valence.setText("" + m_lastOrbitEls);
+        Rectangle valR = m_valence.displayBox();
+        m_valence.basicDisplayBox(new Point(60 - valR.width / 2, 60 - valR.height / 2 - r.height / 2 - 5), null);
+        
+        // Electrons
+        double angle = 2 * Math.PI / m_lastOrbitEls;
+        for (int i = 0; i < m_lastOrbitEls; i++)
         {
             double c = Math.cos(angle * i);
             double s = -Math.sin(angle * i);
@@ -48,10 +54,7 @@ public class CarbonFigure extends AtomFigure
 
             m_electrons.add(new ElectronFigure(new Point(dX, dY), 5, this));
         }
-               
-        super.add(m_nucleus);
-        super.add(m_name);
-        
+
         for (EllipseFigure fig : m_electrons)
             super.add(fig);
     }
