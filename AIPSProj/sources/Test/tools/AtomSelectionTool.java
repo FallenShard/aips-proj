@@ -55,25 +55,30 @@ public class AtomSelectionTool extends SelectionTool
             // Otherwise, a figure might have been selected
             Figure selected = drawing().findFigure(e.getX(), e.getY());
             
-            if (m_selection != selected && m_selection != null)
+            if (m_selection != selected && selected != null)
             {
-                m_selection.setAttribute("FrameColor", Color.BLACK);
-                m_selection.setAttribute("UseRadialGlow", false);
+                //selected.setAttribute("FrameColor", Color.RED);
             }
             
             m_selection = selected;
             
-            if (m_selection != null)
+            if (selected != null)
             {
-                m_selection.setAttribute("FrameColor", Color.RED);
-                m_selection.setAttribute("UseRadialGlow", true);
-                fChild = createDragTracker(view(), m_selection);
+                fChild = createDragTracker(view(), selected);
+                
+                //for (Object f : view().selection())
+                //    ((Figure)f).setAttribute("FrameColor", Color.RED);
             }
-            else {
-                if (!e.isShiftDown()) {
+            else 
+            {
+                if (!e.isShiftDown())
+                {
                     view().clearSelection();
                 }
                 fChild = createAreaTracker(view());
+                
+                //for (Object f : view().selection())
+                //    ((Figure)f).setAttribute("FrameColor", Color.RED);
             }
         }
         fChild.mouseDown(e, x, y);
@@ -86,8 +91,8 @@ public class AtomSelectionTool extends SelectionTool
         
         if (m_selection != null)
         {
-            m_selection.setAttribute("FrameColor", Color.BLACK);
-            m_selection.setAttribute("UseRadialGlow", false);
+            //m_selection.setAttribute("FrameColor", Color.BLACK);
+            //m_selection.setAttribute("UseRadialGlow", false);
         }
     }
 

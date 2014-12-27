@@ -34,9 +34,7 @@ public class HydrogenFigure extends AtomFigure
         m_lastOrbitEls = 1;
         m_lastOrbitMaxEls = 2;
         m_valence.setAttribute("TextColor", Color.WHITE);
-        m_valence.setText("" + m_lastOrbitEls);
-        Rectangle valR = m_valence.displayBox();
-        m_valence.basicDisplayBox(new Point(60 - valR.width / 2, 60 - valR.height / 2 - r.height / 2 - 5), null);
+        updateValenceText();
         
         double angle = 2 * Math.PI / m_lastOrbitEls;
         for (int i = 0; i < m_lastOrbitEls; i++)

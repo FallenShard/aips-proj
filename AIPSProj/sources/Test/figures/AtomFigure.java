@@ -19,6 +19,8 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -42,6 +44,7 @@ public class AtomFigure extends CompositeFigure
     public static final int MAX_BONDS = 3;
     
     protected Vector<ElectronFigure> m_electrons = new Vector<>();
+    protected Map<ChemicalBond, AtomFigure> m_bonds = new HashMap<>();
 
     public AtomFigure()
     {
@@ -173,37 +176,45 @@ public class AtomFigure extends CompositeFigure
             k.nextFigure().draw(g);
     }
     
-    protected void increaseValence()
+    protected void increaseValence(ChemicalBond bond, AtomFigure figure)
     {
         if (m_lastOrbitEls < m_lastOrbitMaxEls)
+        {
             m_lastOrbitEls++;
+            m_bonds.put(bond, figure);
+        }
+            
         
         updateValenceText();
     }
     
-    protected void decreaseValence()
+    protected void decreaseValence(ChemicalBond bond)
     {
         m_lastOrbitEls--;
+        
+        m_bonds.remove(bond);
 
         updateValenceText();
     }
     
     protected void updateValenceText()
     {
-        m_valence.setText("" + m_lastOrbitEls);
+        m_valence.setText("" + m_lastOrbitEls + " (" + m_lastOrbitMaxEls + ")");
         
         if (m_lastOrbitEls == m_lastOrbitMaxEls)
         {
             m_orbitColor = Color.GREEN;
-            m_orbit.setAttribute("FrameColor", m_orbitColor);
-            m_orbit.changed();
         }
         else
         {
             m_orbitColor = Color.WHITE;
-            m_orbit.setAttribute("FrameColor", m_orbitColor);
-            m_orbit.changed();
         }
+        
+        m_orbit.setAttribute("FrameColor", m_orbitColor);
+        Rectangle valR = m_valence.displayBox();
+        
+        Rectangle r = displayBox();
+        m_valence.basicDisplayBox(new Point(r.x + r.width / 2 - valR.width / 2, r.y + r.height / 2 - valR.height / 2 - m_name.displayBox().height / 2 - 5), null);
     }
     
     protected boolean isFullLastOrbit()

@@ -8,15 +8,19 @@
             <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/tools/AtomSelectionTool.java</file>
             <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/figures/ElectronFigure.java</file>
             <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/figures/AtomFigure.java</file>
+            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/anim/AnimatedDrawing.java</file>
             <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/figures/CarbonFigure.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/CH/ifa/draw/standard/CompositeFigure.java</file>
+            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/figures/AngularHandle.java</file>
             <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/figures/ChemicalBond.java</file>
+            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/figures/HydrogenFigure.java</file>
             <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/tools/ChangeBondEndHandle.java</file>
+            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/tools/CovalentBondTool.java</file>
             <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/figures/OxygenFigure.java</file>
             <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/CH/ifa/draw/standard/SelectionTool.java</file>
             <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/CH/ifa/draw/standard/ChangeConnectionStartHandle.java</file>
             <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/tools/ChangeBondStartHandle.java</file>
             <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/core/ChemApp.java</file>
+            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/CH/ifa/draw/standard/StandardDrawing.java</file>
         </group>
     </open-files>
 </project-private>

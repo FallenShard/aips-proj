@@ -44,9 +44,9 @@ public class ElectronFigure extends EllipseFigure
         m_otherElectron = electron;
         
         if (bond == null)
-            m_parent.decreaseValence();
+            m_parent.decreaseValence(bond);
         else
-            m_parent.increaseValence();
+            m_parent.increaseValence(bond, ((ElectronFigure)electron).getParent());
     }
     
     public AtomFigure getParent()

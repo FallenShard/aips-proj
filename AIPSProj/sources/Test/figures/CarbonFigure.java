@@ -39,9 +39,7 @@ public class CarbonFigure extends AtomFigure
         m_lastOrbitMaxEls = 8;
         m_valenceDiff = 0;
         m_valence.setAttribute("TextColor", Color.WHITE);
-        m_valence.setText("" + m_lastOrbitEls);
-        Rectangle valR = m_valence.displayBox();
-        m_valence.basicDisplayBox(new Point(60 - valR.width / 2, 60 - valR.height / 2 - r.height / 2 - 5), null);
+        updateValenceText();
         
         // Electrons
         double angle = 2 * Math.PI / m_lastOrbitEls;

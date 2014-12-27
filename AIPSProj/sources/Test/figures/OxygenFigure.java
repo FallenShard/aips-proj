@@ -34,9 +34,7 @@ public class OxygenFigure extends AtomFigure
         m_lastOrbitEls = 6;
         m_lastOrbitMaxEls = 8;
         m_valence.setAttribute("TextColor", Color.BLACK);
-        m_valence.setText("" + m_lastOrbitEls);
-        Rectangle valR = m_valence.displayBox();
-        m_valence.basicDisplayBox(new Point(60 - valR.width / 2, 60 - valR.height / 2 - r.height / 2 - 5), null);
+        updateValenceText();
         
         double angle = 2 * Math.PI / m_lastOrbitEls;
         for (int i = 0; i < m_lastOrbitEls; i++)
