@@ -4,12 +4,12 @@
  * and open the template in the editor.
  */
 
-package Test.figures;
+package chem.figures;
 
 import CH.ifa.draw.figures.LineConnection;
 import CH.ifa.draw.framework.Figure;
-import Test.tools.ChangeBondEndHandle;
-import Test.tools.ChangeBondStartHandle;
+import chem.tools.ChangeBondEndHandle;
+import chem.tools.ChangeBondStartHandle;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;

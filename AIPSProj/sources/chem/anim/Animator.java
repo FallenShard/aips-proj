@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Test.anim;
+package chem.anim;
 
-import Test.core.NanoTimer;
+import chem.core.NanoTimer;
 import CH.ifa.draw.framework.DrawingView;
 import CH.ifa.draw.util.Animatable;
 

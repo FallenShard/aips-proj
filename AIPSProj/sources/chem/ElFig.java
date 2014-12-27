@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package Test;
+package chem;
 
 import CH.ifa.draw.figures.EllipseFigure;
 import CH.ifa.draw.figures.GroupFigure;

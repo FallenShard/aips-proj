@@ -4,10 +4,10 @@
  * and open the template in the editor.
  */
 
-package Test.figures;
+package chem.figures;
 
-import Test.figures.AtomFigure;
-import Test.figures.ElectronFigure;
+import chem.figures.AtomFigure;
+import chem.figures.ElectronFigure;
 import CH.ifa.draw.figures.EllipseFigure;
 import CH.ifa.draw.figures.TextFigure;
 import java.awt.Color;

@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package Test.tools;
+package chem.tools;
 
 import CH.ifa.draw.framework.DrawingView;
 import CH.ifa.draw.framework.Figure;
@@ -23,7 +23,6 @@ import java.awt.event.MouseEvent;
  */
 public class AtomSelectionTool extends SelectionTool
 {
-    Figure m_selection = null;
     private Tool fChild = null;
 
     public AtomSelectionTool(DrawingView view)
@@ -54,46 +53,24 @@ public class AtomSelectionTool extends SelectionTool
         {
             // Otherwise, a figure might have been selected
             Figure selected = drawing().findFigure(e.getX(), e.getY());
-            
-            if (m_selection != selected && selected != null)
-            {
-                //selected.setAttribute("FrameColor", Color.RED);
-            }
-            
-            m_selection = selected;
-            
+
             if (selected != null)
             {
                 fChild = createDragTracker(view(), selected);
-                
-                //for (Object f : view().selection())
-                //    ((Figure)f).setAttribute("FrameColor", Color.RED);
             }
             else 
             {
                 if (!e.isShiftDown())
                 {
+                    for (Object f : view().selection())
+                        ((Figure)f).setAttribute("FrameColor", Color.BLACK);
+                    
                     view().clearSelection();
                 }
                 fChild = createAreaTracker(view());
-                
-                //for (Object f : view().selection())
-                //    ((Figure)f).setAttribute("FrameColor", Color.RED);
             }
         }
         fChild.mouseDown(e, x, y);
-    }
-    
-    @Override
-    public void deactivate()
-    {
-        super.deactivate();
-        
-        if (m_selection != null)
-        {
-            //m_selection.setAttribute("FrameColor", Color.BLACK);
-            //m_selection.setAttribute("UseRadialGlow", false);
-        }
     }
 
     /**
@@ -127,7 +104,7 @@ public class AtomSelectionTool extends SelectionTool
      * Factory method to create a Drag tracker. It is used to drag a figure.
      */
     protected Tool createDragTracker(DrawingView view, Figure f) {
-        return new DragTracker(view, f);
+        return new AtomDragTracker(view, f);
     }
 
     /**
@@ -135,6 +112,16 @@ public class AtomSelectionTool extends SelectionTool
      * area.
      */
     protected Tool createAreaTracker(DrawingView view) {
-        return new SelectAreaTracker(view);
+        return new AtomAreaTracker(view);
+    }
+    
+    @Override
+    public void deactivate()
+    {
+        super.deactivate();
+        
+        for (Object f : view().selection())
+                        ((Figure)f).setAttribute("FrameColor", Color.BLACK);
+        view().clearSelection();
     }
 }

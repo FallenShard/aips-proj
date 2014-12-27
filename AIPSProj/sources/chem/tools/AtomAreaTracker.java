@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package Test.tools;
+package chem.tools;
 
 import CH.ifa.draw.framework.DrawingView;
 import CH.ifa.draw.framework.Figure;
@@ -78,7 +78,8 @@ public class AtomAreaTracker extends AbstractTool
     private void selectGroup(boolean toggle)
     {
         FigureEnumeration k = drawing().figuresReverse();
-        while (k.hasMoreElements()) {
+        while (k.hasMoreElements())
+        {
             Figure figure = k.nextFigure();
             Rectangle r2 = figure.displayBox();
             if (m_selectGroup.contains(r2.x, r2.y) && m_selectGroup.contains(r2.x+r2.width, r2.y+r2.height))
@@ -86,17 +87,21 @@ public class AtomAreaTracker extends AbstractTool
                 if (toggle)
                 {
                     view().toggleSelection(figure);
-                    figure.setAttribute("FrameColor", Color.BLACK);
+                    if (view().selection().contains(figure))
+                        figure.setAttribute("FrameColor", Color.RED);
+                    else
+                        figure.setAttribute("FrameColor", Color.BLACK);
                     
                 }  
                 else
                 {
                     view().addToSelection(figure);
                     figure.setAttribute("FrameColor", Color.RED);
-                }
-                 
+                } 
             }
-            figure.setAttribute("FrameColor", Color.BLACK);
         }
+        
+        //for (Object f : view().selection())
+        //        ((Figure)f).setAttribute("FrameColor", Color.RED);
     }
 }

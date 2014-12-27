@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package Test.tools;
+package chem.tools;
 
 import CH.ifa.draw.framework.DrawingView;
 import CH.ifa.draw.framework.Figure;
@@ -39,15 +39,22 @@ public class AtomDragTracker extends AbstractTool
         m_lastX = x;
         m_lastY = y;
 
-        // If shift is pressed, it's a chain selection, otherwise 
+        // If shift is pressed, it's a chain selection
         if (e.isShiftDown())
         {
-           view().toggleSelection(m_selectedFigure);
-           m_selectedFigure.setAttribute("FrameColor", Color.BLACK);
-           m_selectedFigure = null;
+            view().toggleSelection(m_selectedFigure);
+            m_selectedFigure = null;
+            
+            // Enumerate all selected figures and paint them red
+            for (Object f : view().selection())
+                ((Figure)f).setAttribute("FrameColor", Color.RED);
         } 
         else if (!view().selection().contains(m_selectedFigure))
         {
+            // Otherwise, user clicked somewhere else, without shift, so nullify selection, but select the new figure
+            for (Object f : view().selection())
+                ((Figure)f).setAttribute("FrameColor", Color.BLACK);
+            
             view().clearSelection();
             view().addToSelection(m_selectedFigure);
             
@@ -69,16 +76,5 @@ public class AtomDragTracker extends AbstractTool
         }
         m_lastX = x;
         m_lastY = y;
-    }
-    
-    @Override
-    public void deactivate()
-    {
-        super.deactivate();
-        if (m_selectedFigure != null)
-        {
-            m_selectedFigure.setAttribute("FrameColor", Color.BLACK);
-            m_selectedFigure = null;
-        }
     }
 }

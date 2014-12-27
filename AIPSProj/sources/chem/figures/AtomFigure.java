@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package Test.figures;
+package chem.figures;
 
 import CH.ifa.draw.figures.ChopEllipseConnector;
 import CH.ifa.draw.figures.EllipseFigure;

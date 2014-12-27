@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package Test.tools;
+package chem.tools;
 
 import CH.ifa.draw.framework.Connector;
 import CH.ifa.draw.framework.Figure;

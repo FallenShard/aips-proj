@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Test.core;
+package chem.core;
 
-import Test.anim.AnimatedDrawing;
-import Test.anim.Animator;
-import Test.figures.ChemicalBond;
-import Test.tools.CovalentBondTool;
+import chem.anim.AnimatedDrawing;
+import chem.anim.Animator;
+import chem.figures.ChemicalBond;
+import chem.tools.CovalentBondTool;
 import CH.ifa.draw.application.DrawApplication;
 import static CH.ifa.draw.application.DrawApplication.IMAGES;
 import CH.ifa.draw.framework.Drawing;
@@ -16,8 +16,8 @@ import CH.ifa.draw.framework.Tool;
 import CH.ifa.draw.standard.CreationTool;
 import CH.ifa.draw.standard.ToolButton;
 import CH.ifa.draw.util.Animatable;
-import Test.figures.AtomFactory;
-import Test.tools.AtomSelectionTool;
+import chem.figures.AtomFactory;
+import chem.tools.AtomSelectionTool;
 import java.awt.Panel;
 
 /**
@@ -28,7 +28,7 @@ public class ChemApp extends DrawApplication
 {
     private Animator animator;
     
-    private static final String CUSTOM_IMAGES = "/Test/res/";
+    private static final String CUSTOM_IMAGES = "/chem/res/";
     
     ChemApp(String title)
     {

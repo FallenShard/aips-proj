@@ -4,9 +4,9 @@
  * and open the template in the editor.
  */
 
-package Test.tools;
+package chem.tools;
 
-import Test.figures.AtomFigure;
+import chem.figures.AtomFigure;
 import CH.ifa.draw.framework.ConnectionFigure;
 import CH.ifa.draw.framework.Connector;
 import CH.ifa.draw.framework.Drawing;

@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package Test.figures;
+package chem.figures;
 
 import CH.ifa.draw.figures.EllipseFigure;
 import CH.ifa.draw.figures.TextFigure;
@@ -17,23 +17,23 @@ import java.awt.Rectangle;
  *
  * @author FallenShard
  */
-public class OxygenFigure extends AtomFigure
-{
-    public OxygenFigure()
+public class HydrogenFigure extends AtomFigure
+{    
+    public HydrogenFigure()
     {
         super();
         
-        m_nucleus.setAttribute("FillColor", Color.WHITE);
+        m_nucleus.setAttribute("FillColor", Color.BLUE);
         
-        
-        m_name.setText("O");
+        m_name.setAttribute("TextColor", Color.WHITE);
+        m_name.setText("H");
         Rectangle r = m_name.displayBox();
         m_name.basicDisplayBox(new Point(60 - r.width / 2, 60 - r.height / 2), null);
         
         // Set valence text attributes
-        m_lastOrbitEls = 6;
-        m_lastOrbitMaxEls = 8;
-        m_valence.setAttribute("TextColor", Color.BLACK);
+        m_lastOrbitEls = 1;
+        m_lastOrbitMaxEls = 2;
+        m_valence.setAttribute("TextColor", Color.WHITE);
         updateValenceText();
         
         double angle = 2 * Math.PI / m_lastOrbitEls;
@@ -43,10 +43,10 @@ public class OxygenFigure extends AtomFigure
             double s = -Math.sin(angle * i);
             int dX = (int)(55 * c + 60);
             int dY = (int)(55 * s + 60);
-            
-            m_electrons.add(new ElectronFigure(new Point(dX, dY), 5, this));
-        }
 
+            m_electrons.add(new ElectronFigure(new Point(dX, dY), 5, this));            
+        }
+               
         for (EllipseFigure fig : m_electrons)
             super.add(fig);
     }
