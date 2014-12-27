@@ -35,7 +35,7 @@ public class ElectronFigure extends EllipseFigure
     @Override
     public boolean canConnect()
     {
-        return m_otherElectron == null && !m_parent.isFullLastOrbit();
+        return m_otherElectron == null;// && !m_parent.isFullLastOrbit();
     }
     
     public void setCovalentBond(ChemicalBond bond, Figure electron)

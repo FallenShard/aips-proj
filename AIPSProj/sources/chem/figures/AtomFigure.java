@@ -83,7 +83,7 @@ public class AtomFigure extends CompositeFigure
     @Override
     public boolean canConnect()
     {
-        return true;
+        return m_lastOrbitEls < m_lastOrbitMaxEls;
     }
     
     @Override
@@ -213,12 +213,24 @@ public class AtomFigure extends CompositeFigure
         m_orbit.setAttribute("FrameColor", m_orbitColor);
         Rectangle valR = m_valence.displayBox();
         
-        Rectangle r = displayBox();
+        Rectangle r = m_nucleus.displayBox();
         m_valence.basicDisplayBox(new Point(r.x + r.width / 2 - valR.width / 2, r.y + r.height / 2 - valR.height / 2 - m_name.displayBox().height / 2 - 5), null);
     }
     
     protected boolean isFullLastOrbit()
     {
         return m_lastOrbitEls == m_lastOrbitMaxEls;
+    }
+    
+    public int bondsWith(AtomFigure atom)
+    {
+        int occurences = 0;
+        for (Map.Entry<ChemicalBond, AtomFigure> entry : m_bonds.entrySet())
+        {
+            if (entry.getValue() == atom)
+                occurences++;
+        }
+        
+        return occurences;
     }
 }

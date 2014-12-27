@@ -48,7 +48,13 @@ public class ChemicalBond extends LineConnection
             ElectronFigure el1 = (ElectronFigure)start;
             ElectronFigure el2 = (ElectronFigure)end;
             
-            return el1.getParent() != el2.getParent();
+            AtomFigure p1 = el1.getParent();
+            AtomFigure p2 = el2.getParent();
+            
+            boolean checkParents = p1 != p2;
+            boolean checkTripleBond = p1.bondsWith(p2) < AtomFigure.MAX_BONDS;
+            
+            return checkParents && checkTripleBond;
         }
         return false;
     }
