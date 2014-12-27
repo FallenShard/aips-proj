@@ -12,13 +12,23 @@ import chem.tools.CovalentBondTool;
 import CH.ifa.draw.application.DrawApplication;
 import static CH.ifa.draw.application.DrawApplication.IMAGES;
 import CH.ifa.draw.framework.Drawing;
+import CH.ifa.draw.framework.Figure;
+import CH.ifa.draw.framework.FigureEnumeration;
 import CH.ifa.draw.framework.Tool;
 import CH.ifa.draw.standard.CreationTool;
 import CH.ifa.draw.standard.ToolButton;
 import chem.anim.Animatable;
+import chem.db.HibernateUtil;
 import chem.figures.AtomFactory;
+import chem.figures.AtomFigure;
+import chem.figures.CarbonFigure;
+import chem.figures.persist.AtomModel;
 import chem.tools.AtomSelectionTool;
 import java.awt.Panel;
+import java.awt.Point;
+import java.util.List;
+import org.hibernate.Query;
+import org.hibernate.Session;
 
 /**
  *
@@ -96,5 +106,80 @@ public class ChemApp extends DrawApplication
             animator.end();
             animator = null;
         }
+    }
+    
+    @Override
+    public void promptSaveAs()
+    {
+        toolDone();
+        
+//        String path = getSavePath("Save File...");
+//        if (path != null) {
+//            if (!path.endsWith(".draw"))
+//                path += ".draw";
+//            saveAsStorableOutput(path);
+//        }
+        
+        FigureEnumeration k = drawing().figures();
+        
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        
+        while (k.hasMoreElements())
+        {
+            Figure f = k.nextFigure();
+            
+            if (f instanceof AtomFigure)
+            {
+                AtomFigure at = (AtomFigure)f;
+                
+                AtomModel m = at.getModel();
+                
+                session.beginTransaction();
+                session.saveOrUpdate(m);
+                session.getTransaction().commit();
+            }
+        }
+        
+        session.close();
+    }
+    
+    @Override
+    public void promptOpen()
+    {
+        toolDone();
+        
+//        String path = getSavePath("Save File...");
+//        if (path != null) {
+//            if (!path.endsWith(".draw"))
+//                path += ".draw";
+//            saveAsStorableOutput(path);
+//        }        
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        
+        try
+        {
+            Query query = session.createQuery("from AtomModel");
+            List atoms = query.list();
+
+            for (Object am : atoms)
+            {
+                AtomModel atm = (AtomModel)am;
+                AtomFigure af = new CarbonFigure();
+
+                int ax = atm.getX();
+                int ay = atm.getY();
+
+                af.basicDisplayBox(new Point(ax, ay), new Point(ax + 120, ay + 120));
+
+                view().add(af);
+            }
+        }
+        catch(Exception ex)
+        {
+            System.out.println(ex.toString());
+        }
+        
+        
+        session.close();
     }
 }

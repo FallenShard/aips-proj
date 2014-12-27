@@ -16,6 +16,7 @@ import CH.ifa.draw.framework.Handle;
 import CH.ifa.draw.standard.CompositeFigure;
 import CH.ifa.draw.standard.RelativeLocator;
 import chem.anim.Animatable;
+import chem.figures.persist.AtomModel;
 import chem.util.SeekStrategy;
 import java.awt.Color;
 import java.awt.Font;
@@ -217,5 +218,13 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable
     {
 //        for (Figure electron : m_electrons)
 //            ((Animatable)electron).animationStep(timeDelta);
+    }
+    
+    public AtomModel getModel()
+    {
+        Rectangle r = displayBox();
+        AtomModel m = new AtomModel(getAtomName(), r.x, r.y);
+        
+        return m;
     }
 }

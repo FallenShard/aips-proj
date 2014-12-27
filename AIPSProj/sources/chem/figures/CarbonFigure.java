@@ -6,13 +6,8 @@
 
 package chem.figures;
 
-import chem.figures.AtomFigure;
-import chem.figures.ElectronFigure;
-import CH.ifa.draw.figures.EllipseFigure;
-import CH.ifa.draw.figures.TextFigure;
 import CH.ifa.draw.framework.Figure;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Point;
 import java.awt.Rectangle;
 
