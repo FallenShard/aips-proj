@@ -11,6 +11,7 @@ import CH.ifa.draw.framework.Figure;
 import chem.anim.Animatable;
 import java.awt.Color;
 import java.awt.Point;
+import java.io.Serializable;
 
 /**
  *
@@ -23,6 +24,13 @@ public class ElectronFigure extends EllipseFigure implements Animatable
     Figure m_otherElectron = null;
     
     ChemicalBond m_covalentBond = null;
+    
+    public ElectronFigure()
+    {
+        setAttribute("FillColor", Color.GREEN);
+        
+        basicDisplayBox(new Point(0, 0), new Point(10, 10));
+    }
     
     public ElectronFigure(Point center, int radius, AtomFigure parent)
     {   
