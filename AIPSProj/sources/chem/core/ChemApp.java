@@ -23,9 +23,11 @@ import chem.figures.AtomFactory;
 import chem.figures.AtomFigure;
 import chem.figures.CarbonFigure;
 import chem.figures.persist.AtomModel;
+import chem.figures.persist.DocumentModel;
 import chem.tools.AtomSelectionTool;
 import java.awt.Panel;
 import java.awt.Point;
+import java.util.Calendar;
 import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -54,7 +56,8 @@ public class ChemApp extends DrawApplication
     }
     
     @Override
-    public void destroy() {
+    public void destroy()
+    {
         super.destroy();
         
         endAnimation();
@@ -120,25 +123,39 @@ public class ChemApp extends DrawApplication
 //            saveAsStorableOutput(path);
 //        }
         
-        FigureEnumeration k = drawing().figures();
+        
+        
+        
+        
+//        FigureEnumeration k = drawing().figures();
+//        
+//        while (k.hasMoreElements())
+//        {
+//            Figure f = k.nextFigure();
+//            
+//            if (f instanceof AtomFigure)
+//            {
+//                AtomFigure at = (AtomFigure)f;
+//                
+//                AtomModel m = at.getModel();
+//                
+//                session.beginTransaction();
+//                session.saveOrUpdate(m);
+//                session.getTransaction().commit();
+//            }
+//        }
+        
+        DocumentModel dm = new DocumentModel();
+        dm.setName("ASDFG");
+        Calendar calendar = Calendar.getInstance();
+        java.util.Date now = calendar.getTime();
+        java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
+        dm.setTimestamp(currentTimestamp);
         
         Session session = HibernateUtil.getSessionFactory().openSession();
-        
-        while (k.hasMoreElements())
-        {
-            Figure f = k.nextFigure();
-            
-            if (f instanceof AtomFigure)
-            {
-                AtomFigure at = (AtomFigure)f;
-                
-                AtomModel m = at.getModel();
-                
-                session.beginTransaction();
-                session.saveOrUpdate(m);
-                session.getTransaction().commit();
-            }
-        }
+        session.beginTransaction();
+        session.saveOrUpdate(dm);
+        session.getTransaction().commit();
         
         session.close();
     }
@@ -151,27 +168,51 @@ public class ChemApp extends DrawApplication
 //        String path = getSavePath("Save File...");
 //        if (path != null) {
 //            if (!path.endsWith(".draw"))
-//                path += ".draw";
+//                path += ".draw"; 
 //            saveAsStorableOutput(path);
 //        }        
         Session session = HibernateUtil.getSessionFactory().openSession();
         
+//        try
+//        {
+//            Query query = session.createQuery("from AtomModel");
+//            List atoms = query.list();
+//
+//            for (Object am : atoms)
+//            {
+//                AtomModel atm = (AtomModel)am;
+//                AtomFigure af = new CarbonFigure();
+//
+//                int ax = atm.getX();
+//                int ay = atm.getY();
+//
+//                af.basicDisplayBox(new Point(ax, ay), new Point(ax + 120, ay + 120));
+//
+//                drawing().add(af);
+//            }
+//        }
+//        catch(Exception ex)
+//        {
+//            System.out.println(ex.toString());
+//        }
+        
         try
         {
-            Query query = session.createQuery("from AtomModel");
-            List atoms = query.list();
+            Query query = session.createQuery("from DocumentModel");
+            List docs = query.list();
 
-            for (Object am : atoms)
+            for (Object doc : docs)
             {
-                AtomModel atm = (AtomModel)am;
-                AtomFigure af = new CarbonFigure();
+                DocumentModel atm = (DocumentModel)doc;
+                //AtomFigure af = new CarbonFigure();
 
-                int ax = atm.getX();
-                int ay = atm.getY();
+                int x = 5;
+                //int ax = atm.getX();
+                //int ay = atm.getY();
 
-                af.basicDisplayBox(new Point(ax, ay), new Point(ax + 120, ay + 120));
+                //af.basicDisplayBox(new Point(ax, ay), new Point(ax + 120, ay + 120));
 
-                view().add(af);
+                //drawing().add(af);
             }
         }
         catch(Exception ex)

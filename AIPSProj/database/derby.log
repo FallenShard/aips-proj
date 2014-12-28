@@ -12,3 +12,5 @@ os.arch=amd64
 os.version=6.3
 derby.system.home=D:\Version Control\aips-proj\AIPSProj\database
 Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Sun Dec 28 18:34:38 CET 2014: Shutting down Derby engine

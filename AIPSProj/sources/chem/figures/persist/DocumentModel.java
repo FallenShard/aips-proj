@@ -6,6 +6,7 @@
 
 package chem.figures.persist;
 
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -17,9 +18,28 @@ public class DocumentModel
     private int id;
     private String name;
     private Date timestamp;
+    
+    public DocumentModel()
+    {
+        id = -1;
+        name = "Untitled";
+        
+        Calendar calendar = Calendar.getInstance();
+        timestamp = calendar.getTime();
+    }
+    
+    public DocumentModel(String name, Date timestamp)
+    {
+        this.name = name;
+        this.timestamp = timestamp;
+    }
 
     public int getId() {
         return id;
+    }
+    
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {

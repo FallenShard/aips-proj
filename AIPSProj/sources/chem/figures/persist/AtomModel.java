@@ -12,6 +12,14 @@ package chem.figures.persist;
  */
 public class AtomModel
 {
+    private int id;
+    
+    private int x;
+    private int y;
+    private String type;
+    
+    private int documentId;
+    
     public AtomModel()
     {
         x = 0;
@@ -19,19 +27,20 @@ public class AtomModel
         type = "";
     }
     
-    public AtomModel(String type, int x, int y)
+    public AtomModel(String type, int x, int y, int documentId)
     {
         this.type = type;
         this.x = x;
         this.y = y;
+        this.documentId = documentId;
     }
 
     public int getId() {
-        return Id;
+        return id;
     }
-
-    public void setId(int Id) {
-        this.Id = Id;
+    
+    public void setId(int id) {
+        this.id = id;
     }
 
     public int getX() {
@@ -57,12 +66,12 @@ public class AtomModel
     public void setType(String type) {
         this.type = type;
     }
-    
-    
-    private int Id;
-    
-    private int x;
-    private int y;
-    private String type;
 
+    public int getDocumentId() {
+        return documentId;
+    }
+
+    public void setDocumentId(int documentId) {
+        this.documentId = documentId;
+    }
 }

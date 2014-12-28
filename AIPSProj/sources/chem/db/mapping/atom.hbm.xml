@@ -3,7 +3,7 @@
 <hibernate-mapping>
   <class name="chem.figures.persist.AtomModel" table="ATOM">
       
-      <id name="Id" type="integer" column="ID">
+      <id name="id" type="integer" column="ID">
           <generator class="increment"></generator>
       </id>
       
