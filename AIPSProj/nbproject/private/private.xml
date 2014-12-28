@@ -2,25 +2,6 @@
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
-        <group>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/CH/ifa/draw/standard/ChangeConnectionEndHandle.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/CH/ifa/draw/standard/AbstractTool.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/tools/AtomSelectionTool.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/figures/ElectronFigure.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/figures/AtomFigure.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/anim/AnimatedDrawing.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/figures/CarbonFigure.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/figures/AngularHandle.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/figures/ChemicalBond.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/figures/HydrogenFigure.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/tools/ChangeBondEndHandle.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/tools/CovalentBondTool.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/figures/OxygenFigure.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/CH/ifa/draw/standard/SelectionTool.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/CH/ifa/draw/standard/ChangeConnectionStartHandle.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/tools/ChangeBondStartHandle.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/Test/core/ChemApp.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/CH/ifa/draw/standard/StandardDrawing.java</file>
-        </group>
+        <group/>
     </open-files>
 </project-private>
