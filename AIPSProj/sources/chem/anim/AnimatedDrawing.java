@@ -9,6 +9,7 @@ import chem.figures.AtomFigure;
 import CH.ifa.draw.framework.Figure;
 import CH.ifa.draw.framework.FigureEnumeration;
 import CH.ifa.draw.standard.StandardDrawing;
+import chem.figures.persist.DocumentModel;
 import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -29,6 +30,24 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable
     private int bouncingDrawingSerializedDataVersion = 1;
     
     List<Animatable> elements = new LinkedList<>();
+    
+    DocumentModel m_model = null;
+   
+    public DocumentModel getModel()
+    {
+        return m_model;
+    }
+    
+    public AnimatedDrawing(int documentId)
+    {
+        m_model = new DocumentModel();
+        m_model.setId(documentId);
+    }
+    
+    public AnimatedDrawing(DocumentModel model)
+    {
+        m_model = model;
+    }
 
     @Override
     public synchronized Figure add(Figure figure) {

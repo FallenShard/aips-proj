@@ -11,5 +11,7 @@
       <property name="x" column="X" type="integer"></property>
       <property name="y" column="Y" type="integer"></property>
       
+      <property name="documentId" column="DOCUMENT_ID" type="integer"></property>
+      
   </class>
 </hibernate-mapping>

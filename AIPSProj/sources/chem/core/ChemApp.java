@@ -95,7 +95,7 @@ public class ChemApp extends DrawApplication
     @Override
     protected Drawing createDrawing()
     {
-        return new AnimatedDrawing();
+        return new AnimatedDrawing(-1);
     }
     
     public void startAnimation() {
@@ -119,95 +119,78 @@ public class ChemApp extends DrawApplication
     {
         toolDone();
         
-//        String path = getSavePath("Save File...");
-//        if (path != null) {
-//            if (!path.endsWith(".draw"))
-//                path += ".draw";
-//            saveAsStorableOutput(path);
-//        }
-        
-        FigureEnumeration k = drawing().figures();
-        
-        while (k.hasMoreElements())
+        try
         {
-            Figure f = k.nextFigure();
+            Session session = HibernateUtil.getSessionFactory().openSession();
             
-            if (f instanceof AtomFigure)
-            {
-                AtomFigure a = (AtomFigure)f;
-                List<ElectronFigure> efs = a.getElectrons();
-                
-                Session session = HibernateUtil.getSessionFactory().openSession();
-                
-                for (ElectronFigure ef : efs)
-                {
-                    ElectronModel em = ef.getModel();
+            
+            DocumentModel docm = ((AnimatedDrawing)drawing()).getModel();
+            Query query = session.createQuery("from DocumentModel d where d.id = " + docm.getId());
+            Object doc = query.list().get(0);
 
-                    session.beginTransaction();
-                    session.saveOrUpdate(em);
-                    session.getTransaction().commit();
-                }
-                
-                session.close();
-            }
-        }
-        
-        
-        
-        
-        FigureEnumeration k1 = drawing().figures();
-        
-        while (k1.hasMoreElements())
-        {
-            Figure f = k1.nextFigure();
+            DocumentModel pers = (DocumentModel)doc;
             
-            if (f instanceof ChemicalBond)
+            session.beginTransaction();
+            session.saveOrUpdate(pers);
+            session.getTransaction().commit();
+            
+            int id = pers.getId();
+            
+            FigureEnumeration k = drawing().figures();
+            
+            
+            while (k.hasMoreElements())
             {
-                ChemicalBond at = (ChemicalBond)f;
-                
-                ChemicalBondModel m = new ChemicalBondModel();
-                
-                Session session = HibernateUtil.getSessionFactory().openSession();
-                session.beginTransaction();
-                session.saveOrUpdate(m);
-                session.getTransaction().commit();
-                session.close();
+                Figure f = k.nextFigure();
+
+                if (f instanceof AtomFigure)
+                {
+                    AtomFigure a = (AtomFigure)f;
+                    //List<ElectronFigure> efs = a.getElectrons();
+
+                    AtomModel am = a.getModel();
+                    am.setDocumentId(id);
+                    
+                    query = session.createQuery("from AtomModel am where am.documentId = " + id + " and " + "am.id = " + am.getId());
+                    List list = query.list();
+                    
+                    if (list.isEmpty())
+                    {
+                        session.beginTransaction();
+                        session.saveOrUpdate(am);
+                        session.getTransaction().commit();
+                    }
+                    else
+                    {
+                        doc = query.list().get(0);
+
+                        AtomModel persAm = (AtomModel)doc;
+                        persAm.setX(am.getX());
+                        persAm.setY(am.getY());
+
+                        session.beginTransaction();
+                        session.saveOrUpdate(persAm);
+                        session.getTransaction().commit();
+                    }
+
+//                    for (ElectronFigure ef : efs)
+//                    {
+//                        ElectronModel em = ef.getModel();
+//
+//                        session.beginTransaction();
+//                        session.saveOrUpdate(em);
+//                        session.getTransaction().commit();
+//                    }
+                }
             }
+
+            session.close();
         }
-        
-        
-        
-//        FigureEnumeration k = drawing().figures();
-//        
-//        while (k.hasMoreElements())
-//        {
-//            Figure f = k.nextFigure();
-//            
-//            if (f instanceof AtomFigure)
-//            {
-//                AtomFigure at = (AtomFigure)f;
-//                
-//                AtomModel m = at.getModel();
-//                
-//                session.beginTransaction();
-//                session.saveOrUpdate(m);
-//                session.getTransaction().commit();
-//            }
-//        }
-        
-        DocumentModel dm = new DocumentModel();
-        dm.setName("ASDFG");
-        Calendar calendar = Calendar.getInstance();
-        java.util.Date now = calendar.getTime();
-        java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
-        dm.setTimestamp(currentTimestamp);
-        
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        session.beginTransaction();
-        session.saveOrUpdate(dm);
-        session.getTransaction().commit();
-        
-        session.close();
+        catch(Exception ex)
+        {
+            System.out.println(ex);
+            ex.printStackTrace();
+        }
     }
     
     @Override
@@ -215,34 +198,38 @@ public class ChemApp extends DrawApplication
     {
         toolDone();
         
-//        String path = getSavePath("Save File...");
-//        if (path != null) {
-//            if (!path.endsWith(".draw"))
-//                path += ".draw";
-//            saveAsStorableOutput(path);
-//        }        
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        
         try
         {
+            Session session = HibernateUtil.getSessionFactory().openSession();
             Query query = session.createQuery("from DocumentModel");
-            List documents = query.list();
+            Object doc = query.list().get(0);
 
-            for (Object obj : documents)
+            DocumentModel docm = (DocumentModel)doc;
+            
+            int id = docm.getId();
+            
+            query = session.createQuery("from AtomModel a where a.documentId = " + id);
+            List res = query.list();
+            
+            Drawing drawing = new AnimatedDrawing(docm);
+            
+            for (Object o : res)
             {
-                DocumentModel doc = (DocumentModel)obj;
-                //AtomFigure af = new CarbonFigure();
-
-                //int ax = atm.getX();
-                //int ay = atm.getY();
-
-                //af.basicDisplayBox(new Point(ax, ay), new Point(ax + 120, ay + 120));
-
-                //view().add(af);
-                
-                System.out.println("Document name: " + doc.getName());
-                System.out.println("Date Modified: " + doc.getTimestamp().toString());
+                AtomModel am = (AtomModel)o;
+                if (am.getType().equalsIgnoreCase("C"))
+                {
+                    AtomFigure fig = new CarbonFigure();
+                    fig.setModel(am);
+                    fig.moveBy(am.getX(), am.getY());
+                    drawing.add(fig);
+                }
             }
+            
+            setDrawing(drawing);
+            
+            view().checkDamage();
+            
+            session.close();
         }
         catch(Exception ex)
         {
@@ -250,6 +237,6 @@ public class ChemApp extends DrawApplication
         }
         
         
-        session.close();
+        
     }
 }

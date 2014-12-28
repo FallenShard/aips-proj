@@ -12,7 +12,5 @@
     <mapping class="chem.figures.persist.DocumentModel" file="" jar="" package="chem.figures.persist" resource="chem/db/mapping/document.hbm.xml"/>
     <mapping class="chem.figures.persist.ElectronModel" file="" jar="" package="chem.figures.persist" resource="chem/db/mapping/electron.hbm.xml"/>
     <mapping class="chem.figures.persist.ChemicalBondModel" file="" jar="" package="chem.figures.persist" resource="chem/db/mapping/chemicalbond.hbm.xml"/>
-    <mapping/>
-    <mapping/>
   </session-factory>
 </hibernate-configuration>

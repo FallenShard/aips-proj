@@ -243,9 +243,14 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable
     
     public AtomModel getModel()
     {
-        Rectangle r = displayBox();
-        AtomModel m = new AtomModel(getAtomName(), r.x, r.y, -1);
-        
-        return m;
+        m_model.setType(getAtomName());
+        m_model.setX(displayBox().x);
+        m_model.setY(displayBox().y);
+        return m_model;
+    }
+    
+    public void setModel(AtomModel am)
+    {
+        m_model = am;
     }
 }
