@@ -22,8 +22,11 @@ import chem.db.HibernateUtil;
 import chem.figures.AtomFactory;
 import chem.figures.AtomFigure;
 import chem.figures.CarbonFigure;
+import chem.figures.ElectronFigure;
 import chem.figures.persist.AtomModel;
+import chem.figures.persist.ChemicalBondModel;
 import chem.figures.persist.DocumentModel;
+import chem.figures.persist.ElectronModel;
 import chem.tools.AtomSelectionTool;
 import java.awt.Panel;
 import java.awt.Point;
@@ -123,7 +126,54 @@ public class ChemApp extends DrawApplication
 //            saveAsStorableOutput(path);
 //        }
         
+        FigureEnumeration k = drawing().figures();
         
+        while (k.hasMoreElements())
+        {
+            Figure f = k.nextFigure();
+            
+            if (f instanceof AtomFigure)
+            {
+                AtomFigure a = (AtomFigure)f;
+                List<ElectronFigure> efs = a.getElectrons();
+                
+                Session session = HibernateUtil.getSessionFactory().openSession();
+                
+                for (ElectronFigure ef : efs)
+                {
+                    ElectronModel em = ef.getModel();
+
+                    session.beginTransaction();
+                    session.saveOrUpdate(em);
+                    session.getTransaction().commit();
+                }
+                
+                session.close();
+            }
+        }
+        
+        
+        
+        
+        FigureEnumeration k1 = drawing().figures();
+        
+        while (k1.hasMoreElements())
+        {
+            Figure f = k1.nextFigure();
+            
+            if (f instanceof ChemicalBond)
+            {
+                ChemicalBond at = (ChemicalBond)f;
+                
+                ChemicalBondModel m = new ChemicalBondModel();
+                
+                Session session = HibernateUtil.getSessionFactory().openSession();
+                session.beginTransaction();
+                session.saveOrUpdate(m);
+                session.getTransaction().commit();
+                session.close();
+            }
+        }
         
         
         
@@ -168,51 +218,30 @@ public class ChemApp extends DrawApplication
 //        String path = getSavePath("Save File...");
 //        if (path != null) {
 //            if (!path.endsWith(".draw"))
-//                path += ".draw"; 
+//                path += ".draw";
 //            saveAsStorableOutput(path);
 //        }        
         Session session = HibernateUtil.getSessionFactory().openSession();
         
-//        try
-//        {
-//            Query query = session.createQuery("from AtomModel");
-//            List atoms = query.list();
-//
-//            for (Object am : atoms)
-//            {
-//                AtomModel atm = (AtomModel)am;
-//                AtomFigure af = new CarbonFigure();
-//
-//                int ax = atm.getX();
-//                int ay = atm.getY();
-//
-//                af.basicDisplayBox(new Point(ax, ay), new Point(ax + 120, ay + 120));
-//
-//                drawing().add(af);
-//            }
-//        }
-//        catch(Exception ex)
-//        {
-//            System.out.println(ex.toString());
-//        }
-        
         try
         {
             Query query = session.createQuery("from DocumentModel");
-            List docs = query.list();
+            List documents = query.list();
 
-            for (Object doc : docs)
+            for (Object obj : documents)
             {
-                DocumentModel atm = (DocumentModel)doc;
+                DocumentModel doc = (DocumentModel)obj;
                 //AtomFigure af = new CarbonFigure();
 
-                int x = 5;
                 //int ax = atm.getX();
                 //int ay = atm.getY();
 
                 //af.basicDisplayBox(new Point(ax, ay), new Point(ax + 120, ay + 120));
 
-                //drawing().add(af);
+                //view().add(af);
+                
+                System.out.println("Document name: " + doc.getName());
+                System.out.println("Date Modified: " + doc.getTimestamp().toString());
             }
         }
         catch(Exception ex)

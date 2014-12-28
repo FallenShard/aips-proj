@@ -23,7 +23,9 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -33,6 +35,8 @@ import java.util.Vector;
  */
 public abstract class AtomFigure extends CompositeFigure implements Animatable
 {
+    protected AtomModel m_model = new AtomModel();
+    
     protected EllipseFigure m_orbit = null;
     protected EllipseFigure m_nucleus = null;
     
@@ -46,6 +50,21 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable
     public static final int MAX_BONDS = 3;
     
     protected Vector<Figure> m_electrons = new Vector<>();
+    
+    public List<ElectronFigure> getElectrons() {
+        ArrayList<ElectronFigure> electrons = new ArrayList<>();
+        
+        for (Figure f : m_electrons)
+        {
+            electrons.add((ElectronFigure)f);
+        }
+        
+        return electrons;
+    }
+    
+    // For positioning
+    private int lastX = 0;
+    private int lastY = 0;
     
     protected Map<ChemicalBond, AtomFigure> m_bonds = new HashMap<>();
 
@@ -82,8 +101,15 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable
     {
         Rectangle r = displayBox();
 
-        // FIX THIS CRAP
-        basicMoveBy(origin.x - r.width / 2, origin.y - r.height / 2);
+        int currX = corner.x - r.width / 2;
+        int currY = corner.y - r.height / 2;
+        
+        int deltaX = currX - lastX;
+        int deltaY = currY - lastY;        
+        
+        basicMoveBy(deltaX, deltaY);
+        lastX = currX;
+        lastY = currY;
     }
     
     @Override
@@ -195,11 +221,6 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable
         Rectangle r = m_nucleus.displayBox();
         m_valence.basicDisplayBox(new Point(r.x + r.width / 2 - valR.width / 2, r.y + r.height / 2 - valR.height / 2 - m_name.displayBox().height / 2 - 5), null);
     }
-    
-//    protected boolean isFullLastOrbit()
-//    {
-//        return m_lastOrbitEls == m_lastOrbitMaxEls;
-//    }
     
     public int bondsWith(AtomFigure atom)
     {

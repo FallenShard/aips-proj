@@ -6,14 +6,14 @@
 
 package chem.figures.persist;
 
-import java.util.Calendar;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  *
  * @author FallenShard
  */
-public class DocumentModel
+public class DocumentModel  implements Serializable
 {
     private int id;
     private String name;
@@ -23,9 +23,7 @@ public class DocumentModel
     {
         id = -1;
         name = "Untitled";
-        
-        Calendar calendar = Calendar.getInstance();
-        timestamp = calendar.getTime();
+        timestamp = new Date();
     }
     
     public DocumentModel(String name, Date timestamp)

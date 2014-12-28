@@ -9,6 +9,7 @@ package chem.figures;
 import CH.ifa.draw.figures.EllipseFigure;
 import CH.ifa.draw.framework.Figure;
 import chem.anim.Animatable;
+import chem.figures.persist.ElectronModel;
 import java.awt.Color;
 import java.awt.Point;
 import java.io.Serializable;
@@ -19,6 +20,9 @@ import java.io.Serializable;
  */
 public class ElectronFigure extends EllipseFigure implements Animatable
 {
+    //Used for database
+    ElectronModel m_model = new ElectronModel();
+    
     AtomFigure m_parent = null;
     
     Figure m_otherElectron = null;
@@ -76,6 +80,11 @@ public class ElectronFigure extends EllipseFigure implements Animatable
     @Override
     public void animationStep(float timeDelta)
     {
-        moveBy((int) (100 * timeDelta + 0.5), 0);
+        //moveBy((int) (100 * timeDelta + 0.5), 0);
+    }
+
+    public ElectronModel getModel() {
+        ElectronModel em = new ElectronModel((double)getAttribute("Angle"));
+        return em;
     }
 }

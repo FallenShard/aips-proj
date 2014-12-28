@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+  <class name="chem.figures.persist.ElectronModel" table="ELECTRON">
+  
+  <id name="id" type="integer" column="ID">
+          <generator class="increment"></generator>
+      </id>
+      
+      <property name="angle" column="ANGLE" type="double" ></property>
+      <!--
+      <property name="atomId" column="ATOM_ID" type="integer"></property>
+      <property name="bondId" column="BOND_ID" type="integer"></property>
+      <property name="otherElectronId" column="OTHER_ELECTRON_ID" type="integer"></property>
+      -->
+      
+  </class>
+  
+</hibernate-mapping>

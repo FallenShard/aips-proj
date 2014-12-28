@@ -45,7 +45,9 @@ public class HydrogenFigure extends AtomFigure
             int dX = (int)(55 * c + 60);
             int dY = (int)(55 * s + 60);
 
-            m_electrons.add(new ElectronFigure(new Point(dX, dY), 5, this));            
+            Figure el = new ElectronFigure(new Point(dX, dY), 5, this);
+            el.setAttribute("Angle", angle * i);
+            m_electrons.add(el); 
         }
                
         for (Figure fig : m_electrons)
