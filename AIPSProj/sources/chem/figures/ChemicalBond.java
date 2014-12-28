@@ -8,6 +8,7 @@ package chem.figures;
 
 import CH.ifa.draw.figures.LineConnection;
 import CH.ifa.draw.framework.Figure;
+import chem.figures.persist.ChemicalBondModel;
 import chem.tools.ChangeBondEndHandle;
 import chem.tools.ChangeBondStartHandle;
 import java.util.Vector;
@@ -18,6 +19,9 @@ import java.util.Vector;
  */
 public class ChemicalBond extends LineConnection
 {
+    //Used for database
+    private ChemicalBondModel m_model = new ChemicalBondModel();
+    
     private ElectronFigure m_start = null;
     private ElectronFigure m_end = null;
     
@@ -79,5 +83,11 @@ public class ChemicalBond extends LineConnection
                 m_end.setCovalentBond(null, null);
             m_end = null;
         }
+    }
+    
+    public ChemicalBondModel getModel()
+    {
+        ChemicalBondModel model = new ChemicalBondModel();
+        return model;
     }
 }

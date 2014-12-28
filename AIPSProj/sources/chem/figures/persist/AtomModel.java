@@ -6,17 +6,20 @@
 
 package chem.figures.persist;
 
+import java.io.Serializable;
+
 /**
  *
  * @author FallenShard
  */
-public class AtomModel
+public class AtomModel implements Serializable
 {
     public AtomModel()
     {
         x = 0;
         y = 0;
         type = "";
+        documentId = -1;
     }
     
     public AtomModel(String type, int x, int y)
@@ -24,6 +27,15 @@ public class AtomModel
         this.type = type;
         this.x = x;
         this.y = y;
+        documentId = -1;
+    }
+    
+    public AtomModel(String type, int x, int y, int documentId)
+    {
+        this.type = type;
+        this.x = x;
+        this.y = y;
+        this.documentId = documentId;
     }
 
     public int getId() {
@@ -57,6 +69,14 @@ public class AtomModel
     public void setType(String type) {
         this.type = type;
     }
+
+    public int getDocumentId() {
+        return documentId;
+    }
+
+    public void setDocumentId(int documentId) {
+        this.documentId = documentId;
+    }
     
     
     private int Id;
@@ -64,5 +84,6 @@ public class AtomModel
     private int x;
     private int y;
     private String type;
+    private int documentId;
 
 }

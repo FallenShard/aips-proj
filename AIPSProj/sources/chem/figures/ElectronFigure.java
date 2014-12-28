@@ -9,6 +9,8 @@ package chem.figures;
 import CH.ifa.draw.figures.EllipseFigure;
 import CH.ifa.draw.framework.Figure;
 import chem.anim.Animatable;
+import chem.figures.persist.AtomModel;
+import chem.figures.persist.ElectronModel;
 import java.awt.Color;
 import java.awt.Point;
 import java.io.Serializable;
@@ -19,11 +21,21 @@ import java.io.Serializable;
  */
 public class ElectronFigure extends EllipseFigure implements Animatable
 {
+    //Used for database
+    ElectronModel m_model = new ElectronModel();
+    
     AtomFigure m_parent = null;
     
     Figure m_otherElectron = null;
     
     ChemicalBond m_covalentBond = null;
+    
+    //Used for database
+    double m_angle;
+
+    public void setAngle(double m_angle) {
+        this.m_angle = m_angle;
+    }
     
     public ElectronFigure()
     {
@@ -77,5 +89,11 @@ public class ElectronFigure extends EllipseFigure implements Animatable
     public void animationStep(float timeDelta)
     {
         moveBy((int) (100 * timeDelta + 0.5), 0);
+    }
+
+    //Used for database
+    public ElectronModel getModel() {
+        ElectronModel em = new ElectronModel(m_angle);
+        return em;
     }
 }

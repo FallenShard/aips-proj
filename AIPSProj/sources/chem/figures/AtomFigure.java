@@ -23,7 +23,9 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -33,6 +35,10 @@ import java.util.Vector;
  */
 public abstract class AtomFigure extends CompositeFigure implements Animatable
 {
+    //Used for database
+    // Should set documentId here after figuring who gets document model...
+    protected AtomModel m_model = new AtomModel();
+    
     protected EllipseFigure m_orbit = null;
     protected EllipseFigure m_nucleus = null;
     
@@ -46,6 +52,22 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable
     public static final int MAX_BONDS = 3;
     
     protected Vector<Figure> m_electrons = new Vector<>();
+    
+    //Used for database
+    public List<ElectronFigure> getElectrons() {
+        ArrayList<ElectronFigure> electrons = new ArrayList<ElectronFigure>();
+        
+        for (Figure f : m_electrons)
+        {
+            electrons.add((ElectronFigure)f);
+        }
+        
+        return electrons;
+    }
+    
+    //Used for fixing "THAT CRAP" bellow ^^
+    private int lastX = 0;
+    private int lastY = 0;
     
     protected Map<ChemicalBond, AtomFigure> m_bonds = new HashMap<>();
 
@@ -83,7 +105,13 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable
         Rectangle r = displayBox();
 
         // FIX THIS CRAP
-        basicMoveBy(origin.x - r.width / 2, origin.y - r.height / 2);
+        // STILL CRAP, NOW IT STAYS WHERE IT'S CLICKED ^^
+        int currX = origin.x - r.width / 2 - lastX;
+        int currY = origin.y - r.height / 2 - lastY;
+        basicMoveBy(currX, currY);
+        lastX = origin.x - r.width / 2;
+        lastY = origin.y - r.height / 2;
+        //basicMoveBy(origin.x - r.width / 2, origin.y - r.height / 2);
     }
     
     @Override

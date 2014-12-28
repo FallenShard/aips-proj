@@ -9,10 +9,12 @@ package chem.figures;
 import CH.ifa.draw.figures.EllipseFigure;
 import CH.ifa.draw.figures.TextFigure;
 import CH.ifa.draw.framework.Figure;
+import chem.db.HibernateUtil;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.Rectangle;
+import org.hibernate.Session;
 
 /**
  *
@@ -45,7 +47,11 @@ public class HydrogenFigure extends AtomFigure
             int dX = (int)(55 * c + 60);
             int dY = (int)(55 * s + 60);
 
-            m_electrons.add(new ElectronFigure(new Point(dX, dY), 5, this));            
+            //Used for database
+            ElectronFigure ef = new ElectronFigure(new Point(dX, dY), 5, this);
+            ef.setAngle(angle * i);
+
+            m_electrons.add(ef);          
         }
                
         for (Figure fig : m_electrons)

@@ -52,6 +52,10 @@ public class AngularHandle extends LocatorHandle
         Point corner = new Point(newX + bounds.width / 2, newY + bounds.height / 2);
         
         owner().displayBox(origin, corner);
+        
+        //Used for ElectronModel and database
+        ElectronFigure ef = (ElectronFigure)owner();
+        ef.setAngle(angle);
     }
     
     @Override

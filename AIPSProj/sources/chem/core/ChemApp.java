@@ -22,10 +22,15 @@ import chem.db.HibernateUtil;
 import chem.figures.AtomFactory;
 import chem.figures.AtomFigure;
 import chem.figures.CarbonFigure;
+import chem.figures.ElectronFigure;
 import chem.figures.persist.AtomModel;
+import chem.figures.persist.ChemicalBondModel;
+import chem.figures.persist.DocumentModel;
+import chem.figures.persist.ElectronModel;
 import chem.tools.AtomSelectionTool;
 import java.awt.Panel;
 import java.awt.Point;
+import java.util.Calendar;
 import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -122,25 +127,71 @@ public class ChemApp extends DrawApplication
         
         FigureEnumeration k = drawing().figures();
         
-        Session session = HibernateUtil.getSessionFactory().openSession();
-        
         while (k.hasMoreElements())
         {
             Figure f = k.nextFigure();
             
             if (f instanceof AtomFigure)
             {
-                AtomFigure at = (AtomFigure)f;
+                AtomFigure a = (AtomFigure)f;
+                List<ElectronFigure> efs = a.getElectrons();
                 
-                AtomModel m = at.getModel();
+                Session session = HibernateUtil.getSessionFactory().openSession();
                 
-                session.beginTransaction();
-                session.saveOrUpdate(m);
-                session.getTransaction().commit();
+                for (ElectronFigure ef : efs)
+                {
+                    ElectronModel em = ef.getModel();
+
+                    session.beginTransaction();
+                    session.saveOrUpdate(em);
+                    session.getTransaction().commit();
+                }
+                
+                session.close();
             }
         }
         
-        session.close();
+        
+        
+        
+        FigureEnumeration k1 = drawing().figures();
+        
+        while (k1.hasMoreElements())
+        {
+            Figure f = k1.nextFigure();
+            
+            if (f instanceof ChemicalBond)
+            {
+                ChemicalBond at = (ChemicalBond)f;
+                
+                ChemicalBondModel m = new ChemicalBondModel();
+                
+                Session session = HibernateUtil.getSessionFactory().openSession();
+                session.beginTransaction();
+                session.saveOrUpdate(m);
+                session.getTransaction().commit();
+                session.close();
+            }
+        }
+        
+        /*DocumentModel dm = new DocumentModel();
+        dm.setName("ASDFG");
+        Calendar calendar = Calendar.getInstance();
+ 
+    // 2) get a java.util.Date from the calendar instance.
+    //    this date will represent the current instant, or "now".
+        java.util.Date now = calendar.getTime();
+
+        // 3) a java current time (now) instance
+        java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
+        dm.setTimestamp(currentTimestamp);
+        
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+        session.saveOrUpdate(dm);
+        session.getTransaction().commit();
+        
+        session.close();*/
     }
     
     @Override
@@ -158,20 +209,23 @@ public class ChemApp extends DrawApplication
         
         try
         {
-            Query query = session.createQuery("from AtomModel");
-            List atoms = query.list();
+            Query query = session.createQuery("from DocumentModel");
+            List documents = query.list();
 
-            for (Object am : atoms)
+            for (Object obj : documents)
             {
-                AtomModel atm = (AtomModel)am;
-                AtomFigure af = new CarbonFigure();
+                DocumentModel doc = (DocumentModel)obj;
+                //AtomFigure af = new CarbonFigure();
 
-                int ax = atm.getX();
-                int ay = atm.getY();
+                //int ax = atm.getX();
+                //int ay = atm.getY();
 
-                af.basicDisplayBox(new Point(ax, ay), new Point(ax + 120, ay + 120));
+                //af.basicDisplayBox(new Point(ax, ay), new Point(ax + 120, ay + 120));
 
-                view().add(af);
+                //view().add(af);
+                
+                System.out.println("Document name: " + doc.getName());
+                System.out.println("Date Modified: " + doc.getTimestamp().toString());
             }
         }
         catch(Exception ex)
