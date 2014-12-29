@@ -17,6 +17,10 @@ import CH.ifa.draw.standard.CompositeFigure;
 import CH.ifa.draw.standard.RelativeLocator;
 import chem.anim.Animatable;
 import chem.figures.persist.AtomModel;
+import chem.figures.persist.Persistable;
+import chem.figures.persist.PersistableFigure;
+import chem.util.Const;
+import chem.util.Dim;
 import chem.util.SeekStrategy;
 import java.awt.Color;
 import java.awt.Font;
@@ -26,27 +30,40 @@ import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
+import org.hibernate.Session;
 
 /**
  *
  * @author FallenShard
  */
-public abstract class AtomFigure extends CompositeFigure implements Animatable
+public abstract class AtomFigure extends CompositeFigure implements Animatable, PersistableFigure
 {
+    public static final int MAX_BONDS = 3;
+    
+    // Used for persistence in database
+    protected AtomModel m_model = new AtomModel();
+    
+    // Figures that comprise the atom
     protected EllipseFigure m_orbit = null;
     protected EllipseFigure m_nucleus = null;
     
     protected TextFigure m_name = null;
     protected TextFigure m_valence = null;
-    protected int m_lastOrbitEls;
-    protected int m_lastOrbitMaxEls;
-    
-    protected Color m_orbitColor = Color.WHITE;
-    
-    public static final int MAX_BONDS = 3;
     
     protected Vector<Figure> m_electrons = new Vector<>();
     
+    // Orbit parameters
+    protected int m_lastOrbitEls;
+    protected int m_lastOrbitMaxEls;
+    
+    // Quickfix for orbit, will make a new figure later
+    protected Color m_orbitColor = Const.ORBIT_DEFAULT;
+
+    // For positioning bug
+    private int lastX = 0;
+    private int lastY = 0;
+    
+    // Used in graph processing
     protected Map<ChemicalBond, AtomFigure> m_bonds = new HashMap<>();
 
     public AtomFigure()
@@ -54,20 +71,22 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable
         super();
         
         // Create nucleus here
-        m_nucleus = new EllipseFigure(new Point(20, 20), new Point(100,100));
+        m_nucleus = new EllipseFigure(new Point(Dim.NUCLEUS_OFFSET_X, Dim.NUCLEUS_OFFSET_Y), 
+                                      new Point(Dim.NUCLEUS_OFFSET_X + Dim.NUCLEUS_SIZE, Dim.NUCLEUS_OFFSET_Y + Dim.NUCLEUS_SIZE));
         
         // Create a halo-like orbit
-        m_orbit = new EllipseFigure(new Point (5, 5), new Point(115, 115));
-        m_orbit.setAttribute("FillColor", new Color(0, 0, 0, 0));
-        m_orbit.setAttribute("FrameColor", Color.WHITE);
+        m_orbit = new EllipseFigure(new Point(Dim.ORBIT_OFFSET_X, Dim.ORBIT_OFFSET_Y), 
+                                    new Point(Dim.ORBIT_OFFSET_X + Dim.ORBIT_SIZE, Dim.ORBIT_OFFSET_Y + Dim.ORBIT_SIZE));
+        m_orbit.setAttribute("FillColor", Const.TRANSPARENT);
+        m_orbit.setAttribute("FrameColor", m_orbitColor);
         
         // This is the central text, atom's name
         m_name = new TextFigure();
-        m_name.setFont(new Font("Calibri", Font.BOLD, 30));
+        m_name.setFont(new Font("Calibri", Font.BOLD, Dim.NUCLEUS_FONT_SIZE));
         
         // This is the valence number
         m_valence = new TextFigure();
-        m_valence.setFont(new Font("Calibri", Font.BOLD, 12));
+        m_valence.setFont(new Font("Calibri", Font.BOLD, Dim.VALENCE_FONT_SIZE));
         
         super.add(m_orbit);
         super.add(m_nucleus);
@@ -82,8 +101,15 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable
     {
         Rectangle r = displayBox();
 
-        // FIX THIS CRAP
-        basicMoveBy(origin.x - r.width / 2, origin.y - r.height / 2);
+        int currX = corner.x - r.width / 2;
+        int currY = corner.y - r.height / 2;
+        
+        int deltaX = currX - lastX;
+        int deltaY = currY - lastY;        
+        
+        basicMoveBy(deltaX, deltaY);
+        lastX = currX;
+        lastY = currY;
     }
     
     @Override
@@ -99,7 +125,7 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable
         
         for (Figure fig : m_electrons)
         {
-            handles.add(new AngularHandle(fig, m_nucleus, RelativeLocator.center(), 15));
+            handles.add(new AngularHandle(fig, m_nucleus, RelativeLocator.center(), Dim.ELECTRON_OFFSET));
         }
 
         return handles;
@@ -134,7 +160,7 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable
         while (k.hasMoreElements())
             k.nextFigure().setAttribute(name, value);
         
-        if (name.equalsIgnoreCase("FrameColor") && (Color)(value) == Color.BLACK)
+        if (name.equalsIgnoreCase("FrameColor") && (Color)(value) == Const.IDLE_BORDER)
         {
             m_orbit.setAttribute(name, m_orbitColor);
         }
@@ -193,13 +219,9 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable
         Rectangle valR = m_valence.displayBox();
         
         Rectangle r = m_nucleus.displayBox();
-        m_valence.basicDisplayBox(new Point(r.x + r.width / 2 - valR.width / 2, r.y + r.height / 2 - valR.height / 2 - m_name.displayBox().height / 2 - 5), null);
+        m_valence.basicDisplayBox(new Point(r.x + r.width / 2 - valR.width / 2, 
+                                            r.y + r.height / 2 - valR.height / 2 - m_name.displayBox().height / 2 - Dim.ELECTRON_SIZE), null);
     }
-    
-//    protected boolean isFullLastOrbit()
-//    {
-//        return m_lastOrbitEls == m_lastOrbitMaxEls;
-//    }
     
     public int bondsWith(AtomFigure atom)
     {
@@ -220,11 +242,54 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable
 //            ((Animatable)electron).animationStep(timeDelta);
     }
     
+    public Vector<ElectronFigure> getElectrons()
+    {
+        Vector<ElectronFigure> electrons = new Vector<>();
+        
+        for (Figure f : m_electrons)
+        {
+            electrons.add((ElectronFigure)f);
+        }
+        
+        return electrons;
+    }
+    
+    public void setElectrons(Vector<Figure> electrons)
+    {    
+        super.removeAll(m_electrons);
+        
+        m_electrons.clear();
+        m_electrons = electrons;
+        
+        for (Figure el : m_electrons)
+            super.add(el);
+    }
+    
+    @Override
     public AtomModel getModel()
     {
-        Rectangle r = displayBox();
-        AtomModel m = new AtomModel(getAtomName(), r.x, r.y);
+        m_model.setType(getAtomName());
+        m_model.setX(displayBox().x);
+        m_model.setY(displayBox().y);
+        return m_model;
+    }
+
+    @Override
+    public void setModel(Persistable model)
+    {
+        m_model = (AtomModel)model;
+    }
+
+    @Override
+    public void saveToDatabase(Session session, int documentId)
+    {
+        getModel();
+
+        m_model.save(session, documentId);
         
-        return m;
+        for (Figure electron : m_electrons)
+        {
+            ((PersistableFigure)electron).saveToDatabase(session, documentId);
+        }
     }
 }

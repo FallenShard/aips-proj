@@ -7,7 +7,8 @@
 package chem.figures;
 
 import CH.ifa.draw.framework.Figure;
-import java.awt.Color;
+import chem.util.Const;
+import chem.util.Dim;
 import java.awt.Point;
 import java.awt.Rectangle;
 
@@ -22,18 +23,18 @@ public class CarbonFigure extends AtomFigure
         super();
 
         // Set nucleus color
-        m_nucleus.setAttribute("FillColor", Color.DARK_GRAY);
+        m_nucleus.setAttribute("FillColor", Const.CARBON_FILL);
 
         // Set name text attributes
-        m_name.setAttribute("TextColor", Color.WHITE);
+        m_name.setAttribute("TextColor", Const.LIGHT_TEXT);
         m_name.setText("C");
         Rectangle r = m_name.displayBox();
-        m_name.basicDisplayBox(new Point(60 - r.width / 2, 60 - r.height / 2), null);
+        m_name.basicDisplayBox(new Point(Dim.ATOM_RADIUS - r.width / 2, Dim.ATOM_RADIUS - r.height / 2), null);
         
         // Set valence text attributes
         m_lastOrbitEls = 4;
         m_lastOrbitMaxEls = 8;
-        m_valence.setAttribute("TextColor", Color.WHITE);
+        m_valence.setAttribute("TextColor", Const.LIGHT_TEXT);
         updateValenceText();
         
         // Electrons
@@ -42,10 +43,12 @@ public class CarbonFigure extends AtomFigure
         {
             double c = Math.cos(angle * i);
             double s = -Math.sin(angle * i);
-            int dX = (int)(55 * c + 60);
-            int dY = (int)(55 * s + 60);
+            int dX = (int)((Dim.ATOM_RADIUS - Dim.ELECTRON_RADIUS) * c + Dim.ATOM_RADIUS);
+            int dY = (int)((Dim.ATOM_RADIUS - Dim.ELECTRON_RADIUS) * s + Dim.ATOM_RADIUS);
 
-            m_electrons.add(new ElectronFigure(new Point(dX, dY), 5, this));
+            Figure el = new ElectronFigure(new Point(dX, dY), Dim.ELECTRON_RADIUS, this, i);
+            el.setAttribute("Angle", angle * i);
+            m_electrons.add(el);
         }
 
         for (Figure fig : m_electrons)

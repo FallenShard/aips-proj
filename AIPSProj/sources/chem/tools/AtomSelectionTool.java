@@ -12,7 +12,7 @@ import CH.ifa.draw.framework.Handle;
 import CH.ifa.draw.framework.Tool;
 import CH.ifa.draw.standard.HandleTracker;
 import CH.ifa.draw.standard.SelectionTool;
-import java.awt.Color;
+import chem.util.Const;
 import java.awt.event.MouseEvent;
 
 /**
@@ -62,7 +62,7 @@ public class AtomSelectionTool extends SelectionTool
                 if (!e.isShiftDown())
                 {
                     for (Object f : view().selection())
-                        ((Figure)f).setAttribute("FrameColor", Color.BLACK);
+                        ((Figure)f).setAttribute("FrameColor", Const.IDLE_BORDER);
                     
                     view().clearSelection();
                 }
@@ -123,7 +123,7 @@ public class AtomSelectionTool extends SelectionTool
         super.deactivate();
         
         for (Object f : view().selection())
-                        ((Figure)f).setAttribute("FrameColor", Color.BLACK);
+                        ((Figure)f).setAttribute("FrameColor", Const.IDLE_BORDER);
         view().clearSelection();
     }
 }

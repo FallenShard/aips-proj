@@ -9,18 +9,22 @@ import chem.figures.AtomFigure;
 import CH.ifa.draw.framework.Figure;
 import CH.ifa.draw.framework.FigureEnumeration;
 import CH.ifa.draw.standard.StandardDrawing;
+import chem.figures.persist.DocumentModel;
+import chem.figures.persist.Persistable;
+import chem.figures.persist.PersistableFigure;
 import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.util.LinkedList;
 import java.util.List;
+import org.hibernate.Session;
 
 /**
  *
  * @author FallenShard
  */
-public class AnimatedDrawing extends StandardDrawing implements Animatable
+public class AnimatedDrawing extends StandardDrawing implements Animatable, PersistableFigure
 {
     /*
      * Serialization support.
@@ -29,6 +33,24 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable
     private int bouncingDrawingSerializedDataVersion = 1;
     
     List<Animatable> elements = new LinkedList<>();
+    
+    DocumentModel m_model = new DocumentModel();
+   
+    public AnimatedDrawing(int documentId)
+    {
+        m_model = new DocumentModel();
+        m_model.setId(documentId);
+    }
+    
+    public AnimatedDrawing(DocumentModel model)
+    {
+        m_model = model;
+    }
+    
+    public void setDocumentName(String name)
+    {
+        m_model.setName(name);
+    }
 
     @Override
     public synchronized Figure add(Figure figure) {
@@ -81,5 +103,32 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable
         {
             element.animationStep(timeDelta);
         });
+    }
+    
+    @Override
+    public DocumentModel getModel()
+    {
+        return m_model;
+    }
+
+    @Override
+    public void setModel(Persistable model)
+    {
+        m_model = (DocumentModel)model;
+    }
+
+    @Override
+    public void saveToDatabase(Session session, int documentId)
+    {
+        m_model.save(session, documentId);
+        
+        FigureEnumeration figures = figures();
+        
+        while (figures.hasMoreElements())
+        {
+            Figure fig = figures.nextFigure();
+            PersistableFigure pf = (PersistableFigure)fig;
+            pf.saveToDatabase(session, m_model.getId());
+        }
     }
 }

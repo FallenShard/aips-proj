@@ -10,7 +10,7 @@ import CH.ifa.draw.framework.DrawingView;
 import CH.ifa.draw.framework.Figure;
 import CH.ifa.draw.framework.FigureEnumeration;
 import CH.ifa.draw.standard.AbstractTool;
-import java.awt.Color;
+import chem.util.Const;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -71,7 +71,7 @@ public class AtomAreaTracker extends AbstractTool
     {
         Graphics g = view().getGraphics();
         g.setXORMode(view().getBackground());
-        g.setColor(Color.black);
+        g.setColor(Const.IDLE_BORDER);
         g.drawRect(r.x, r.y, r.width, r.height);
     }
 
@@ -88,15 +88,14 @@ public class AtomAreaTracker extends AbstractTool
                 {
                     view().toggleSelection(figure);
                     if (view().selection().contains(figure))
-                        figure.setAttribute("FrameColor", Color.RED);
+                        figure.setAttribute("FrameColor", Const.SELECTION_BORDER);
                     else
-                        figure.setAttribute("FrameColor", Color.BLACK);
-                    
+                        figure.setAttribute("FrameColor", Const.IDLE_BORDER);
                 }  
                 else
                 {
                     view().addToSelection(figure);
-                    figure.setAttribute("FrameColor", Color.RED);
+                    figure.setAttribute("FrameColor", Const.SELECTION_BORDER);
                 } 
             }
         }

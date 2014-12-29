@@ -3,13 +3,15 @@
 <hibernate-mapping>
   <class name="chem.figures.persist.AtomModel" table="ATOM">
       
-      <id name="Id" type="integer" column="ID">
+      <id name="id" type="integer" column="ID">
           <generator class="increment"></generator>
       </id>
       
       <property name="type" column="TYPE" type="string"></property>
       <property name="x" column="X" type="integer"></property>
       <property name="y" column="Y" type="integer"></property>
+      
+      <property name="documentId" column="DOCUMENT_ID" type="integer"></property>
       
   </class>
 </hibernate-mapping>

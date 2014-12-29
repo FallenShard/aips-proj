@@ -15,7 +15,7 @@ public class Main
 {
     public static void main(String[] args)
     {
-        DrawApplication app = new ChemApp("Organic Chemistry");
+        DrawApplication app = new ChemApp("CH4emistry");
         app.open();
     }
 }

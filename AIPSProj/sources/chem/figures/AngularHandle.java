@@ -52,11 +52,13 @@ public class AngularHandle extends LocatorHandle
         Point corner = new Point(newX + bounds.width / 2, newY + bounds.height / 2);
         
         owner().displayBox(origin, corner);
+        
+        owner().setAttribute("Angle", angle);
     }
     
     @Override
     public void draw(Graphics g)
     {
-        
+        // Draw nothing
     }
 }
