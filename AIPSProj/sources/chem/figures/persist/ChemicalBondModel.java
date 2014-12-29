@@ -89,10 +89,22 @@ public class ChemicalBondModel implements Serializable, Persistable
 //            session.getTransaction().commit();
         }
     }
+    
+    @Override
+    public void saveAs(Session session, int documentId)
+    {
+        this.id = -1;
+        this.documentId = documentId;
+        session.beginTransaction();
+        session.save(this);
+        session.getTransaction().commit();
+    }
 
     @Override
     public void delete(Session session)
     {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    
 }

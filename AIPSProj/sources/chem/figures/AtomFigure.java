@@ -292,4 +292,23 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable, 
             ((PersistableFigure)electron).saveToDatabase(session, documentId);
         }
     }
+    
+    @Override
+    public void saveToDatabaseAs(Session session, int documentId)
+    {
+        getModel();
+
+        m_model.saveAs(session, documentId);
+        
+        for (Figure electron : m_electrons)
+        {
+            ((PersistableFigure)electron).saveToDatabaseAs(session, documentId);
+        }
+    }
+    
+    @Override
+    public void deleteFromDatabase(Session session)
+    {
+        
+    }
 }
