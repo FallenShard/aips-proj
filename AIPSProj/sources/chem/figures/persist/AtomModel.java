@@ -19,7 +19,7 @@ public class AtomModel implements Serializable
         x = 0;
         y = 0;
         type = "";
-        documentId = -1;
+        //documentId = -1;
     }
     
     public AtomModel(String type, int x, int y)
@@ -27,7 +27,7 @@ public class AtomModel implements Serializable
         this.type = type;
         this.x = x;
         this.y = y;
-        documentId = -1;
+        //documentId = -1;
     }
     
     public AtomModel(String type, int x, int y, int documentId)

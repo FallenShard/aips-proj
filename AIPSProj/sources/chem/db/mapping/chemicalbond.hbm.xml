@@ -7,10 +7,11 @@
           <generator class="increment"></generator>
       </id>
       
-      <!--
+      
       <property name="startElectronId" column="START_ELECTRON_ID" type="integer"></property>
       <property name="endElectronId" column="END_ELECTRON_ID" type="integer"></property>
-      -->
+      <property name="documentId" column="DOCUMENT_ID" type="integer"></property>
+      
       
   </class>
 </hibernate-mapping>

@@ -22,6 +22,7 @@ public class ElectronModel implements Serializable
     public ElectronModel()
     {
         angle = 0.0;
+        bondId = 0;
     }
     
     public ElectronModel(double angle)

@@ -17,6 +17,7 @@ import CH.ifa.draw.framework.FigureEnumeration;
 import CH.ifa.draw.framework.Tool;
 import CH.ifa.draw.standard.CreationTool;
 import CH.ifa.draw.standard.ToolButton;
+import chem.UI.SaveDialog;
 import chem.anim.Animatable;
 import chem.db.HibernateUtil;
 import chem.figures.AtomFactory;
@@ -27,6 +28,7 @@ import chem.figures.persist.AtomModel;
 import chem.figures.persist.ChemicalBondModel;
 import chem.figures.persist.DocumentModel;
 import chem.figures.persist.ElectronModel;
+import chem.figures.persist.Persistable;
 import chem.tools.AtomSelectionTool;
 import java.awt.Panel;
 import java.awt.Point;
@@ -44,6 +46,11 @@ public class ChemApp extends DrawApplication
     private AnimatorThread animator;
     
     private static final String CUSTOM_IMAGES = "/chem/res/";
+    
+    private String projectName;
+    
+    public String getProjectName() { return projectName; }
+    public void setProjectName(String name) { projectName = name; }
     
     ChemApp(String title)
     {
@@ -125,7 +132,7 @@ public class ChemApp extends DrawApplication
 //            saveAsStorableOutput(path);
 //        }
         
-        FigureEnumeration k = drawing().figures();
+        /*FigureEnumeration k = drawing().figures();
         
         while (k.hasMoreElements())
         {
@@ -192,6 +199,12 @@ public class ChemApp extends DrawApplication
         session.getTransaction().commit();
         
         session.close();*/
+        
+        SaveDialog sd = new SaveDialog(this, true);
+        sd.show();
+        
+        Persistable per = (Persistable)drawing();
+        per.save();
     }
     
     @Override

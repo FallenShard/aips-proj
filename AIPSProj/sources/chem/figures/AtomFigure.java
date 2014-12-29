@@ -16,7 +16,10 @@ import CH.ifa.draw.framework.Handle;
 import CH.ifa.draw.standard.CompositeFigure;
 import CH.ifa.draw.standard.RelativeLocator;
 import chem.anim.Animatable;
+import chem.db.HibernateUtil;
 import chem.figures.persist.AtomModel;
+import chem.figures.persist.DocumentFigure;
+import chem.figures.persist.Persistable;
 import chem.util.SeekStrategy;
 import java.awt.Color;
 import java.awt.Font;
@@ -28,16 +31,73 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import org.hibernate.Query;
+import org.hibernate.Session;
 
 /**
  *
  * @author FallenShard
  */
-public abstract class AtomFigure extends CompositeFigure implements Animatable
+public abstract class AtomFigure extends CompositeFigure implements Animatable, Persistable, DocumentFigure
 {
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     //Used for database
-    // Should set documentId here after figuring who gets document model...
     protected AtomModel m_model = new AtomModel();
+    
+    @Override
+    public int getId()
+    {
+        return m_model.getId();
+    }
+
+    @Override
+    public void setModel()
+    {
+        m_model.setType(getAtomName());
+        m_model.setX(displayBox().x);
+        m_model.setY(displayBox().y);
+    }
+    
+    @Override
+    public void setDocumentId(int id)
+    {
+        m_model.setDocumentId(id);
+    }
+    
+    @Override
+    public void save()
+    {
+        setModel();
+        
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+        session.saveOrUpdate(m_model);
+        session.getTransaction().commit();
+        session.close();
+    }
+    
+    @Override
+    public void delete()
+    {
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        
+        //Delete electrons
+        String hqlString = "DELETE FROM ELECTRON WHERE ATOM_ID = :atomid";
+        Query query = session.createQuery(hqlString);
+        query.setParameter("atomid", m_model.getId());
+        query.executeUpdate();
+        
+        //Delete atom
+        String hqlString1 = "DELETE FROM ATOM WHERE ID = :id";
+        Query query1 = session.createQuery(hqlString1);
+        query1.setParameter("id", m_model.getId());
+        query1.executeUpdate();
+        
+        session.close();
+    }
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     protected EllipseFigure m_orbit = null;
     protected EllipseFigure m_nucleus = null;
@@ -111,7 +171,6 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable
         basicMoveBy(currX, currY);
         lastX = origin.x - r.width / 2;
         lastY = origin.y - r.height / 2;
-        //basicMoveBy(origin.x - r.width / 2, origin.y - r.height / 2);
     }
     
     @Override

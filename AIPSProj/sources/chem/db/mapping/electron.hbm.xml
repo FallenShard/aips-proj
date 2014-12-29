@@ -8,11 +8,11 @@
       </id>
       
       <property name="angle" column="ANGLE" type="double" ></property>
-      <!--
+      
       <property name="atomId" column="ATOM_ID" type="integer"></property>
       <property name="bondId" column="BOND_ID" type="integer"></property>
       <property name="otherElectronId" column="OTHER_ELECTRON_ID" type="integer"></property>
-      -->
+      
       
   </class>
 </hibernate-mapping>

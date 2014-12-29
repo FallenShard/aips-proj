@@ -16,17 +16,20 @@ public class ChemicalBondModel implements Serializable
     private int id;
     private int startElectronId;
     private int endElectronId;
+    private int documentId;
     
     public ChemicalBondModel()
     {
-        startElectronId = -1;
-        endElectronId = -1;
+        startElectronId = 0;
+        endElectronId = 0;
+        //documentId = -1;
     }
     
-    public ChemicalBondModel(int startElectronId, int endElectronId)
+    public ChemicalBondModel(int startElectronId, int endElectronId, int documentId)
     {
         this.startElectronId = startElectronId;
         this.endElectronId = endElectronId;
+        this.documentId = documentId;
     }
 
     public int getId() {
@@ -51,5 +54,13 @@ public class ChemicalBondModel implements Serializable
 
     public void setEndElectronId(int endElectronId) {
         this.endElectronId = endElectronId;
+    }
+
+    public int getDocumentId() {
+        return documentId;
+    }
+
+    public void setDocumentId(int documentId) {
+        this.documentId = documentId;
     }
 }

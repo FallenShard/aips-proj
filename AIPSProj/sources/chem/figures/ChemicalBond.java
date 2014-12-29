@@ -8,19 +8,75 @@ package chem.figures;
 
 import CH.ifa.draw.figures.LineConnection;
 import CH.ifa.draw.framework.Figure;
+import chem.db.HibernateUtil;
 import chem.figures.persist.ChemicalBondModel;
+import chem.figures.persist.ConnectableFigure;
+import chem.figures.persist.DocumentFigure;
+import chem.figures.persist.Persistable;
 import chem.tools.ChangeBondEndHandle;
 import chem.tools.ChangeBondStartHandle;
 import java.util.Vector;
+import org.hibernate.Session;
 
 /**
  *
  * @author FallenShard
  */
-public class ChemicalBond extends LineConnection
+public class ChemicalBond extends LineConnection implements Persistable, DocumentFigure, ConnectableFigure
 {
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     //Used for database
     private ChemicalBondModel m_model = new ChemicalBondModel();
+
+    @Override
+    public int getId()
+    {
+        return m_model.getId();
+    }
+
+    @Override
+    public void setModel() { /*Bonds only have pointers to other objects so all setting is in setRelations();*/ }
+    
+    @Override
+    public void setDocumentId(int id)
+    {
+        m_model.setDocumentId(id);
+    }
+    
+    @Override
+    public void save()
+    {
+        setModel();
+        
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+        session.saveOrUpdate(m_model);
+        session.getTransaction().commit();
+        session.close();
+    }
+    
+    @Override
+    public void setRelations()
+    {
+        if (m_start != null)
+            m_model.setStartElectronId(m_start.getId());
+        if (m_end != null)
+            m_model.setEndElectronId(m_end.getId());
+        
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+        session.saveOrUpdate(m_model);
+        session.getTransaction().commit();
+        session.close();
+    }
+
+    @Override
+    public void delete() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     private ElectronFigure m_start = null;
     private ElectronFigure m_end = null;

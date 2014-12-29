@@ -12,3 +12,4 @@ os.arch=amd64
 os.version=6.1
 derby.system.home=C:\Users\Mefi\Documents\Version control\aips-proj\AIPSProj\database
 Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------

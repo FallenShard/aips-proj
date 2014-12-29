@@ -9,23 +9,80 @@ package chem.figures;
 import CH.ifa.draw.figures.EllipseFigure;
 import CH.ifa.draw.framework.Figure;
 import chem.anim.Animatable;
+import chem.db.HibernateUtil;
 import chem.figures.persist.AtomModel;
+import chem.figures.persist.ConnectableFigure;
 import chem.figures.persist.ElectronModel;
+import chem.figures.persist.Persistable;
 import java.awt.Color;
 import java.awt.Point;
 import java.io.Serializable;
+import org.hibernate.Session;
 
 /**
  *
  * @author FallenShard
  */
-public class ElectronFigure extends EllipseFigure implements Animatable
+public class ElectronFigure extends EllipseFigure implements Animatable, Persistable, ConnectableFigure
 {
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     //Used for database
     ElectronModel m_model = new ElectronModel();
     
+    @Override
+    public int getId()
+    {
+        return m_model.getId();
+    }
+
+    @Override
+    public void setModel()
+    {
+        m_model.setAngle(m_angle);
+        m_model.setAtomId(m_parent.getId());
+    }
+
+    @Override
+    public void save()
+    {
+        setModel();
+        
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+        session.saveOrUpdate(m_model);
+        session.getTransaction().commit();
+        session.close();
+    }
+
+    @Override
+    public void setRelations()
+    {
+        if (m_covalentBond != null)
+            m_model.setBondId(m_covalentBond.getId());
+        if (m_otherElectron != null)
+        {
+            ElectronFigure otherElectron = (ElectronFigure)m_otherElectron;
+            m_model.setOtherElectronId(otherElectron.getId());
+        }
+        
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+        session.saveOrUpdate(m_model);
+        session.getTransaction().commit();
+        session.close();
+    }
+
+    @Override
+    public void delete() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    ////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     AtomFigure m_parent = null;
     
+    //Changed type from Figure
     Figure m_otherElectron = null;
     
     ChemicalBond m_covalentBond = null;
