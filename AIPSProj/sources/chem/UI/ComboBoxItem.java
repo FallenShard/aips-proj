@@ -3,7 +3,8 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package chem.UI.util;
+
+package chem.UI;
 
 import chem.figures.persist.DocumentModel;
 import java.util.Date;
