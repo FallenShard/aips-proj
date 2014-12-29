@@ -1,7 +1,7 @@
-Sun Dec 28 22:24:46 CET 2014 : Apache Derby Network Server - 10.10.1.3 - (1557168) started and ready to accept connections on port 1527
+Mon Dec 29 15:09:28 CET 2014 : Apache Derby Network Server - 10.10.1.3 - (1557168) started and ready to accept connections on port 1527
 ----------------------------------------------------------------
-Sun Dec 28 22:24:46 CET 2014:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.1.3 - (1557168): instance a816c00e-014a-92c9-7d09-00002cb901e5 
+Mon Dec 29 15:09:29 CET 2014:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.1.3 - (1557168): instance a816c00e-014a-9661-53e9-00002cb901e5 
 on database directory D:\Version Control\aips-proj\AIPSProj\database\ChemDB with class loader sun.misc.Launcher$AppClassLoader@1d44bcfa 
 Loaded from file:/D:/Programs/Java/jdk1.8.0_25/db/lib/derby.jar
 java.vendor=Oracle Corporation

@@ -11,27 +11,41 @@ import chem.figures.ChemicalBond;
 import chem.tools.CovalentBondTool;
 import CH.ifa.draw.application.DrawApplication;
 import static CH.ifa.draw.application.DrawApplication.IMAGES;
+import CH.ifa.draw.figures.GroupCommand;
+import CH.ifa.draw.figures.UngroupCommand;
 import CH.ifa.draw.framework.Drawing;
-import CH.ifa.draw.framework.Figure;
-import CH.ifa.draw.framework.FigureEnumeration;
 import CH.ifa.draw.framework.Tool;
+import CH.ifa.draw.standard.AlignCommand;
+import CH.ifa.draw.standard.BringToFrontCommand;
+import CH.ifa.draw.standard.CopyCommand;
 import CH.ifa.draw.standard.CreationTool;
+import CH.ifa.draw.standard.CutCommand;
+import CH.ifa.draw.standard.DeleteCommand;
+import CH.ifa.draw.standard.DuplicateCommand;
+import CH.ifa.draw.standard.PasteCommand;
+import CH.ifa.draw.standard.SendToBackCommand;
+import CH.ifa.draw.standard.ToggleGridCommand;
 import CH.ifa.draw.standard.ToolButton;
+import CH.ifa.draw.util.CommandMenu;
+import chem.UI.LoadDialog;
+import chem.UI.SaveDialog;
 import chem.anim.Animatable;
+import chem.db.DocumentLoader;
 import chem.db.HibernateUtil;
-import chem.figures.AtomFactory;
-import chem.figures.AtomFigure;
-import chem.figures.CarbonFigure;
-import chem.figures.ElectronFigure;
-import chem.figures.persist.AtomModel;
-import chem.figures.persist.ChemicalBondModel;
+import chem.db.Reconstructor;
 import chem.figures.persist.DocumentModel;
-import chem.figures.persist.ElectronModel;
+import chem.util.AtomFactory;
+import chem.figures.persist.PersistableFigure;
 import chem.tools.AtomSelectionTool;
+import java.awt.Menu;
+import java.awt.MenuBar;
+import java.awt.MenuItem;
+import java.awt.MenuShortcut;
 import java.awt.Panel;
 import java.awt.Point;
-import java.util.Calendar;
-import java.util.List;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JOptionPane;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
@@ -115,7 +129,32 @@ public class ChemApp extends DrawApplication
     }
     
     @Override
+    public void promptOpen()
+    {
+        LoadDialog loadDialog = new LoadDialog(this, true);
+        loadDialog.setVisible(true);
+        
+    }
+    
+    @Override
     public void promptSaveAs()
+    {
+        SaveDialog saveDialog = new SaveDialog(this, true);
+        saveDialog.setVisible(true);
+    }
+    
+    public void promptSave()
+    {
+        if (((PersistableFigure)drawing()).getModel().getId() == -1)
+        {
+            SaveDialog saveDialog = new SaveDialog(this, true);
+            saveDialog.setVisible(true);
+        }
+        else
+            saveDocument();
+    }
+    
+    public void loadDocument(int docId)
     {
         toolDone();
         
@@ -123,66 +162,35 @@ public class ChemApp extends DrawApplication
         {
             Session session = HibernateUtil.getSessionFactory().openSession();
             
+            DocumentLoader loader = new Reconstructor();
+            Drawing drawing = loader.loadDrawing(session, docId);
+            Query query = session.createQuery("from DocumentModel d where d.id = " + docId);
+            Object docObj = query.list().get(0);
+            DocumentModel docModel = (DocumentModel)docObj;
+            setTitle(docModel.getName() + " - " + "CH4emistry");
             
-            DocumentModel docm = ((AnimatedDrawing)drawing()).getModel();
-            Query query = session.createQuery("from DocumentModel d where d.id = " + docm.getId());
-            Object doc = query.list().get(0);
-
-            DocumentModel pers = (DocumentModel)doc;
+            setDrawing(drawing);
             
-            session.beginTransaction();
-            session.saveOrUpdate(pers);
-            session.getTransaction().commit();
+            session.close();
+        }
+        catch(Exception ex)
+        {
+            System.out.println(ex.toString());
+        }
+    }
+    
+    public void saveDocument()
+    {
+        toolDone();
+        
+        try
+        {
+            Session session = HibernateUtil.getSessionFactory().openSession();
             
-            int id = pers.getId();
+            PersistableFigure doc = (PersistableFigure)(drawing());
+            AnimatedDrawing dr = (AnimatedDrawing)drawing();
             
-            FigureEnumeration k = drawing().figures();
-            
-            
-            while (k.hasMoreElements())
-            {
-                Figure f = k.nextFigure();
-
-                if (f instanceof AtomFigure)
-                {
-                    AtomFigure a = (AtomFigure)f;
-                    //List<ElectronFigure> efs = a.getElectrons();
-
-                    AtomModel am = a.getModel();
-                    am.setDocumentId(id);
-                    
-                    query = session.createQuery("from AtomModel am where am.documentId = " + id + " and " + "am.id = " + am.getId());
-                    List list = query.list();
-                    
-                    if (list.isEmpty())
-                    {
-                        session.beginTransaction();
-                        session.saveOrUpdate(am);
-                        session.getTransaction().commit();
-                    }
-                    else
-                    {
-                        doc = query.list().get(0);
-
-                        AtomModel persAm = (AtomModel)doc;
-                        persAm.setX(am.getX());
-                        persAm.setY(am.getY());
-
-                        session.beginTransaction();
-                        session.saveOrUpdate(persAm);
-                        session.getTransaction().commit();
-                    }
-
-//                    for (ElectronFigure ef : efs)
-//                    {
-//                        ElectronModel em = ef.getModel();
-//
-//                        session.beginTransaction();
-//                        session.saveOrUpdate(em);
-//                        session.getTransaction().commit();
-//                    }
-                }
-            }
+            doc.saveToDatabase(session, doc.getModel().getId());
 
             session.close();
         }
@@ -193,50 +201,152 @@ public class ChemApp extends DrawApplication
         }
     }
     
-    @Override
-    public void promptOpen()
+    public void saveDocumentAs(String name)
     {
         toolDone();
         
         try
         {
             Session session = HibernateUtil.getSessionFactory().openSession();
-            Query query = session.createQuery("from DocumentModel");
-            Object doc = query.list().get(0);
+            
+            PersistableFigure doc = (PersistableFigure)(drawing());
+            AnimatedDrawing dr = (AnimatedDrawing)drawing();
+            dr.setDocumentName(name);
+            
+            doc.saveToDatabase(session, -1);
 
-            DocumentModel docm = (DocumentModel)doc;
-            
-            int id = docm.getId();
-            
-            query = session.createQuery("from AtomModel a where a.documentId = " + id);
-            List res = query.list();
-            
-            Drawing drawing = new AnimatedDrawing(docm);
-            
-            for (Object o : res)
-            {
-                AtomModel am = (AtomModel)o;
-                if (am.getType().equalsIgnoreCase("C"))
-                {
-                    AtomFigure fig = new CarbonFigure();
-                    fig.setModel(am);
-                    fig.moveBy(am.getX(), am.getY());
-                    drawing.add(fig);
-                }
-            }
-            
-            setDrawing(drawing);
-            
-            view().checkDamage();
-            
             session.close();
         }
         catch(Exception ex)
         {
-            System.out.println(ex.toString());
+            System.out.println(ex);
+            ex.printStackTrace();
         }
+    }
+    
+    /**
+     * Creates the standard menus. Clients override this
+     * method to add additional menus.
+     */
+    @Override
+    protected void createMenus(MenuBar mb)
+    {
+		mb.add(createFileMenu());
+		mb.add(createEditMenu());
+		mb.add(createAlignmentMenu());
+    }
+
+    /**
+     * Creates the file menu. Clients override this
+     * method to add additional menu items.
+     */
+    protected Menu createFileMenu() {
+		Menu menu = new Menu("File");
+		MenuItem mi = new MenuItem("New", new MenuShortcut('n'));
+		mi.addActionListener(
+		    new ActionListener() {
+		        public void actionPerformed(ActionEvent event) {
+		            promptNew();
+		        }
+		    }
+		);
+		menu.add(mi);
+
+		mi = new MenuItem("Open...", new MenuShortcut('o'));
+		mi.addActionListener(
+		    new ActionListener() {
+		        public void actionPerformed(ActionEvent event) {
+		            promptOpen();
+		        }
+		    }
+		);
+		menu.add(mi);
         
+        mi = new MenuItem("Save...");
+		mi.addActionListener(
+		    new ActionListener() {
+		        public void actionPerformed(ActionEvent event) {
+		            promptSave();
+		        }
+		    }
+		);
+		menu.add(mi);
+
+		mi = new MenuItem("Save As...", new MenuShortcut('s'));
+		mi.addActionListener(
+		    new ActionListener() {
+		        public void actionPerformed(ActionEvent event) {
+		            promptSaveAs();
+		        }
+		    }
+		);
+		menu.add(mi);
+		menu.addSeparator();
         
+		mi = new MenuItem("Print...", new MenuShortcut('p'));
+		mi.addActionListener(
+		    new ActionListener() {
+		        public void actionPerformed(ActionEvent event) {
+		            print();
+		        }
+		    }
+		);
+		menu.add(mi);
+		menu.addSeparator();
         
+		mi = new MenuItem("Exit");
+		mi.addActionListener(
+		    new ActionListener() {
+		        public void actionPerformed(ActionEvent event) {
+		            exit();
+		        }
+		    }
+		);
+		menu.add(mi);
+		return menu;
+	}
+
+    /**
+     * Creates the edit menu. Clients override this
+     * method to add additional menu items.
+     */
+    protected Menu createEditMenu() {
+		CommandMenu menu = new CommandMenu("Edit");
+		menu.add(new CutCommand("Cut", view()), new MenuShortcut('x'));
+		menu.add(new CopyCommand("Copy", view()), new MenuShortcut('c'));
+		menu.add(new PasteCommand("Paste", view()), new MenuShortcut('v'));
+		menu.addSeparator();
+		menu.add(new DuplicateCommand("Duplicate", view()), new MenuShortcut('d'));
+		menu.add(new DeleteCommand("Delete", view()));
+		menu.addSeparator();
+		menu.add(new GroupCommand("Group", view()));
+		menu.add(new UngroupCommand("Ungroup", view()));
+		menu.addSeparator();
+		menu.add(new SendToBackCommand("Send to Back", view()));
+		menu.add(new BringToFrontCommand("Bring to Front", view()));
+		return menu;
+	}
+
+    /**
+     * Creates the alignment menu. Clients override this
+     * method to add additional menu items.
+     */
+    protected Menu createAlignmentMenu() {
+		CommandMenu menu = new CommandMenu("Align");
+		menu.add(new ToggleGridCommand("Toggle Snap to Grid", view(), new Point(4,4)));
+		menu.addSeparator();
+		menu.add(new AlignCommand("Lefts", view(), AlignCommand.LEFTS));
+		menu.add(new AlignCommand("Centers", view(), AlignCommand.CENTERS));
+		menu.add(new AlignCommand("Rights", view(), AlignCommand.RIGHTS));
+		menu.addSeparator();
+		menu.add(new AlignCommand("Tops", view(), AlignCommand.TOPS));
+		menu.add(new AlignCommand("Middles", view(), AlignCommand.MIDDLES));
+		menu.add(new AlignCommand("Bottoms", view(), AlignCommand.BOTTOMS));
+		return menu;
+	}
+
+    public static int yesNoCancel(String question)
+    {
+        return JOptionPane.showConfirmDialog(null, question, "Alert", JOptionPane.YES_NO_CANCEL_OPTION);
     }
 }

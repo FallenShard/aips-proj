@@ -8,20 +8,21 @@ package chem.figures.persist;
 
 import java.io.Serializable;
 import java.util.Date;
+import org.hibernate.Query;
+import org.hibernate.Session;
 
 /**
  *
  * @author FallenShard
  */
-public class DocumentModel  implements Serializable
+public class DocumentModel implements Serializable, Persistable
 {
-    private int id;
+    private int id = -1;
     private String name;
     private Date timestamp;
     
     public DocumentModel()
     {
-        id = -1;
         name = "Untitled";
         timestamp = new Date();
     }
@@ -55,6 +56,39 @@ public class DocumentModel  implements Serializable
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
-    
-    
+
+    @Override
+    public void save(Session session, int documentId)
+    {
+        // Set timestamp to current time
+        this.timestamp = new Date();
+        this.id = documentId;
+        
+        // If id is -1, we're saving for the first time
+        if (id == -1)
+        {
+            session.beginTransaction();
+            session.save(this);
+            session.getTransaction().commit();
+        }
+        else
+        {
+            // Otherwise, pull from database and refresh
+            Query query = session.createQuery("from DocumentModel d where d.id = " + id);
+            Object doc = query.list().get(0);
+            
+            DocumentModel persDoc = (DocumentModel)doc;
+            persDoc.setName(name);
+            persDoc.setTimestamp(timestamp);
+            
+            session.beginTransaction();
+            session.saveOrUpdate(persDoc);
+            session.getTransaction().commit();
+        }
+    }
+
+    @Override
+    public void delete(Session session) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

@@ -3,19 +3,10 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/CH/ifa/draw/application/DrawApplication.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/chem/core/Main.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/chem/anim/AnimatedDrawing.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/chem/db/mapping/atom.hbm.xml</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/chem/db/mapping/document.hbm.xml</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/hibernate.cfg.xml</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/chem/figures/AtomFigure.java</file>
             <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/chem/core/ChemApp.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/chem/figures/persist/BondModel.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/chem/db/HibernateUtil.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/chem/figures/persist/AtomModel.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/chem/figures/persist/DocumentModel.java</file>
-            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/chem/figures/persist/ElectronModel.java</file>
+            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/chem/figures/persist/ChemicalBondModel.java</file>
+            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/chem/anim/AnimatedDrawing.java</file>
+            <file>file:/D:/Version%20Control/aips-proj/AIPSProj/sources/chem/figures/AtomFigure.java</file>
         </group>
     </open-files>
 </project-private>

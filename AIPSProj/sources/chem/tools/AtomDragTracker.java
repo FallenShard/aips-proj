@@ -10,7 +10,7 @@ import CH.ifa.draw.framework.DrawingView;
 import CH.ifa.draw.framework.Figure;
 import CH.ifa.draw.framework.FigureEnumeration;
 import CH.ifa.draw.standard.AbstractTool;
-import java.awt.Color;
+import chem.util.Const;
 import java.awt.event.MouseEvent;
 
 /**
@@ -45,26 +45,26 @@ public class AtomDragTracker extends AbstractTool
             view().toggleSelection(m_selectedFigure);
             
             if (view().selection().contains(m_selectedFigure))
-                m_selectedFigure.setAttribute("FrameColor", Color.RED);
+                m_selectedFigure.setAttribute("FrameColor", Const.SELECTION_BORDER);
             else
-                m_selectedFigure.setAttribute("FrameColor", Color.BLACK);
+                m_selectedFigure.setAttribute("FrameColor", Const.IDLE_BORDER);
             
             m_selectedFigure = null;
             
             // Enumerate all selected figures and paint them red
             for (Object f : view().selection())
-                ((Figure)f).setAttribute("FrameColor", Color.RED);
+                ((Figure)f).setAttribute("FrameColor", Const.SELECTION_BORDER);
         } 
         else if (!view().selection().contains(m_selectedFigure))
         {
             // Otherwise, user clicked somewhere else, without shift, so nullify selection, but select the new figure
             for (Object f : view().selection())
-                ((Figure)f).setAttribute("FrameColor", Color.BLACK);
+                ((Figure)f).setAttribute("FrameColor", Const.IDLE_BORDER);
             
             view().clearSelection();
             view().addToSelection(m_selectedFigure);
             
-            m_selectedFigure.setAttribute("FrameColor", Color.RED);
+            m_selectedFigure.setAttribute("FrameColor", Const.SELECTION_BORDER);
         }
     }
 

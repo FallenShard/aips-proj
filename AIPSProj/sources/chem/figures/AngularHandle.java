@@ -59,6 +59,6 @@ public class AngularHandle extends LocatorHandle
     @Override
     public void draw(Graphics g)
     {
-        
+        // Draw nothing
     }
 }

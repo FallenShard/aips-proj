@@ -9,15 +9,18 @@ package chem.figures;
 import CH.ifa.draw.figures.LineConnection;
 import CH.ifa.draw.framework.Figure;
 import chem.figures.persist.ChemicalBondModel;
+import chem.figures.persist.Persistable;
+import chem.figures.persist.PersistableFigure;
 import chem.tools.ChangeBondEndHandle;
 import chem.tools.ChangeBondStartHandle;
 import java.util.Vector;
+import org.hibernate.Session;
 
 /**
  *
  * @author FallenShard
  */
-public class ChemicalBond extends LineConnection
+public class ChemicalBond extends LineConnection implements PersistableFigure
 {
     private ChemicalBondModel m_model = new ChemicalBondModel();
     
@@ -84,9 +87,26 @@ public class ChemicalBond extends LineConnection
         }
     }
     
+
+    @Override
     public ChemicalBondModel getModel()
     {
-        ChemicalBondModel model = new ChemicalBondModel();
-        return model;
+        m_model.setStartElectronId(m_start.getModel().getId());
+        m_model.setEndElectronId(m_end.getModel().getId());
+        return m_model;
+    }
+
+    @Override
+    public void setModel(Persistable model)
+    {
+        m_model = (ChemicalBondModel)model;
+    }
+
+    @Override
+    public void saveToDatabase(Session session, int documentId)
+    {
+        getModel();
+        
+        m_model.save(session, documentId);
     }
 }

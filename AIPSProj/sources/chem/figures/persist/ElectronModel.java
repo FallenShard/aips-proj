@@ -7,22 +7,25 @@
 package chem.figures.persist;
 
 import java.io.Serializable;
+import org.hibernate.Query;
+import org.hibernate.Session;
 
 /**
  *
  * @author FallenShard
  */
-public class ElectronModel implements Serializable
+public class ElectronModel implements Serializable, Persistable
 {
-    private int id;
+    private int id = -1;
     private double angle;
     private int atomId;
-    private int bondId;
-    private int otherElectronId;
+    private int index;
     
     public ElectronModel()
     {
         angle = 0.0;
+        atomId = -1;
+        index = -1;
     }
     
     public ElectronModel(double angle)
@@ -30,12 +33,10 @@ public class ElectronModel implements Serializable
         this.angle = angle;
     }
     
-    public ElectronModel(double angle, int atomId, int bondId, int otherElectronId)
+    public ElectronModel(double angle, int atomId)
     {
         this.angle = angle;
         this.atomId = atomId;
-        this.bondId = bondId;
-        this.otherElectronId = otherElectronId;
     }
 
     public int getId() {
@@ -61,20 +62,45 @@ public class ElectronModel implements Serializable
     public void setAtomId(int atomId) {
         this.atomId = atomId;
     }
-
-    public int getBondId() {
-        return bondId;
+    
+    public int getIndex()
+    {
+        return index;
+    }
+    
+    public void setIndex(int index)
+    {
+        this.index = index;
     }
 
-    public void setBondId(int bondId) {
-        this.bondId = bondId;
+    @Override
+    public void save(Session session, int documentId)
+    {
+        // If id is -1, we're saving for the first time, set docId
+        if (id == -1 || documentId == -1)
+        {
+            id = -1;
+            session.beginTransaction();
+            session.save(this);
+            session.getTransaction().commit();
+        }
+        else
+        {
+            // Otherwise, pull from database and refresh
+            Query query = session.createQuery("from ElectronModel e where e.id = " + id);
+            Object obj = query.list().get(0);
+            
+            ElectronModel persEl = (ElectronModel)obj;
+            persEl.angle = angle;
+            
+            session.beginTransaction();
+            session.saveOrUpdate(persEl);
+            session.getTransaction().commit();
+        }
     }
 
-    public int getOtherElectronId() {
-        return otherElectronId;
-    }
-
-    public void setOtherElectronId(int otherElectronId) {
-        this.otherElectronId = otherElectronId;
+    @Override
+    public void delete(Session session) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

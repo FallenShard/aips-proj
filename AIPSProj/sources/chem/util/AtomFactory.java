@@ -4,7 +4,12 @@
  * and open the template in the editor.
  */
 
-package chem.figures;
+package chem.util;
+
+import chem.figures.AtomFigure;
+import chem.figures.CarbonFigure;
+import chem.figures.HydrogenFigure;
+import chem.figures.OxygenFigure;
 
 /**
  *
@@ -30,6 +35,23 @@ public class AtomFactory
                 return new OxygenFigure();
                 
             case HYDROGEN:
+                return new HydrogenFigure();
+        }
+        
+        return null;
+    }
+    
+    public AtomFigure createAtom(String name)
+    {
+        switch (name)
+        {
+            case "C":
+                return new CarbonFigure();
+                
+            case "O":
+                return new OxygenFigure();
+                
+            case "H":
                 return new HydrogenFigure();
         }
         

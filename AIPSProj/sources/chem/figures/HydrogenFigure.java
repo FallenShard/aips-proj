@@ -6,11 +6,9 @@
 
 package chem.figures;
 
-import CH.ifa.draw.figures.EllipseFigure;
-import CH.ifa.draw.figures.TextFigure;
 import CH.ifa.draw.framework.Figure;
-import java.awt.Color;
-import java.awt.Font;
+import chem.util.Const;
+import chem.util.Dim;
 import java.awt.Point;
 import java.awt.Rectangle;
 
@@ -24,17 +22,17 @@ public class HydrogenFigure extends AtomFigure
     {
         super();
         
-        m_nucleus.setAttribute("FillColor", Color.BLUE);
+        m_nucleus.setAttribute("FillColor", Const.HYDROGEN_FILL);
         
-        m_name.setAttribute("TextColor", Color.WHITE);
+        m_name.setAttribute("TextColor", Const.LIGHT_TEXT);
         m_name.setText("H");
         Rectangle r = m_name.displayBox();
-        m_name.basicDisplayBox(new Point(60 - r.width / 2, 60 - r.height / 2), null);
+        m_name.basicDisplayBox(new Point(Dim.ATOM_RADIUS - r.width / 2, Dim.ATOM_RADIUS - r.height / 2), null);
         
         // Set valence text attributes
         m_lastOrbitEls = 1;
         m_lastOrbitMaxEls = 2;
-        m_valence.setAttribute("TextColor", Color.WHITE);
+        m_valence.setAttribute("TextColor", Const.LIGHT_TEXT);
         updateValenceText();
         
         double angle = 2 * Math.PI / m_lastOrbitEls;
@@ -42,10 +40,10 @@ public class HydrogenFigure extends AtomFigure
         {
             double c = Math.cos(angle * i);
             double s = -Math.sin(angle * i);
-            int dX = (int)(55 * c + 60);
-            int dY = (int)(55 * s + 60);
+            int dX = (int)((Dim.ATOM_RADIUS - Dim.ELECTRON_RADIUS) * c + Dim.ATOM_RADIUS);
+            int dY = (int)((Dim.ATOM_RADIUS - Dim.ELECTRON_RADIUS) * s + Dim.ATOM_RADIUS);
 
-            Figure el = new ElectronFigure(new Point(dX, dY), 5, this);
+            Figure el = new ElectronFigure(new Point(dX, dY), Dim.ELECTRON_RADIUS, this, i);
             el.setAttribute("Angle", angle * i);
             m_electrons.add(el); 
         }

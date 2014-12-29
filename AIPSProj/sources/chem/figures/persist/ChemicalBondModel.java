@@ -7,14 +7,15 @@
 package chem.figures.persist;
 
 import java.io.Serializable;
+import org.hibernate.Session;
 
 /**
  *
  * @author FallenShard
  */
-public class ChemicalBondModel implements Serializable
+public class ChemicalBondModel implements Serializable, Persistable
 {
-    private int id;
+    private int id = -1;
     private int startElectronId;
     private int endElectronId;
     private int documentId;
@@ -61,5 +62,37 @@ public class ChemicalBondModel implements Serializable
 
     public void setDocumentId(int documentId) {
         this.documentId = documentId;
+    }
+
+    @Override
+    public void save(Session session, int documentId)
+    {
+        // If id is -1, we're saving for the first time, set docId
+        if (id == -1 || documentId == -1)
+        {
+            this.id = -1;
+            this.documentId = documentId;
+            session.beginTransaction();
+            session.save(this);
+            session.getTransaction().commit();
+        }
+        else
+        {
+            // Otherwise, pull from database and refresh
+//            Query query = session.createQuery("from ChemicalBondModel cb where cb.id = " + id);
+//            Object obj = query.list().get(0);
+//            
+//            ChemicalBondModel persBond = (ChemicalBondModel)obj;
+//
+//            session.beginTransaction();
+//            session.saveOrUpdate(persBond);
+//            session.getTransaction().commit();
+        }
+    }
+
+    @Override
+    public void delete(Session session)
+    {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
