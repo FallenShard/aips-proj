@@ -8,6 +8,7 @@ nbactions.xml
 nb-configuration.xml
 build.xml
 nbbuild.xml
+database/
 
 # Class Files #
 *.class
