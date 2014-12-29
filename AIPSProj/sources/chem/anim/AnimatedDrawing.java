@@ -131,4 +131,25 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable, Pers
             pf.saveToDatabase(session, m_model.getId());
         }
     }
+    
+    @Override
+    public void saveToDatabaseAs(Session session, int documentId)
+    {
+        m_model.saveAs(session, documentId);
+        
+        FigureEnumeration figures = figures();
+        
+        while (figures.hasMoreElements())
+        {
+            Figure fig = figures.nextFigure();
+            PersistableFigure pf = (PersistableFigure)fig;
+            pf.saveToDatabaseAs(session, m_model.getId());
+        }
+    }
+    
+    @Override
+    public void deleteFromDatabase(Session session)
+    {
+        
+    }
 }

@@ -16,5 +16,6 @@ public interface Persistable
     public int getId();
     public void setId(int id);
     public void save(Session session, int documentId);
+    public void saveAs(Session session, int documentId);
     public void delete(Session session);
 }

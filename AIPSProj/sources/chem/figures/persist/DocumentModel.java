@@ -86,9 +86,21 @@ public class DocumentModel implements Serializable, Persistable
             session.getTransaction().commit();
         }
     }
+    
+    @Override
+    public void saveAs(Session session, int documentId)
+    {
+        this.timestamp = new Date();
+        this.id = documentId;
+        session.beginTransaction();
+        session.save(this);
+        session.getTransaction().commit();
+    }
 
     @Override
     public void delete(Session session) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    
 }

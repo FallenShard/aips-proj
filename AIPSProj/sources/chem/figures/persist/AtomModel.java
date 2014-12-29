@@ -92,7 +92,6 @@ public class AtomModel implements Serializable, Persistable
         // If id is -1, we're saving for the first time, set docId
         if (id == -1 || documentId == -1)
         {
-            this.id = -1;
             this.documentId = documentId;
             session.beginTransaction();
             session.save(this);
@@ -113,6 +112,16 @@ public class AtomModel implements Serializable, Persistable
             session.saveOrUpdate(persAtom);
             session.getTransaction().commit();
         }
+    }
+
+    @Override
+    public void saveAs(Session session, int documentId)
+    {
+        this.id = -1;
+        this.documentId = documentId;
+        session.beginTransaction();
+        session.save(this);
+        session.getTransaction().commit();
     }
 
     @Override

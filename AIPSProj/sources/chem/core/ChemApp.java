@@ -213,7 +213,7 @@ public class ChemApp extends DrawApplication
             AnimatedDrawing dr = (AnimatedDrawing)drawing();
             dr.setDocumentName(name);
             
-            doc.saveToDatabase(session, -1);
+            doc.saveToDatabaseAs(session, -1);
 
             session.close();
         }

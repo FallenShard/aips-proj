@@ -5,7 +5,6 @@
  */
 package chem.UI;
 
-import chem.UI.util.ComboBoxItem;
 import chem.core.ChemApp;
 import chem.db.HibernateUtil;
 import chem.figures.persist.DocumentModel;

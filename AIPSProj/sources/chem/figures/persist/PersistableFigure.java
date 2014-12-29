@@ -16,4 +16,6 @@ public interface PersistableFigure
     Persistable getModel();
     void setModel(Persistable model);
     void saveToDatabase(Session session, int documentId);
+    void saveToDatabaseAs(Session session, int documentId);
+    void deleteFromDatabase(Session session);
 }

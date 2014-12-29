@@ -103,4 +103,13 @@ public class ElectronModel implements Serializable, Persistable
     public void delete(Session session) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public void saveAs(Session session, int documentId)
+    {
+        id = -1;
+        session.beginTransaction();
+        session.save(this);
+        session.getTransaction().commit();
+    }
 }

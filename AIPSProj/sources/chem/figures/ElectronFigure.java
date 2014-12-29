@@ -117,4 +117,18 @@ public class ElectronFigure extends EllipseFigure implements Animatable, Persist
 
         m_model.save(session, documentId);
     }
+    
+    @Override
+    public void saveToDatabaseAs(Session session, int documentId)
+    {
+        getModel();
+
+        m_model.saveAs(session, documentId);
+    }
+    
+    @Override
+    public void deleteFromDatabase(Session session)
+    {
+        
+    }
 }
