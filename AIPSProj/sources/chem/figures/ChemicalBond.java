@@ -69,6 +69,9 @@ public class ChemicalBond extends LineConnection implements PersistableFigure
             
             m_start.setCovalentBond(this, end);
             m_end.setCovalentBond(this, start);
+            
+            m_model.setStartElectronId(m_start.getModel().getId());
+            m_model.setEndElectronId(m_end.getModel().getId());
         }
     }
     
@@ -91,8 +94,8 @@ public class ChemicalBond extends LineConnection implements PersistableFigure
     @Override
     public ChemicalBondModel getModel()
     {
-        m_model.setStartElectronId(m_start.getModel().getId());
-        m_model.setEndElectronId(m_end.getModel().getId());
+        //m_model.setStartElectronId(m_start.getModel().getId());
+        //m_model.setEndElectronId(m_end.getModel().getId());
         return m_model;
     }
 
