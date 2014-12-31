@@ -67,8 +67,8 @@ public class ChemicalBondModel implements Serializable, Persistable
     @Override
     public void save(Session session, int documentId)
     {
-        // If id is -1, we're saving for the first time, set docId
-        if (id == -1 || documentId == -1)
+        // If id is -1, we're saving for the first time
+        if (id == -1)
         {
             this.id = -1;
             this.documentId = documentId;

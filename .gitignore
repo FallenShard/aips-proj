@@ -10,7 +10,7 @@ build.xml
 nbbuild.xml
 private.xml
 nbproject/private/private.xml
-
+*/nbproject/private/private.xml
 # Database #
 database/
 

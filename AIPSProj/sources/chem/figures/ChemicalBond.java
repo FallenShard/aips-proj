@@ -94,8 +94,10 @@ public class ChemicalBond extends LineConnection implements PersistableFigure
     @Override
     public ChemicalBondModel getModel()
     {
-        //m_model.setStartElectronId(m_start.getModel().getId());
-        //m_model.setEndElectronId(m_end.getModel().getId());
+        if (m_start != null)
+            m_model.setStartElectronId(m_start.getModel().getId());
+        if (m_end != null)
+            m_model.setEndElectronId(m_end.getModel().getId());
         return m_model;
     }
 
