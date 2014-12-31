@@ -172,6 +172,7 @@ public class ChemApp extends DrawApplication
             setDrawing(drawing);
             
             session.close();
+
         }
         catch(Exception ex)
         {

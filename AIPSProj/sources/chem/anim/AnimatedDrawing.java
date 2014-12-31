@@ -16,8 +16,12 @@ import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import org.hibernate.Query;
 import org.hibernate.Session;
 
 /**
@@ -35,15 +39,19 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable, Pers
     List<Animatable> elements = new LinkedList<>();
     
     DocumentModel m_model = new DocumentModel();
+    
+    Map<Integer, String> m_deleteCache = new HashMap<>();
    
     public AnimatedDrawing(int documentId)
     {
+        super();
         m_model = new DocumentModel();
         m_model.setId(documentId);
     }
     
     public AnimatedDrawing(DocumentModel model)
     {
+        super();
         m_model = model;
     }
     
@@ -64,10 +72,20 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable, Pers
     @Override
     public synchronized Figure remove(Figure figure) {
         Figure f = super.remove(figure);
-        if (f instanceof AnimationDecorator)
+        if (f instanceof PersistableFigure)
         {
             //elements.remove((AnimationDecorator)f);
             //return ((AnimationDecorator) f).peelDecoration();
+            PersistableFigure persf = (PersistableFigure)f;
+            
+            String className = "";
+
+            int i = persf.getModel().getClass().toString().lastIndexOf('.');
+            if (i > 0)
+            {
+                className = persf.getModel().getClass().toString().substring(i+1);
+            }
+            m_deleteCache.put(persf.getModel().getId(), className);
         }
             
         return f;
@@ -121,6 +139,26 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable, Pers
     public void saveToDatabase(Session session, int documentId)
     {
         m_model.save(session, documentId);
+        
+        for (Entry<Integer, String> entry : m_deleteCache.entrySet())
+        {
+            if (entry.getValue().equalsIgnoreCase("AtomModel"))
+            {
+                String elHql = "DELETE FROM ElectronModel WHERE atomId = " + entry.getKey();
+                Query query = session.createQuery(elHql);
+                int rows = query.executeUpdate();
+                System.out.println("Rows affected by ElectronModel delete: " + rows);
+            }
+            
+            
+            
+            String hql = "DELETE FROM " + entry.getValue() + " WHERE id = :delId";
+            Query query = session.createQuery(hql);
+            query.setParameter("delId", entry.getKey());
+            int rows = query.executeUpdate();
+            System.out.println("Rows affected by " + entry.getValue() + ": " + rows);
+        }
+        
         
         FigureEnumeration figures = figures();
         
