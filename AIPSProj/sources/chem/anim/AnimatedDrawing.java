@@ -44,12 +44,14 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable, Pers
    
     public AnimatedDrawing(int documentId)
     {
+        super();
         m_model = new DocumentModel();
         m_model.setId(documentId);
     }
     
     public AnimatedDrawing(DocumentModel model)
     {
+        super();
         m_model = model;
     }
     

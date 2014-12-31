@@ -9,6 +9,7 @@ nb-configuration.xml
 build.xml
 nbbuild.xml
 private.xml
+
 # Database #
 database/
 
