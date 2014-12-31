@@ -8,7 +8,7 @@
 *nb-configuration.xml
 *build.xml
 *nbbuild.xml
-AIPSProj/database/
+*database/*
 
 # Class Files #
 *.class
