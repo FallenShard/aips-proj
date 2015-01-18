@@ -1,5 +1,14 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
 package chemserver;
+
 import java.io.Serializable;
+import org.hibernate.Query;
+import org.hibernate.Session;
 
 /**
  *
@@ -78,7 +87,8 @@ public class AtomModel implements Serializable
     }
     
     @Override
-    public String toString() {
-        return "X:" + x + " Y:" + y + " DocID:" + documentId + " T: " + type + " ID:" + id;
+    public String toString()
+    {
+        return "Type: " + type + " Id: " + id + " DocId: " + documentId;
     }
 }

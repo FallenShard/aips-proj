@@ -36,7 +36,7 @@ public class ComboBoxItem
     @Override
     public String toString()
     {
-        return String.format("\t%-20s %s" , m_name, m_timestamp.toString());
+        return String.format("\t%-20s %-20s" , m_name, m_timestamp.toString());
     }
     
     public String getName() { return m_name; }

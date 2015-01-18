@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC "-//Hibernate/Hibernate Configuration DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+  <session-factory>
+    <property name="hibernate.dialect">org.hibernate.dialect.DerbyDialect</property>
+    <property name="hibernate.connection.driver_class">org.apache.derby.jdbc.ClientDriver</property>
+    <property name="hibernate.connection.url">jdbc:derby://localhost:1527/ChemDB</property>
+    <property name="hibernate.connection.username">Bart</property>
+    <property name="hibernate.connection.password">Bart</property>
+    <property name="hibernate.query.factory_class">org.hibernate.hql.internal.ast.ASTQueryTranslatorFactory</property>
+    <mapping class="chemserver.AtomModel" file="" jar="" package="chemserver" resource="chemserver/atom.hbm.xml"/>
+    <mapping class="chemserver.DocumentModel" file="" jar="" package="chemserver" resource="chemserver/document.hbm.xml"/>
+    <mapping class="chemserver.ElectronModel" file="" jar="" package="chemserver" resource="chemserver/electron.hbm.xml"/>
+    <mapping class="chemserver.ChemicalBondModel" file="" jar="" package="chemserver" resource="chemserver/chemicalbond.hbm.xml"/>
+  </session-factory>
+</hibernate-configuration>

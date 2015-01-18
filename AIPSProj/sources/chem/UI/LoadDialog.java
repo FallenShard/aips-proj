@@ -8,7 +8,11 @@ package chem.UI;
 import chem.core.ChemApp;
 import chem.db.HibernateUtil;
 import chem.figures.persist.DocumentModel;
+import chem.network.NetworkHandler;
 import java.util.List;
+import javax.swing.DefaultListModel;
+import javax.swing.ListSelectionModel;
+import javax.swing.table.TableModel;
 import org.hibernate.HibernateException;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -19,7 +23,8 @@ import org.hibernate.Session;
  */
 public class LoadDialog extends javax.swing.JDialog
 {
-    // This dialog sets parent's project name and id.
+    // This dialog sets parent's project name and id
+    NetworkHandler m_networkhandler = null;
 
     /**
      * Creates new form LoadDialog
@@ -29,6 +34,10 @@ public class LoadDialog extends javax.swing.JDialog
         super(parent, modal);
         initComponents();
         m_parent = (ChemApp)parent;
+        
+        listEditableDocs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tableViewableDocs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
         loadProjects();
     }
     
@@ -68,6 +77,18 @@ public class LoadDialog extends javax.swing.JDialog
             ComboBoxItem cbi = new ComboBoxItem(dm);
             cb_projects.addItem(cbi);
         }
+        
+        DefaultListModel model = new DefaultListModel();
+        for (DocumentModel dm : resultList)
+        {
+            DocumentListItem dli = new DocumentListItem(dm);
+            model.addElement(dli);
+        }
+        
+        listEditableDocs.setModel(model);
+        
+        TableModel tableModel = new DocTableModel(resultList);
+        tableViewableDocs.setModel(tableModel);
     }
 
     /**
@@ -83,6 +104,13 @@ public class LoadDialog extends javax.swing.JDialog
         cb_projects = new javax.swing.JComboBox();
         btn_cancel = new javax.swing.JButton();
         btn_Load = new javax.swing.JButton();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        listEditableDocs = new javax.swing.JList();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        btnJoin = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tableViewableDocs = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -104,24 +132,55 @@ public class LoadDialog extends javax.swing.JDialog
             }
         });
 
+        listEditableDocs.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+            public int getSize() { return strings.length; }
+            public Object getElementAt(int i) { return strings[i]; }
+        });
+        jScrollPane3.setViewportView(listEditableDocs);
+
+        jLabel2.setText("Editable Documents:");
+
+        jLabel3.setText("Viewable Documents:");
+
+        btnJoin.setText("Join");
+
+        tableViewableDocs.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        jScrollPane1.setViewportView(tableViewableDocs);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel1)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cb_projects, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jLabel3)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btn_Load, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btn_cancel, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(20, 20, 20))))
+                        .addComponent(cb_projects, 0, 353, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE)
+                            .addComponent(jScrollPane3))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btn_Load, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btn_cancel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnJoin, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -129,11 +188,21 @@ public class LoadDialog extends javax.swing.JDialog
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(cb_projects, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cb_projects, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(15, 15, 15)
+                .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(btn_Load)
-                    .addComponent(btn_cancel))
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(jLabel3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnJoin))
+                .addGap(5, 5, 5)
+                .addComponent(btn_cancel)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -144,7 +213,10 @@ public class LoadDialog extends javax.swing.JDialog
     private void btn_LoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_LoadActionPerformed
         ComboBoxItem cbi = (ComboBoxItem)cb_projects.getSelectedItem();
         
-        m_parent.loadDocument(cbi.getDocId());
+        DocumentListItem dli = (DocumentListItem)listEditableDocs.getSelectedValue();
+        if (dli != null)
+            m_parent.loadDocument(dli.getDocumentId());
+        //m_parent.loadDocument(cbi.getDocId());
         
         setVisible(false);
         dispose();
@@ -167,7 +239,7 @@ public class LoadDialog extends javax.swing.JDialog
          */
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
+                if ("Windows".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
                 }
@@ -199,9 +271,16 @@ public class LoadDialog extends javax.swing.JDialog
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnJoin;
     private javax.swing.JButton btn_Load;
     private javax.swing.JButton btn_cancel;
     private javax.swing.JComboBox cb_projects;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JList listEditableDocs;
+    private javax.swing.JTable tableViewableDocs;
     // End of variables declaration//GEN-END:variables
 }

@@ -6,12 +6,22 @@
 
 package chem.network;
 
+import org.zeromq.ZMQ;
+
 /**
  *
  * @author FallenShard
  */
 public class NetworkHandler
 {
+    ZMQ.Context m_context = null;
+    
+    ZMQ.Socket m_connectionSocket = null;
+    
+    public NetworkHandler()
+    {
+        m_context = ZMQ.context(1);
+    }
     
 
 }

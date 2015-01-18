@@ -101,6 +101,4 @@ public class DocumentModel implements Serializable, Persistable
     public void delete(Session session) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
-    
 }
