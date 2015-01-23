@@ -37,6 +37,7 @@ import chem.figures.persist.DocumentModel;
 import chem.util.AtomFactory;
 import chem.figures.persist.PersistableFigure;
 import chem.network.ConnectThread;
+import chem.network.NetworkHandler;
 import chem.tools.AtomSelectionTool;
 import java.awt.Menu;
 import java.awt.MenuBar;
@@ -61,7 +62,7 @@ public class ChemApp extends DrawApplication
     
     private static final String CUSTOM_IMAGES = "/chem/res/";
     
-    private ZMQ.Context m_context = null;
+    private NetworkHandler m_networkHandler = null;
     
     ChemApp(String title)
     {
@@ -73,8 +74,7 @@ public class ChemApp extends DrawApplication
     {
         super.open();
         
-        m_context = ZMQ.context(1);
-        
+        m_networkHandler = new NetworkHandler();
         startAnimation();
     }
     
@@ -83,8 +83,7 @@ public class ChemApp extends DrawApplication
     {
         super.destroy();
         
-        m_context.term();
-                
+        m_networkHandler.dispose();
         endAnimation();
     }
     
@@ -139,11 +138,9 @@ public class ChemApp extends DrawApplication
     @Override
     public void promptOpen()
     {
-        ConnectThread thread = new ConnectThread(m_context);
-        thread.start();
-        //LoadDialog loadDialog = new LoadDialog(this, true);
-        //loadDialog.setVisible(true);
-        
+        LoadDialog loadDialog = new LoadDialog(this, true, m_networkHandler);
+        loadDialog.startNetworking();
+        loadDialog.setVisible(true);
     }
     
     @Override
@@ -170,18 +167,18 @@ public class ChemApp extends DrawApplication
         
         try
         {
-            //Session session = HibernateUtil.getSessionFactory().openSession();
+            Session session = HibernateUtil.getSessionFactory().openSession();
             
-            //DocumentLoader loader = new Reconstructor();
-            //Drawing drawing = loader.loadDrawing(session, docId);
-            //Query query = session.createQuery("from DocumentModel d where d.id = " + docId);
-            //Object docObj = query.list().get(0);
-            //DocumentModel docModel = (DocumentModel)docObj;
-            //setTitle(docModel.getName() + " - " + "CH4emistry");
+            DocumentLoader loader = new Reconstructor();
+            Drawing drawing = loader.loadDrawing(session, docId);
+            Query query = session.createQuery("from DocumentModel d where d.id = " + docId);
+            Object docObj = query.list().get(0);
+            DocumentModel docModel = (DocumentModel)docObj;
+            setTitle(docModel.getName() + " - " + "CH4emistry");
             
-            //setDrawing(drawing);
+           setDrawing(drawing);
             
-            //session.close();
+           session.close();
             
             
 

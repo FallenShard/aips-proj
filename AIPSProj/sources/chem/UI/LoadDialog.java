@@ -6,88 +6,78 @@
 package chem.UI;
 
 import chem.core.ChemApp;
-import chem.db.HibernateUtil;
 import chem.figures.persist.DocumentModel;
+import chem.network.ConnectThread;
+import chem.network.DocumentReceiver;
 import chem.network.NetworkHandler;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.table.TableModel;
-import org.hibernate.HibernateException;
-import org.hibernate.Query;
-import org.hibernate.Session;
 
 /**
  *
  * @author Mefi
  */
-public class LoadDialog extends javax.swing.JDialog
+public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
 {
     // This dialog sets parent's project name and id
     NetworkHandler m_networkhandler = null;
+    ConnectThread m_conThread = null;
+    private final ChemApp m_parent;
+    
+    List<DocumentModel> m_docModels = new ArrayList<>();
+    
+    DocumentModel m_selectedDoc = null;
 
     /**
      * Creates new form LoadDialog
      */
-    public LoadDialog(java.awt.Frame parent, boolean modal)
+    public LoadDialog(java.awt.Frame parent, boolean modal, NetworkHandler networkHandler)
     {
         super(parent, modal);
         initComponents();
+        
         m_parent = (ChemApp)parent;
         
         listEditableDocs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tableViewableDocs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
-        loadProjects();
+        tableViewableDocs.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> 
+        {
+            m_selectedDoc = m_docModels.get(tableViewableDocs.getSelectedRow());
+            lbl_SelectedDoc.setText(m_selectedDoc.getName() + " " + m_selectedDoc.getId());
+        });
+        
+        m_conThread = new ConnectThread(networkHandler.getContext(), this);
     }
     
-    private final ChemApp m_parent;
-    
-    //Loads all projects into combobox
-    private void loadProjects()
+    public void startNetworking()
     {
-        // Clearing projects combo box
-        cb_projects.removeAllItems();
-        
-        // Filling projects combo box
-        try
-        {
-            Session session = HibernateUtil.getSessionFactory().openSession();
-            session.beginTransaction();
-
-            String hql = "from DocumentModel";
-            Query q = session.createQuery(hql);
-            List<DocumentModel> resultList = q.list();
-            
-            displayResult(resultList);
-            
-            session.getTransaction().commit();
-        }
-        catch (HibernateException he)
-        {
-            he.printStackTrace();
-        }
+        m_conThread.start();
     }
     
     //Helper method for loadProjects()
-    private void displayResult(List<DocumentModel> resultList)
+    public synchronized void displayResult()
     {
-        for (DocumentModel dm : resultList)
+        cb_projects.removeAllItems();
+        for (DocumentModel dm : m_docModels)
         {
             ComboBoxItem cbi = new ComboBoxItem(dm);
             cb_projects.addItem(cbi);
         }
         
         DefaultListModel model = new DefaultListModel();
-        for (DocumentModel dm : resultList)
+        for (DocumentModel dm : m_docModels)
         {
             DocumentListItem dli = new DocumentListItem(dm);
             model.addElement(dli);
         }
-        
         listEditableDocs.setModel(model);
         
-        TableModel tableModel = new DocTableModel(resultList);
+        TableModel tableModel = new DocTableModel(m_docModels);
         tableViewableDocs.setModel(tableModel);
     }
 
@@ -111,6 +101,7 @@ public class LoadDialog extends javax.swing.JDialog
         btnJoin = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tableViewableDocs = new javax.swing.JTable();
+        lbl_SelectedDoc = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -137,6 +128,11 @@ public class LoadDialog extends javax.swing.JDialog
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
+        listEditableDocs.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                listEditableDocsValueChanged(evt);
+            }
+        });
         jScrollPane3.setViewportView(listEditableDocs);
 
         jLabel2.setText("Editable Documents:");
@@ -155,6 +151,8 @@ public class LoadDialog extends javax.swing.JDialog
         ));
         jScrollPane1.setViewportView(tableViewableDocs);
 
+        lbl_SelectedDoc.setText("jLabel4");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -172,9 +170,11 @@ public class LoadDialog extends javax.swing.JDialog
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cb_projects, 0, 353, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE)
-                            .addComponent(jScrollPane3))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE)
+                                .addComponent(jScrollPane3))
+                            .addComponent(lbl_SelectedDoc))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btn_Load, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -202,7 +202,9 @@ public class LoadDialog extends javax.swing.JDialog
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnJoin))
                 .addGap(5, 5, 5)
-                .addComponent(btn_cancel)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btn_cancel)
+                    .addComponent(lbl_SelectedDoc))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -211,15 +213,13 @@ public class LoadDialog extends javax.swing.JDialog
 
     //LOAD - sets parents project name and id
     private void btn_LoadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_LoadActionPerformed
-        ComboBoxItem cbi = (ComboBoxItem)cb_projects.getSelectedItem();
         
-        DocumentListItem dli = (DocumentListItem)listEditableDocs.getSelectedValue();
-        if (dli != null)
-            m_parent.loadDocument(dli.getDocumentId());
-        //m_parent.loadDocument(cbi.getDocId());
-        
-        setVisible(false);
-        dispose();
+        if (m_selectedDoc != null)
+        {
+            m_parent.loadDocument(m_selectedDoc.getId());
+            setVisible(false);
+            dispose();
+        }
     }//GEN-LAST:event_btn_LoadActionPerformed
 
     //CANCEL - closes dialog
@@ -228,47 +228,12 @@ public class LoadDialog extends javax.swing.JDialog
         dispose();
     }//GEN-LAST:event_btn_cancelActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Windows".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(LoadDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(LoadDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(LoadDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(LoadDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
+    private void listEditableDocsValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_listEditableDocsValueChanged
+        // TODO add your handling code here:
+        m_selectedDoc = m_docModels.get(listEditableDocs.getSelectedIndex());
+        lbl_SelectedDoc.setText(m_selectedDoc.getName() + " " + m_selectedDoc.getId());
+    }//GEN-LAST:event_listEditableDocsValueChanged
 
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                LoadDialog dialog = new LoadDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
-            }
-        });
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnJoin;
@@ -280,7 +245,16 @@ public class LoadDialog extends javax.swing.JDialog
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JLabel lbl_SelectedDoc;
     private javax.swing.JList listEditableDocs;
     private javax.swing.JTable tableViewableDocs;
     // End of variables declaration//GEN-END:variables
+
+    @Override
+    public synchronized void setDocumentModelList(List<DocumentModel> list)
+    {
+        m_docModels = list;
+        
+        displayResult();
+    }
 }

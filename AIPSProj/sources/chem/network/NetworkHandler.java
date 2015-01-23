@@ -23,5 +23,13 @@ public class NetworkHandler
         m_context = ZMQ.context(1);
     }
     
-
+    public void dispose()
+    {
+        m_context.term();
+    }
+    
+    public ZMQ.Context getContext()
+    {
+        return m_context;
+    }
 }
