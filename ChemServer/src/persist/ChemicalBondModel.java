@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package chemserver;
+package persist;
 
 import java.io.Serializable;
 import org.hibernate.Session;
@@ -13,7 +13,7 @@ import org.hibernate.Session;
  *
  * @author FallenShard
  */
-public class ChemicalBondModel implements Serializable
+public class ChemicalBondModel implements Serializable, Persistable
 {
     private int id = -1;
     private int startElectronId;
@@ -68,5 +68,30 @@ public class ChemicalBondModel implements Serializable
     public String toString()
     {
         return "Id: " + id + " start: " + startElectronId + " end: " + endElectronId;
+    }
+
+    @Override
+    public void save(Session session, int documentId)
+    {
+        if (id == -1)
+        {
+            saveAs(session, documentId);
+        }
+        // else, don't touch the database, no need
+    }
+
+    @Override
+    public void saveAs(Session session, int documentId)
+    {
+        this.id = -1;
+        this.documentId = documentId;
+        session.beginTransaction();
+        session.save(this);
+        session.getTransaction().commit();
+    }
+
+    @Override
+    public void delete(Session session)
+    {
     }
 }

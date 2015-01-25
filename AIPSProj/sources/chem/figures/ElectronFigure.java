@@ -15,7 +15,11 @@ import chem.figures.persist.ElectronModel;
 import chem.figures.persist.Persistable;
 import chem.figures.persist.PersistableFigure;
 import chem.util.Const;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.awt.Point;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hibernate.Session;
 
 /**
@@ -130,5 +134,20 @@ public class ElectronFigure extends EllipseFigure implements Animatable, Persist
     public void deleteFromDatabase(Session session)
     {
         
+    }
+
+    @Override
+    public void appendJson(StringBuilder packedJson, ObjectMapper mapper)
+    {
+        try 
+        {
+            getModel();
+            packedJson.append("@");
+            packedJson.append(mapper.writeValueAsString(m_model));
+        } 
+        catch (JsonProcessingException ex)
+        {
+            Logger.getLogger(AtomFigure.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

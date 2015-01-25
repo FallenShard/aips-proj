@@ -32,13 +32,16 @@ import chem.UI.SaveDialog;
 import chem.anim.Animatable;
 import chem.db.DocumentLoader;
 import chem.db.HibernateUtil;
+import chem.db.JsonLoader;
 import chem.db.Reconstructor;
 import chem.figures.persist.DocumentModel;
 import chem.util.AtomFactory;
 import chem.figures.persist.PersistableFigure;
 import chem.network.ConnectThread;
 import chem.network.NetworkHandler;
+import chem.network.ViewerThread;
 import chem.tools.AtomSelectionTool;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
@@ -62,7 +65,11 @@ public class ChemApp extends DrawApplication
     
     private static final String CUSTOM_IMAGES = "/chem/res/";
     
+    private Panel m_palette;
+    
     private NetworkHandler m_networkHandler = null;
+    
+    private ViewerThread m_viewerThread = null;
     
     ChemApp(String title)
     {
@@ -82,6 +89,8 @@ public class ChemApp extends DrawApplication
     public void destroy()
     {
         super.destroy();
+        
+        
         
         m_networkHandler.dispose();
         endAnimation();
@@ -105,6 +114,8 @@ public class ChemApp extends DrawApplication
         
         tool = new CovalentBondTool(view(), new ChemicalBond());
         palette.add(new ToolButton(this, IMAGES + "LINE", "Covalent Bond Tool", tool));
+        
+        m_palette = palette;
     }
     
     @Override
@@ -167,26 +178,60 @@ public class ChemApp extends DrawApplication
         
         try
         {
-            Session session = HibernateUtil.getSessionFactory().openSession();
+            ZMQ.Socket docLoader = m_networkHandler.createSocket(ZMQ.REQ);
+            docLoader.connect("tcp://localhost:" + 8888);
+            docLoader.sendMore("LOAD_DOC_EDITOR");
+            docLoader.send("" + docId);
             
-            DocumentLoader loader = new Reconstructor();
-            Drawing drawing = loader.loadDrawing(session, docId);
-            Query query = session.createQuery("from DocumentModel d where d.id = " + docId);
-            Object docObj = query.list().get(0);
-            DocumentModel docModel = (DocumentModel)docObj;
-            setTitle(docModel.getName() + " - " + "CH4emistry");
+            String response = docLoader.recvStr();
+            docLoader.close();
             
-           setDrawing(drawing);
+            System.out.println(response.length());
             
-           session.close();
+            JsonLoader loader = new JsonLoader();
             
+            Drawing drawing = loader.loadDrawing(response);
+            setDrawing(drawing);
             
-
+            this.add("West", m_palette);
         }
         catch(Exception ex)
         {
             System.out.println(ex.toString());
         }
+    }
+    
+    public void viewDocument(int docId)
+    {
+       toolDone();
+        
+        try
+        {
+            ZMQ.Socket docLoader = m_networkHandler.createSocket(ZMQ.REQ);
+            docLoader.connect("tcp://localhost:" + 8888);
+            docLoader.sendMore("LOAD_DOC_VIEWER");
+            docLoader.send("" + docId);
+            
+            String response = docLoader.recvStr();
+            docLoader.close();
+            
+            System.out.println(response.length());
+            
+            JsonLoader loader = new JsonLoader();
+            
+            Drawing drawing = loader.loadDrawing(response);
+            setDrawing(drawing);
+            
+            this.remove(m_palette);
+            
+            m_viewerThread = new ViewerThread(m_networkHandler.getContext(), this, docId);
+            m_viewerThread.start();
+            
+        }
+        catch(Exception ex)
+        {
+            System.out.println(ex.toString());
+        } 
     }
     
     public void saveDocument()
@@ -195,14 +240,29 @@ public class ChemApp extends DrawApplication
         
         try
         {
-            Session session = HibernateUtil.getSessionFactory().openSession();
+            long start = System.currentTimeMillis();
             
             PersistableFigure doc = (PersistableFigure)(drawing());
-            AnimatedDrawing dr = (AnimatedDrawing)drawing();
             
-            doc.saveToDatabase(session, doc.getModel().getId());
+            StringBuilder packedJson = new StringBuilder();
+            ObjectMapper mapper = new ObjectMapper();
+            doc.appendJson(packedJson, mapper);
+            
+            String dataToSend = packedJson.toString();
+            System.out.println(dataToSend.length() + " Time: " + (System.currentTimeMillis() - start));            
 
-            session.close();
+            ZMQ.Socket docSaver = m_networkHandler.createSocket(ZMQ.REQ);
+            docSaver.connect("tcp://localhost:" + 8888);
+            docSaver.sendMore("SAVE_DOC");
+            docSaver.send(dataToSend);
+            
+            String response = docSaver.recvStr();
+            docSaver.close();
+            
+            if (response.equalsIgnoreCase("Success"))
+                showStatus("Document saved successfully");
+            else
+                showStatus("Failed to save document");
         }
         catch(Exception ex)
         {

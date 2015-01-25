@@ -12,15 +12,20 @@ import CH.ifa.draw.standard.StandardDrawing;
 import chem.figures.persist.DocumentModel;
 import chem.figures.persist.Persistable;
 import chem.figures.persist.PersistableFigure;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.awt.BasicStroke;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
@@ -189,5 +194,40 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable, Pers
     public void deleteFromDatabase(Session session)
     {
         
+    }
+
+    @Override
+    public void appendJson(StringBuilder packedJson, ObjectMapper mapper)
+    {
+        try 
+        {
+            packedJson.append(mapper.writeValueAsString(m_model));
+            packedJson.append("*");
+            
+            FigureEnumeration k = figures();
+            
+            List<PersistableFigure> bonds = new ArrayList<>();
+            
+            while (k.hasMoreElements())
+            {
+                Figure f = k.nextFigure();
+                
+                if (f instanceof AtomFigure)
+                    ((PersistableFigure)f).appendJson(packedJson, mapper);
+                else
+                    bonds.add((PersistableFigure)f);
+            }
+            
+            packedJson.append("*");
+            
+            for (PersistableFigure bond : bonds)
+            {
+                bond.appendJson(packedJson, mapper);
+            }
+        } 
+        catch (JsonProcessingException ex)
+        {
+            Logger.getLogger(AtomFigure.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

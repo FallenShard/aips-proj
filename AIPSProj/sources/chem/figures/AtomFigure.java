@@ -22,6 +22,8 @@ import chem.figures.persist.PersistableFigure;
 import chem.util.Const;
 import chem.util.Dim;
 import chem.util.SeekStrategy;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -30,6 +32,8 @@ import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hibernate.Session;
 
 /**
@@ -310,5 +314,26 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable, 
     public void deleteFromDatabase(Session session)
     {
         
+    }
+    
+    @Override
+    public void appendJson(StringBuilder packedJson, ObjectMapper mapper)
+    {
+        try 
+        {
+            getModel();
+            packedJson.append(mapper.writeValueAsString(m_model));
+            
+            for (Figure electron : m_electrons)
+            {
+                ((PersistableFigure)electron).appendJson(packedJson, mapper);
+            }
+            
+            packedJson.append("$");
+        } 
+        catch (JsonProcessingException ex)
+        {
+            Logger.getLogger(AtomFigure.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

@@ -13,7 +13,11 @@ import chem.figures.persist.Persistable;
 import chem.figures.persist.PersistableFigure;
 import chem.tools.ChangeBondEndHandle;
 import chem.tools.ChangeBondStartHandle;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.hibernate.Session;
 
 /**
@@ -127,5 +131,20 @@ public class ChemicalBond extends LineConnection implements PersistableFigure
     public void deleteFromDatabase(Session session)
     {
         
+    }
+
+    @Override
+    public void appendJson(StringBuilder packedJson, ObjectMapper mapper)
+    {
+        try 
+        {
+            getModel();
+            packedJson.append(mapper.writeValueAsString(m_model));
+            packedJson.append("$");
+        } 
+        catch (JsonProcessingException ex)
+        {
+            Logger.getLogger(AtomFigure.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

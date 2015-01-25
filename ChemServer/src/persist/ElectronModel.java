@@ -4,7 +4,7 @@
  * and open the template in the editor.
  */
 
-package chemserver;
+package persist;
 
 import java.io.Serializable;
 import org.hibernate.Query;
@@ -14,7 +14,7 @@ import org.hibernate.Session;
  *
  * @author FallenShard
  */
-public class ElectronModel implements Serializable
+public class ElectronModel implements Serializable, Persistable
 {
     private int id = -1;
     private double angle;
@@ -76,5 +76,42 @@ public class ElectronModel implements Serializable
     public String toString()
     {
         return "Index : " + index + " Angle: " + angle;
+    }
+
+    @Override
+    public void save(Session session, int documentId)
+    {
+        // If id is -1, we're saving for the first time, set docId
+        if (id == -1 || documentId == -1)
+        {
+            saveAs(session, documentId);
+        }
+        else
+        {
+            // Otherwise, pull from database and refresh
+            Query query = session.createQuery("from ElectronModel e where e.id = " + id);
+            Object obj = query.list().get(0);
+            
+            ElectronModel persEl = (ElectronModel)obj;
+            persEl.angle = angle;
+            
+            session.beginTransaction();
+            session.saveOrUpdate(persEl);
+            session.getTransaction().commit();
+        }
+    }
+
+    @Override
+    public void saveAs(Session session, int documentId)
+    {
+        id = -1;
+        session.beginTransaction();
+        session.save(this);
+        session.getTransaction().commit();
+    }
+
+    @Override
+    public void delete(Session session)
+    {
     }
 }

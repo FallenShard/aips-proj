@@ -32,4 +32,9 @@ public class NetworkHandler
     {
         return m_context;
     }
+    
+    public ZMQ.Socket createSocket(int type)
+    {
+        return m_context.socket(type);
+    }
 }

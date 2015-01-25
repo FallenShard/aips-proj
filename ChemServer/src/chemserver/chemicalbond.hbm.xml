@@ -1,16 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
-  <class name="chemserver.ChemicalBondModel" table="CHEMICALBOND">
-  
-    <id name="id" type="integer" column="ID">
-          <generator class="increment"></generator>
+  <class name="persist.ChemicalBondModel" table="CHEMICALBOND">
+    <id column="ID" name="id" type="integer">
+      <generator class="increment"/>
     </id>
-
-    <property name="startElectronId" column="START_ELECTRON_ID" type="integer" ></property>
-    <property name="endElectronId" column="END_ELECTRON_ID" type="integer"></property>
-
-    <property name="documentId" column="DOCUMENT_ID" type="integer"></property>
+    <property column="START_ELECTRON_ID" name="startElectronId" type="integer"/>
+    <property column="END_ELECTRON_ID" name="endElectronId" type="integer"/>
+    <property column="DOCUMENT_ID" name="documentId" type="integer"/>
   </class>
-
 </hibernate-mapping>
