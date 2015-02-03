@@ -35,6 +35,7 @@ import chem.db.JsonLoader;
 import chem.util.AtomFactory;
 import chem.figures.persist.PersistableFigure;
 import chem.network.NetworkHandler;
+import chem.network.SaveThread;
 import chem.network.ViewerThread;
 import chem.tools.AtomSelectionTool;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,10 +65,31 @@ public class ChemApp extends DrawApplication
     private NetworkHandler m_networkHandler = null;
     
     private ViewerThread m_viewerThread = null;
+    private SaveThread m_saveThread = null;
+    
+    private static final int CH4_NONE = 0;
+    private static final int CH4_EDITOR = 1;
+    private static final int CH4_VIEWER = 2;
+    
+    private static int m_userStatus = CH4_NONE;
     
     ChemApp(String title)
     {
         super(title);
+        
+        this.addWindowListener(new java.awt.event.WindowAdapter()
+        {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent)
+            {
+                if (JOptionPane.showConfirmDialog(ChemApp.this, 
+                    "Are you sure to close this window?", "Really Closing?", 
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION){
+                    System.exit(0);
+                }
+            }
+        });
     }
     
     @Override
@@ -95,6 +117,21 @@ public class ChemApp extends DrawApplication
             {
                 ex.printStackTrace();
             }
+            m_viewerThread = null;
+        }
+        
+        if (m_saveThread != null)
+        {
+            try
+            {
+                m_saveThread.end();
+                m_saveThread.join();
+            }
+            catch (InterruptedException ex)
+            {
+                ex.printStackTrace();
+            }
+            m_saveThread = null;
         }
         
         m_networkHandler.dispose();
@@ -183,6 +220,8 @@ public class ChemApp extends DrawApplication
         
         try
         {
+            disconnectPrevious();
+            m_userStatus = CH4_EDITOR;
             ZMQ.Socket docLoader = m_networkHandler.createSocket(ZMQ.REQ);
             docLoader.connect("tcp://localhost:" + 8888);
             docLoader.sendMore("LOAD_DOC_EDITOR");
@@ -212,6 +251,8 @@ public class ChemApp extends DrawApplication
         
         try
         {
+            disconnectPrevious();
+            m_userStatus = CH4_VIEWER;
             ZMQ.Socket docLoader = m_networkHandler.createSocket(ZMQ.REQ);
             docLoader.connect("tcp://localhost:" + 8888);
             docLoader.sendMore("LOAD_DOC_VIEWER");
@@ -223,11 +264,10 @@ public class ChemApp extends DrawApplication
             System.out.println(response.length());
             
             DrawingLoader loader = new JsonLoader(response);
-            
             Drawing drawing = loader.createDrawing();
             setDrawing(drawing);
             
-            this.remove(m_palette);
+            remove(m_palette);
             
             m_viewerThread = new ViewerThread(m_networkHandler.getContext(), this, docId);
             m_viewerThread.start();
@@ -239,40 +279,77 @@ public class ChemApp extends DrawApplication
         } 
     }
     
+    private void disconnectPrevious()
+    {
+        PersistableFigure doc = (PersistableFigure)drawing();
+        if (doc != null && doc.getModel().getId() != -1)
+        {
+            int docId = doc.getModel().getId();
+            
+            if (m_userStatus == CH4_EDITOR)
+            {
+                ZMQ.Socket docLoader = m_networkHandler.createSocket(ZMQ.REQ);
+                docLoader.connect("tcp://localhost:" + 8888);
+                docLoader.sendMore("DISC_EDITOR");
+                docLoader.send("" + docId);
+
+                docLoader.recvStr();
+                docLoader.close();
+            }
+            else if (m_userStatus == CH4_VIEWER)
+            {
+                ZMQ.Socket docLoader = m_networkHandler.createSocket(ZMQ.REQ);
+                docLoader.connect("tcp://localhost:" + 8888);
+                docLoader.sendMore("DISC_VIEWER");
+                docLoader.send("" + docId);
+
+                docLoader.recvStr();
+                docLoader.close();
+            }
+            
+            m_userStatus = CH4_NONE;
+        }
+    }
+    
     public void saveDocument()
     {
         toolDone();
         
         try
         {
-            long start = System.currentTimeMillis();
-            
-            PersistableFigure doc = (PersistableFigure)(drawing());
-            
-            StringBuilder packedJson = new StringBuilder();
-            ObjectMapper mapper = new ObjectMapper();
-            doc.appendJson(packedJson, mapper);
-            
-            String dataToSend = packedJson.toString();
-            System.out.println(dataToSend.length() + " Time: " + (System.currentTimeMillis() - start));            
-
-            ZMQ.Socket docSaver = m_networkHandler.createSocket(ZMQ.REQ);
-            docSaver.connect("tcp://localhost:" + 8888);
-            docSaver.sendMore("SAVE_DOC");
-            docSaver.send(dataToSend);
-            
-            String response = docSaver.recvStr();
-            docSaver.close();
-            
-            if (!response.equalsIgnoreCase("Failed"))
+            if (m_saveThread == null && m_userStatus == CH4_EDITOR)
             {
-                showStatus("Document saved successfully");
-                DrawingLoader loader = new JsonLoader(response);
-                Drawing drawing = loader.createDrawing();
-                setDrawing(drawing);
+                m_saveThread = new SaveThread(m_networkHandler.getContext(), this);
+                m_saveThread.start();
             }
-            else
-                showStatus("Failed to save document");
+//            long start = System.currentTimeMillis();
+//            
+//            PersistableFigure doc = (PersistableFigure)(drawing());
+//            
+//            StringBuilder packedJson = new StringBuilder();
+//            ObjectMapper mapper = new ObjectMapper();
+//            doc.appendJson(packedJson, mapper);
+//            
+//            String dataToSend = packedJson.toString();
+//            System.out.println(dataToSend.length() + " Time: " + (System.currentTimeMillis() - start));            
+//
+//            ZMQ.Socket docSaver = m_networkHandler.createSocket(ZMQ.REQ);
+//            docSaver.connect("tcp://localhost:" + 8888);
+//            docSaver.sendMore("SAVE_DOC");
+//            docSaver.send(dataToSend);
+//            
+//            String response = docSaver.recvStr();
+//            docSaver.close();
+//            
+//            if (!response.equalsIgnoreCase("Failed"))
+//            {
+//                showStatus("Document saved successfully");
+//                DrawingLoader loader = new JsonLoader(response);
+//                Drawing drawing = loader.createDrawing();
+//                setDrawing(drawing);
+//            }
+//            else
+//                showStatus("Failed to save document");
         }
         catch(Exception ex)
         {

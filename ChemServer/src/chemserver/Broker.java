@@ -8,8 +8,10 @@ package chemserver;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.zeromq.ZMQ;
 import task.CheckEditorTask;
@@ -30,13 +32,11 @@ public class Broker
     ZMQ.Socket m_routerSocket = null;
         
     Map<Integer, String> m_editors = null;
-    Map<Integer, List<byte[]>> m_viewers = null;
     Map<Integer, PublisherThread> m_publishers = null;
     
     public Broker()
     {
         m_editors = new ConcurrentHashMap<>();
-        m_viewers = new ConcurrentHashMap<>();
         m_publishers = new ConcurrentHashMap<>();
     }
     
@@ -59,7 +59,7 @@ public class Broker
             String empty = m_routerSocket.recvStr();
             String header = m_routerSocket.recvStr();
             String content = m_routerSocket.recvStr();
-            String result = "";
+            String result = "Default message";
             
             Task task = createTask(address, header, content);
             if (task != null)
@@ -81,13 +81,13 @@ public class Broker
         System.out.println("Shutting down...");
     }
     
-    public Task createTask(byte[] address, String messageHeader, String messageBody)
+    public synchronized Task createTask(byte[] address, String messageHeader, String messageBody)
     {
         switch (messageHeader)
         {
             case "GET_DOCS":
             {
-                return new GetDocsTask();
+                return new GetDocsTask(getEditedDocs());
             }
             
             case "CHECK_EDITOR":
@@ -98,35 +98,17 @@ public class Broker
             case "LOAD_DOC_EDITOR":
             {
                 int docId = Integer.parseInt(messageBody);
-                m_editors.put(docId, new String(address, ZMQ.CHARSET));
-
-                PublisherThread pb = new PublisherThread(m_context, docId);
-                m_publishers.put(docId, pb);
-                pb.start();
+                
+                editorConnected(address, docId);
                 
                 return new LoadDocumentTask(docId);
             }
-            
-            case "REFRESH_EDITOR":
-            {
-                
-            }
-            
+
             case "LOAD_DOC_VIEWER":
             {
                 int docId = Integer.parseInt(messageBody);
 
-                if (m_viewers.containsKey(docId))
-                {
-                    List<byte[]> addresses = m_viewers.get(docId);
-                    addresses.add(address);
-                }
-                else
-                {
-                    List<byte[]> list = new ArrayList<>();
-                    list.add(address);
-                    m_viewers.put(docId, list);
-                }
+                viewerConnected(address, docId);
                 
                 return new LoadDocumentTask(docId);
             }
@@ -136,10 +118,70 @@ public class Broker
                 return new SaveDocumentTask(messageBody);
             }
             
+            case "DISC_EDITOR":
+            {
+                int docId = Integer.parseInt(messageBody);
+                
+                editorDisconnected(docId);
+                
+                return null;
+            }
+            
+            case "DISC_VIEWER":
+            {
+                int docId = Integer.parseInt(messageBody);
+                
+                viewerDisconnected(docId);
+                
+                return null;
+            }
+            
             default:
             {
                 return null;
             }
         }
+    }
+    
+    public synchronized void editorConnected(byte[] address, int docId)
+    {
+        m_editors.put(docId, new String(address, ZMQ.CHARSET));
+
+        //PublisherThread pb = new PublisherThread(m_context, docId);
+        //m_publishers.put(docId, pb);
+        //pb.start();
+    }
+    
+    public synchronized void viewerConnected(byte[] address, int docId)
+    {
+//        if (m_viewers.containsKey(docId))
+//        {
+//            List<byte[]> addresses = m_viewers.get(docId);
+//            addresses.add(address);
+//        }
+//        else
+//        {
+//            List<byte[]> list = new ArrayList<>();
+//            list.add(address);
+//            m_viewers.put(docId, list);
+//        }
+    }
+    
+    public synchronized void editorDisconnected(int docId)
+    {
+        m_editors.remove(docId);
+        
+        PublisherThread pub = m_publishers.get(docId);
+        pub.end();
+        m_publishers.remove(docId);
+    }
+    
+    public synchronized void viewerDisconnected(int docId)
+    {
+    }
+    
+    public synchronized Set<Integer> getEditedDocs()
+    {
+        return m_editors.keySet();
     }
 }

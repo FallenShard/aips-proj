@@ -72,16 +72,21 @@ public class ConnectThread extends Thread
                 String content = m_connectSocket.recvStr();
 
                 String[] jsons = content.split("\\$");
-                List<DocumentModel> resultList = new ArrayList<>();
-
-                for (String json : jsons)
+                List<DocumentModel> freeDocsList = new ArrayList<>();
+                List<DocumentModel> openedDocsList = new ArrayList<>();
+                
+                for (int i = 0; i < jsons.length; i += 2)
                 {
-                    DocumentModel dm = om.readValue(json, DocumentModel.class);
-                    resultList.add(dm);
-                    System.out.println("Received " + dm.getName() + " ID: " + dm.getId());
+                    DocumentModel dm = om.readValue(jsons[i], DocumentModel.class);
+                    if (jsons[i + 1].equalsIgnoreCase("E"))                
+                        openedDocsList.add(dm);
+                    else if (jsons[i + 1].equalsIgnoreCase("F"))
+                        freeDocsList.add(dm);
+                    
+                    System.out.println("Received " + dm.getName() + " ID: " + dm.getId() + " Status: " + jsons[i + 1]);
                 }
 
-                m_receiver.setDocumentModelList(resultList);
+                m_receiver.setDocumentModelList(freeDocsList, openedDocsList);
                 m_isRunning = false;
             }
         }

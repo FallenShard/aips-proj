@@ -23,7 +23,7 @@ public class ViewerThread extends Thread
     private volatile boolean     m_isRunning = false;
     private int m_documentId = -1;
     
-    public ViewerThread(ZMQ.7Context context, DrawApplication app, int docId)
+    public ViewerThread(ZMQ.Context context, DrawApplication app, int docId)
     {
         m_app = app;
         m_subscriber = context.socket(ZMQ.SUB);

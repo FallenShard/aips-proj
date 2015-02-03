@@ -11,6 +11,7 @@ import chemserver.HibernateUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
+import java.util.Set;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
@@ -21,9 +22,11 @@ import org.hibernate.Session;
 public class GetDocsTask implements Task
 {
     private String m_result = "";
+    private Set<Integer> m_openedDocs = null;
     
-    public GetDocsTask()
+    public GetDocsTask(Set<Integer> openedDocs)
     {
+        m_openedDocs = openedDocs;
     }
 
     @Override
@@ -43,7 +46,16 @@ public class GetDocsTask implements Task
             try
             {
                 String json = mapper.writeValueAsString(dm);
-                jsonPack.append(json).append("$");
+                jsonPack.append(json);
+                
+                if (m_openedDocs.contains(dm.getId()))
+                {
+                    jsonPack.append("$E$");
+                }
+                else
+                {
+                    jsonPack.append("$F$");
+                }
             }
             catch (JsonProcessingException ex)
             {

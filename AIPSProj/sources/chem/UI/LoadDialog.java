@@ -30,7 +30,8 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
     ConnectThread m_conThread = null;
     private final ChemApp m_parent;
     
-    List<DocumentModel> m_docModels = new ArrayList<>();
+    List<DocumentModel> m_freeDocModels = new ArrayList<>();
+    List<DocumentModel> m_openedDocModels = new ArrayList<>();
     
     DocumentModel m_selectedDoc = null;
 
@@ -49,7 +50,7 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
         
         tableViewableDocs.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> 
         {
-            m_selectedDoc = m_docModels.get(tableViewableDocs.getSelectedRow());
+            m_selectedDoc = m_openedDocModels.get(tableViewableDocs.getSelectedRow());
             lbl_SelectedDoc.setText(m_selectedDoc.getName() + " " + m_selectedDoc.getId());
         });
         
@@ -67,14 +68,14 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
     public synchronized void displayResult()
     {
         DefaultListModel model = new DefaultListModel();
-        for (DocumentModel dm : m_docModels)
+        for (DocumentModel dm : m_freeDocModels)
         {
             DocumentListItem dli = new DocumentListItem(dm);
             model.addElement(dli);
         }
         listEditableDocs.setModel(model);
         
-        TableModel tableModel = new DocTableModel(m_docModels);
+        TableModel tableModel = new DocTableModel(m_openedDocModels);
         tableViewableDocs.setModel(tableModel);
     }
     
@@ -262,7 +263,7 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
         // TODO add your handling code here:
         if (listEditableDocs.getSelectedIndex() != -1 && !m_conThread.isAlive())
         {
-            m_selectedDoc = m_docModels.get(listEditableDocs.getSelectedIndex());
+            m_selectedDoc = m_freeDocModels.get(listEditableDocs.getSelectedIndex());
             lbl_SelectedDoc.setText(m_selectedDoc.getName() + " " + m_selectedDoc.getId());
         }
     }//GEN-LAST:event_listEditableDocsValueChanged
@@ -304,10 +305,11 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
     private javax.swing.JTable tableViewableDocs;
     // End of variables declaration//GEN-END:variables
 
+
     @Override
-    public synchronized void setDocumentModelList(List<DocumentModel> list)
-    {
-        m_docModels = list;
+    public void setDocumentModelList(List<DocumentModel> freeDocs, List<DocumentModel> openedDocs) {
+        m_freeDocModels = freeDocs;
+        m_openedDocModels = openedDocs;
         
         displayResult();
     }

@@ -17,7 +17,7 @@ import task.Task;
 public class PublisherThread extends Thread
 {
     ZMQ.Socket m_publisher = null;
-    private boolean m_isRunning = false;
+    private volatile boolean m_isRunning = false;
     private int m_docId = -1;
     
     public PublisherThread(ZMQ.Context context, int docId)
@@ -36,30 +36,25 @@ public class PublisherThread extends Thread
             
             super.start();
             m_isRunning = true;
-            
-            
         }
+    }
+    
+    public void end()
+    {
+        m_isRunning = false;
     }
     
     @Override
     public void run()
     {
-        while (m_isRunning)
+        if (m_isRunning)
         {
-            try
-            {
-                sleep(1000);
-                Task task = new LoadDocumentTask(m_docId);
-                task.run();
-                String result = task.getResult();
-                m_publisher.sendMore(String.format("%03d", m_docId));
-                m_publisher.send(result);
-                System.out.println("Sent snapshot!  of " + m_docId + " at " + System.currentTimeMillis());
-            } 
-            catch (InterruptedException ex)
-            {
-                ex.printStackTrace();
-            }
+            Task task = new LoadDocumentTask(m_docId);
+            task.run();
+            String result = task.getResult();
+            m_publisher.sendMore(String.format("%03d", m_docId));
+            m_publisher.send(result);
+            System.out.println("Sent snapshot!  of " + m_docId + " at " + System.currentTimeMillis());
         }
         
         m_publisher.close();

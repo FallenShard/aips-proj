@@ -14,5 +14,5 @@ import java.util.List;
  */
 public interface DocumentReceiver
 {
-    public void setDocumentModelList(List<DocumentModel> list);
+    public void setDocumentModelList(List<DocumentModel> freeDocs, List<DocumentModel> openedDocs);
 }
