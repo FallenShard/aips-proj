@@ -30,14 +30,10 @@ import CH.ifa.draw.util.CommandMenu;
 import chem.UI.LoadDialog;
 import chem.UI.SaveDialog;
 import chem.anim.Animatable;
-import chem.db.DocumentLoader;
-import chem.db.HibernateUtil;
+import chem.db.DrawingLoader;
 import chem.db.JsonLoader;
-import chem.db.Reconstructor;
-import chem.figures.persist.DocumentModel;
 import chem.util.AtomFactory;
 import chem.figures.persist.PersistableFigure;
-import chem.network.ConnectThread;
 import chem.network.NetworkHandler;
 import chem.network.ViewerThread;
 import chem.tools.AtomSelectionTool;
@@ -51,8 +47,6 @@ import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JOptionPane;
-import org.hibernate.Query;
-import org.hibernate.Session;
 import org.zeromq.ZMQ;
 
 /**
@@ -90,7 +84,18 @@ public class ChemApp extends DrawApplication
     {
         super.destroy();
         
-        
+        if (m_viewerThread != null)
+        {
+            try
+            {
+                m_viewerThread.end();
+                m_viewerThread.join();
+            }
+            catch (InterruptedException ex)
+            {
+                ex.printStackTrace();
+            }
+        }
         
         m_networkHandler.dispose();
         endAnimation();
@@ -188,9 +193,9 @@ public class ChemApp extends DrawApplication
             
             System.out.println(response.length());
             
-            JsonLoader loader = new JsonLoader();
+            DrawingLoader loader = new JsonLoader(response);
             
-            Drawing drawing = loader.loadDrawing(response);
+            Drawing drawing = loader.createDrawing();
             setDrawing(drawing);
             
             this.add("West", m_palette);
@@ -217,9 +222,9 @@ public class ChemApp extends DrawApplication
             
             System.out.println(response.length());
             
-            JsonLoader loader = new JsonLoader();
+            DrawingLoader loader = new JsonLoader(response);
             
-            Drawing drawing = loader.loadDrawing(response);
+            Drawing drawing = loader.createDrawing();
             setDrawing(drawing);
             
             this.remove(m_palette);
@@ -259,8 +264,13 @@ public class ChemApp extends DrawApplication
             String response = docSaver.recvStr();
             docSaver.close();
             
-            if (response.equalsIgnoreCase("Success"))
+            if (!response.equalsIgnoreCase("Failed"))
+            {
                 showStatus("Document saved successfully");
+                DrawingLoader loader = new JsonLoader(response);
+                Drawing drawing = loader.createDrawing();
+                setDrawing(drawing);
+            }
             else
                 showStatus("Failed to save document");
         }
@@ -277,15 +287,15 @@ public class ChemApp extends DrawApplication
         
         try
         {
-            Session session = HibernateUtil.getSessionFactory().openSession();
-            
-            PersistableFigure doc = (PersistableFigure)(drawing());
-            AnimatedDrawing dr = (AnimatedDrawing)drawing();
-            dr.setDocumentName(name);
-            
-            doc.saveToDatabaseAs(session, -1);
-
-            session.close();
+//            Session session = HibernateUtil.getSessionFactory().openSession();
+//            
+//            PersistableFigure doc = (PersistableFigure)(drawing());
+//            AnimatedDrawing dr = (AnimatedDrawing)drawing();
+//            dr.setDocumentName(name);
+//            
+//            doc.saveToDatabaseAs(session, -1);
+//
+//            session.close();
         }
         catch(Exception ex)
         {

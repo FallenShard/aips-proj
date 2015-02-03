@@ -6,13 +6,12 @@
 package chem.db;
 
 import CH.ifa.draw.framework.Drawing;
-import org.hibernate.Session;
 
 /**
  *
  * @author FallenShard
  */
-public interface DocumentLoader
+public interface DrawingLoader
 {
-    public Drawing loadDrawing(Session session, int documentId);
+    public Drawing createDrawing();
 }

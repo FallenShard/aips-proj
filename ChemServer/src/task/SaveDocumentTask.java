@@ -60,6 +60,7 @@ public class SaveDocumentTask implements Task
                 for (int i = 1; i < individualAtomData.length; i++)
                 {
                     ElectronModel elModel = mapper.readValue(individualAtomData[i], ElectronModel.class);
+                    elModel.setAtomId(atomModel.getId());
                     elModel.save(session, docId);
                 }
             }
@@ -70,13 +71,17 @@ public class SaveDocumentTask implements Task
                 for (String bond : bondData)
                 {
                    ChemicalBondModel bondModel = mapper.readValue(bond, ChemicalBondModel.class);
-                   bondModel.save(session, docId);
+                   //bondModel.save(session, docId);
                 }
             }
             
             session.close();
             
-            m_result = "Success";
+            
+            Task task = new LoadDocumentTask(docId);
+            task.run();
+
+            m_result = task.getResult();
             return;
         } 
         catch (IOException ex) 

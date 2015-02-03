@@ -8,12 +8,8 @@ package chem.network;
 
 import CH.ifa.draw.application.DrawApplication;
 import CH.ifa.draw.framework.Drawing;
-import CH.ifa.draw.framework.DrawingView;
+import chem.db.DrawingLoader;
 import chem.db.JsonLoader;
-import chem.util.NanoTimer;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.zeromq.ZMQ;
 
 /**
@@ -27,7 +23,7 @@ public class ViewerThread extends Thread
     private volatile boolean     m_isRunning = false;
     private int m_documentId = -1;
     
-    public ViewerThread(ZMQ.Context context, DrawApplication app, int docId)
+    public ViewerThread(ZMQ.7Context context, DrawApplication app, int docId)
     {
         m_app = app;
         m_subscriber = context.socket(ZMQ.SUB);
@@ -55,7 +51,6 @@ public class ViewerThread extends Thread
         if (m_isRunning)
         {
             m_isRunning = false;
-            m_subscriber.close();
         }
     }
     
@@ -64,25 +59,19 @@ public class ViewerThread extends Thread
     {
         while (m_isRunning)
         {
-            try {
-                String topic = m_subscriber.recvStr();
-                if (topic == null)
-                    break;
-                String data = m_subscriber.recvStr();
-                System.out.println("Received some data!");
-                
-                JsonLoader loader = new JsonLoader();
-                Drawing drawing = loader.loadDrawing(data);
-                
-                m_app.view().freezeView();
-                m_app.setDrawing(drawing);
-                m_app.view().checkDamage();
-                m_app.view().unfreezeView();
-            } 
-            catch (IOException ex)
-            {
-                ex.printStackTrace();
-            }
+            String topic = m_subscriber.recvStr();
+            if (topic == null)
+                break;
+            String data = m_subscriber.recvStr();
+            System.out.println("Received some data!");
+            
+            DrawingLoader loader = new JsonLoader(data);
+            Drawing drawing = loader.createDrawing();
+            
+            m_app.view().freezeView();
+            m_app.setDrawing(drawing);
+            m_app.view().checkDamage();
+            m_app.view().unfreezeView();
         }
         
         m_subscriber.close();

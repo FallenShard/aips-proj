@@ -8,6 +8,7 @@ package chem.figures;
 
 import CH.ifa.draw.figures.ChopEllipseConnector;
 import CH.ifa.draw.figures.EllipseFigure;
+import CH.ifa.draw.figures.RectangleFigure;
 import CH.ifa.draw.figures.TextFigure;
 import CH.ifa.draw.framework.Connector;
 import CH.ifa.draw.framework.Figure;
@@ -48,6 +49,7 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable, 
     protected AtomModel m_model = new AtomModel();
     
     // Figures that comprise the atom
+    protected RectangleFigure m_boundingBox = null;
     protected EllipseFigure m_orbit = null;
     protected EllipseFigure m_nucleus = null;
     
@@ -74,6 +76,8 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable, 
     {
         super();
         
+        m_boundingBox = new RectangleFigure(new Point(0, 0), new Point(Dim.ATOM_SIZE, Dim.ATOM_SIZE));
+
         // Create nucleus here
         m_nucleus = new EllipseFigure(new Point(Dim.NUCLEUS_OFFSET_X, Dim.NUCLEUS_OFFSET_Y), 
                                       new Point(Dim.NUCLEUS_OFFSET_X + Dim.NUCLEUS_SIZE, Dim.NUCLEUS_OFFSET_Y + Dim.NUCLEUS_SIZE));
@@ -92,6 +96,7 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable, 
         m_valence = new TextFigure();
         m_valence.setFont(new Font("Calibri", Font.BOLD, Dim.VALENCE_FONT_SIZE));
         
+        super.add(m_boundingBox);
         super.add(m_orbit);
         super.add(m_nucleus);
         super.add(m_name);
@@ -182,8 +187,13 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable, 
     public void draw(Graphics g)
     {   
         FigureEnumeration k = figures();
+        
         while (k.hasMoreElements())
-            k.nextFigure().draw(g);
+        {
+            Figure fig = k.nextFigure();
+            if (!fig.equals(m_boundingBox))
+                fig.draw(g);
+        }
     }
     
     protected void increaseValence(ChemicalBond bond, AtomFigure figure)

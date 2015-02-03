@@ -30,14 +30,23 @@ import org.hibernate.Session;
  *
  * @author FallenShard
  */
-public class Reconstructor implements DocumentLoader
+public class DatabaseLoader implements DrawingLoader
 {
+    private Session m_session = null;
+    private int m_documentId = -1;
+    
+    public DatabaseLoader(Session session, int documentId)
+    {
+        m_session = session;
+        m_documentId = documentId;
+    }
+    
     // Reconstructs a drawing with a given open session and document id
     @Override
-    public Drawing loadDrawing(Session session, int documentId)
+    public Drawing createDrawing()
     {
         // First of all, load the document
-        Query query = session.createQuery("from DocumentModel d where d.id = " + documentId);
+        Query query = m_session.createQuery("from DocumentModel d where d.id = " + m_documentId);
         Object docObj = query.list().get(0);
 
         // Create the drawing with the model
@@ -45,7 +54,7 @@ public class Reconstructor implements DocumentLoader
         Drawing drawing = new AnimatedDrawing(docModel);
 
         // Now load all the atoms that are associated with this document
-        query = session.createQuery("from AtomModel a where a.documentId = " + documentId);
+        query = m_session.createQuery("from AtomModel a where a.documentId = " + m_documentId);
         List atomList = query.list();
 
         // This atom factory will produce concrete atoms
@@ -62,7 +71,7 @@ public class Reconstructor implements DocumentLoader
             int atomId = atomModel.getId();
 
             // Now load all the electrons associated with this atom model, sorted by index
-            query = session.createQuery("from ElectronModel e where e.atomId = " + atomId + " ORDER BY e.index ASC");
+            query = m_session.createQuery("from ElectronModel e where e.atomId = " + atomId + " ORDER BY e.index ASC");
             List electronList = query.list();
 
             Vector<Figure> electronFigures = new Vector<>();
@@ -92,7 +101,7 @@ public class Reconstructor implements DocumentLoader
         }
         
         // Now load all the bonds that are part of the document
-        query = session.createQuery("from ChemicalBondModel cb where cb.documentId = " + documentId);
+        query = m_session.createQuery("from ChemicalBondModel cb where cb.documentId = " + m_documentId);
         List bondList = query.list();
 
         // Add to the temporary vector first, then add as vector later
