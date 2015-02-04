@@ -6,14 +6,11 @@
 
 package chemserver;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.zeromq.ZMQ;
+import protocol.MessageType;
 import task.CheckEditorTask;
 import task.GetDocsTask;
 import task.LoadDocumentTask;
@@ -83,19 +80,20 @@ public class Broker
     
     public synchronized Task createTask(byte[] address, String messageHeader, String messageBody)
     {
-        switch (messageHeader)
+        MessageType type = MessageType.valueOf(messageHeader);
+        switch (type)
         {
-            case "GET_DOCS":
+            case GET_DOCS:
             {
                 return new GetDocsTask(getEditedDocs());
             }
             
-            case "CHECK_EDITOR":
+            case CHECK_EDITOR:
             {
                 return new CheckEditorTask(messageBody, m_editors);
             }
             
-            case "LOAD_DOC_EDITOR":
+            case LOAD_DOC_EDITOR:
             {
                 int docId = Integer.parseInt(messageBody);
                 
@@ -104,7 +102,7 @@ public class Broker
                 return new LoadDocumentTask(docId);
             }
 
-            case "LOAD_DOC_VIEWER":
+            case LOAD_DOC_VIEWER:
             {
                 int docId = Integer.parseInt(messageBody);
 
@@ -113,12 +111,25 @@ public class Broker
                 return new LoadDocumentTask(docId);
             }
 
-            case "SAVE_DOC":
+            case SAVE_DOC:
             {
                 return new SaveDocumentTask(messageBody);
             }
             
-            case "DISC_EDITOR":
+            case SAVE_ATOMS:
+            {
+                
+                
+                return null;
+            }
+            
+            case SAVE_BONDS:
+            {
+                
+                return null;
+            }
+            
+            case DISC_EDITOR:
             {
                 int docId = Integer.parseInt(messageBody);
                 
@@ -127,7 +138,7 @@ public class Broker
                 return null;
             }
             
-            case "DISC_VIEWER":
+            case DISC_VIEWER:
             {
                 int docId = Integer.parseInt(messageBody);
                 

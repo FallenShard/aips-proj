@@ -16,6 +16,7 @@ import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.PollItem;
 import org.zeromq.ZMQ.Poller;
 import org.zeromq.ZMsg;
+import protocol.Ports;
 
 /**
  *
@@ -40,7 +41,7 @@ public class ConnectThread extends Thread
     {
         if (!m_isRunning)
         {
-            m_connectSocket.connect("tcp://localhost:" + 8888);
+            m_connectSocket.connect("tcp://localhost:" + Ports.MAIN_PORT);
             //String id = String.format("%04X-%04X", rand.nextInt(), rand.nextInt());
             //m_connectSocket.setIdentity(id.getBytes());
             
