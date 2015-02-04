@@ -47,14 +47,22 @@ public class PublisherThread extends Thread
     @Override
     public void run()
     {
-        if (m_isRunning)
+        while (m_isRunning)
         {
-            Task task = new LoadDocumentTask(m_docId);
-            task.run();
-            String result = task.getResult();
-            m_publisher.sendMore(String.format("%03d", m_docId));
-            m_publisher.send(result);
-            System.out.println("Sent snapshot!  of " + m_docId + " at " + System.currentTimeMillis());
+            try 
+            {
+                sleep(1000);
+                Task task = new LoadDocumentTask(m_docId);
+                task.run();
+                String result = task.getResult();
+                m_publisher.sendMore(String.format("%03d", m_docId));
+                m_publisher.send(result);
+                System.out.println("Sent snapshot!  of " + m_docId + " at " + System.currentTimeMillis());
+            } 
+            catch (InterruptedException ex) 
+            {
+                ex.printStackTrace();
+            }
         }
         
         m_publisher.close();

@@ -317,39 +317,39 @@ public class ChemApp extends DrawApplication
         
         try
         {
-            if (m_saveThread == null && m_userStatus == CH4_EDITOR)
-            {
-                m_saveThread = new SaveThread(m_networkHandler.getContext(), this);
-                m_saveThread.start();
-            }
-//            long start = System.currentTimeMillis();
-//            
-//            PersistableFigure doc = (PersistableFigure)(drawing());
-//            
-//            StringBuilder packedJson = new StringBuilder();
-//            ObjectMapper mapper = new ObjectMapper();
-//            doc.appendJson(packedJson, mapper);
-//            
-//            String dataToSend = packedJson.toString();
-//            System.out.println(dataToSend.length() + " Time: " + (System.currentTimeMillis() - start));            
-//
-//            ZMQ.Socket docSaver = m_networkHandler.createSocket(ZMQ.REQ);
-//            docSaver.connect("tcp://localhost:" + 8888);
-//            docSaver.sendMore("SAVE_DOC");
-//            docSaver.send(dataToSend);
-//            
-//            String response = docSaver.recvStr();
-//            docSaver.close();
-//            
-//            if (!response.equalsIgnoreCase("Failed"))
+//            if (m_saveThread == null && m_userStatus == CH4_EDITOR)
 //            {
-//                showStatus("Document saved successfully");
-//                DrawingLoader loader = new JsonLoader(response);
-//                Drawing drawing = loader.createDrawing();
-//                setDrawing(drawing);
+//                m_saveThread = new SaveThread(m_networkHandler.getContext(), this);
+//                m_saveThread.start();
 //            }
-//            else
-//                showStatus("Failed to save document");
+            long start = System.currentTimeMillis();
+            
+            PersistableFigure doc = (PersistableFigure)(drawing());
+            
+            StringBuilder packedJson = new StringBuilder();
+            ObjectMapper mapper = new ObjectMapper();
+            doc.appendJson(packedJson, mapper);
+            
+            String dataToSend = packedJson.toString();
+            System.out.println(dataToSend.length() + " Time: " + (System.currentTimeMillis() - start));            
+
+            ZMQ.Socket docSaver = m_networkHandler.createSocket(ZMQ.REQ);
+            docSaver.connect("tcp://localhost:" + 8888);
+            docSaver.sendMore("SAVE_DOC");
+            docSaver.send(dataToSend);
+            
+            String response = docSaver.recvStr();
+            docSaver.close();
+            
+            if (!response.equalsIgnoreCase("Failed"))
+            {
+                showStatus("Document saved successfully");
+                DrawingLoader loader = new JsonLoader(response);
+                Drawing drawing = loader.createDrawing();
+                setDrawing(drawing);
+            }
+            else
+                showStatus("Failed to save document");
         }
         catch(Exception ex)
         {

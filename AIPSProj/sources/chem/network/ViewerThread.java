@@ -59,11 +59,12 @@ public class ViewerThread extends Thread
     {
         while (m_isRunning)
         {
+            //sleep(500);
             String topic = m_subscriber.recvStr();
             if (topic == null)
                 break;
             String data = m_subscriber.recvStr();
-            System.out.println("Received some data!");
+            System.out.println("Received some data in viewer thread!");
             
             DrawingLoader loader = new JsonLoader(data);
             Drawing drawing = loader.createDrawing();

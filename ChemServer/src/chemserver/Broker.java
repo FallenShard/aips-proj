@@ -147,9 +147,9 @@ public class Broker
     {
         m_editors.put(docId, new String(address, ZMQ.CHARSET));
 
-        //PublisherThread pb = new PublisherThread(m_context, docId);
-        //m_publishers.put(docId, pb);
-        //pb.start();
+        PublisherThread pb = new PublisherThread(m_context, docId);
+        m_publishers.put(docId, pb);
+        pb.start();
     }
     
     public synchronized void viewerConnected(byte[] address, int docId)

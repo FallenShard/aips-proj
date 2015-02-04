@@ -71,7 +71,7 @@ public class SaveDocumentTask implements Task
                 for (String bond : bondData)
                 {
                    ChemicalBondModel bondModel = mapper.readValue(bond, ChemicalBondModel.class);
-                   //bondModel.save(session, docId);
+                   bondModel.save(session, docId);
                 }
             }
             
