@@ -143,7 +143,7 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable, Pers
     @Override
     public void saveToDatabase(Session session, int documentId)
     {
-        m_model.save(session, documentId);
+        //m_model.save(session, documentId);
         
         for (Entry<Integer, String> entry : m_deleteCache.entrySet())
         {
@@ -178,7 +178,7 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable, Pers
     @Override
     public void saveToDatabaseAs(Session session, int documentId)
     {
-        m_model.saveAs(session, documentId);
+        //m_model.saveAs(session, documentId);
         
         FigureEnumeration figures = figures();
         
@@ -202,28 +202,39 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable, Pers
         try 
         {
             packedJson.append(mapper.writeValueAsString(m_model));
-            packedJson.append("*");
+            packedJson.append("@D@");
             
             FigureEnumeration k = figures();
-            
-            List<PersistableFigure> bonds = new ArrayList<>();
             
             while (k.hasMoreElements())
             {
                 Figure f = k.nextFigure();
                 
-                if (f instanceof AtomFigure)
-                    ((PersistableFigure)f).appendJson(packedJson, mapper);
-                else
-                    bonds.add((PersistableFigure)f);
+                if (f instanceof PersistableFigure)
+                {
+                    PersistableFigure persFig = (PersistableFigure)f;
+                    persFig.appendJson(packedJson, mapper);
+                }
             }
             
-            packedJson.append("*");
-            
-            for (PersistableFigure bond : bonds)
-            {
-                bond.appendJson(packedJson, mapper);
-            }
+//            List<PersistableFigure> bonds = new ArrayList<>();
+//            
+//            while (k.hasMoreElements())
+//            {
+//                Figure f = k.nextFigure();
+//                
+//                if (f instanceof AtomFigure)
+//                    ((PersistableFigure)f).appendJson(packedJson, mapper);
+//                else
+//                    bonds.add((PersistableFigure)f);
+//            }
+//            
+//            packedJson.append("*");
+//            
+//            for (PersistableFigure bond : bonds)
+//            {
+//                bond.appendJson(packedJson, mapper);
+//            }
         } 
         catch (JsonProcessingException ex)
         {

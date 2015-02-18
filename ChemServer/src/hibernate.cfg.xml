@@ -8,9 +8,10 @@
     <property name="hibernate.connection.username">Bart</property>
     <property name="hibernate.connection.password">Bart</property>
     <property name="hibernate.query.factory_class">org.hibernate.hql.internal.ast.ASTQueryTranslatorFactory</property>
-    <mapping class="chemserver.AtomModel" file="" jar="" package="chemserver" resource="chemserver/atom.hbm.xml"/>
-    <mapping class="chemserver.DocumentModel" file="" jar="" package="chemserver" resource="chemserver/document.hbm.xml"/>
-    <mapping class="chemserver.ElectronModel" file="" jar="" package="chemserver" resource="chemserver/electron.hbm.xml"/>
-    <mapping class="chemserver.ChemicalBondModel" file="" jar="" package="chemserver" resource="chemserver/chemicalbond.hbm.xml"/>
+    <property name="hibernate.show_sql">true</property>
+    <mapping class="persist.AtomModel" file="" jar="" package="persist" resource="persist/atom.hbm.xml"/>
+    <mapping class="persist.DocumentModel" file="" jar="" package="persist" resource="persist/document.hbm.xml"/>
+    <mapping class="persist.ElectronModel" file="" jar="" package="persist" resource="persist/electron.hbm.xml"/>
+    <mapping class="persist.BondModel" file="" jar="" package="persist" resource="persist/bond.hbm.xml"/>
   </session-factory>
 </hibernate-configuration>

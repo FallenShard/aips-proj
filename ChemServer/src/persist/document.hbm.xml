@@ -2,10 +2,13 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <hibernate-mapping>
   <class name="persist.DocumentModel" table="DOCUMENT">
-    <id column="ID" name="id" type="integer">
-      <generator class="increment"/>
-    </id>
-    <property column="NAME" name="name" type="string"/>
-    <property column="DATE_MODIFIED" name="timestamp" type="timestamp"/>
+  
+      <id name="id" type="integer" column="ID">
+          <generator class="increment"></generator>
+      </id>
+      
+      <property name="name" column="NAME" type="string"></property>
+      <property name="timestamp" column="DATE_MODIFIED" type="timestamp"></property>
+      
   </class>
 </hibernate-mapping>

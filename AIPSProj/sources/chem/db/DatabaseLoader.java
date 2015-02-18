@@ -16,7 +16,8 @@ import chem.figures.AtomFigure;
 import chem.figures.ChemicalBond;
 import chem.figures.ElectronFigure;
 import chem.figures.persist.AtomModel;
-import chem.figures.persist.ChemicalBondModel;
+import chem.figures.persist.BondModel;
+//import chem.figures.persist.ChemicalBondModel;
 import chem.figures.persist.DocumentModel;
 import chem.figures.persist.ElectronModel;
 import chem.util.Dim;
@@ -108,7 +109,7 @@ public class DatabaseLoader implements DrawingLoader
         Vector<Figure> bondFigures = new Vector<>();
         for (Object bondObj : bondList)
         {
-            ChemicalBondModel bondModel = (ChemicalBondModel)bondObj;
+            BondModel bondModel = (BondModel)bondObj;
 
             // Create a new bond, with null connectors as well
             ChemicalBond bond = new ChemicalBond();
@@ -133,18 +134,18 @@ public class DatabaseLoader implements DrawingLoader
                         int electronId = electron.getModel().getId();
                         
                         // If currently inspected electron has id equal to startId, mark it as startConnector
-                        if (electronId == bondModel.getStartElectronId())
-                        {
-                            startCon = electron.connectorAt(electron.center().x, electron.center().y);
-                            bond.startPoint(electron.center().x, electron.center().y);
-                            bond.endPoint(electron.center().x + 20, electron.center().y + 20);
-                        }
-
-                        // If currently inspected electron has id equal to endId, mark it as endConnector
-                        if (electronId == bondModel.getEndElectronId())
-                        {
-                            endCon = electron.connectorAt(electron.center().x, electron.center().y);
-                        }
+//                        if (electronId == bondModel.getStartElectronId())
+//                        {
+//                            startCon = electron.connectorAt(electron.center().x, electron.center().y);
+//                            bond.startPoint(electron.center().x, electron.center().y);
+//                            bond.endPoint(electron.center().x + 20, electron.center().y + 20);
+//                        }
+//
+//                        // If currently inspected electron has id equal to endId, mark it as endConnector
+//                        if (electronId == bondModel.getEndElectronId())
+//                        {
+//                            endCon = electron.connectorAt(electron.center().x, electron.center().y);
+//                        }
                     }
                 }
                 

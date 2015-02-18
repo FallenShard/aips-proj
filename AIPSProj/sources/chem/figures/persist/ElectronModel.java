@@ -7,8 +7,6 @@
 package chem.figures.persist;
 
 import java.io.Serializable;
-import org.hibernate.Query;
-import org.hibernate.Session;
 
 /**
  *
@@ -17,14 +15,18 @@ import org.hibernate.Session;
 public class ElectronModel implements Serializable, Persistable
 {
     private int id = -1;
-    private double angle;
-    private int atomId;
+    
+    private int atomX;
+    private int atomY;
     private int index;
+    
+    private double angle;
+    
+    private int documentId;
     
     public ElectronModel()
     {
         angle = 0.0;
-        atomId = -1;
         index = -1;
     }
     
@@ -33,10 +35,11 @@ public class ElectronModel implements Serializable, Persistable
         this.angle = angle;
     }
     
-    public ElectronModel(double angle, int atomId)
+    public ElectronModel(double angle, int atomX, int atomY)
     {
         this.angle = angle;
-        this.atomId = atomId;
+        this.atomX = atomX;
+        this.atomY = atomY;
     }
 
     public int getId() {
@@ -47,6 +50,30 @@ public class ElectronModel implements Serializable, Persistable
         this.id = id;
     }
 
+    public int getAtomX() {
+        return atomX;
+    }
+
+    public void setAtomX(int atomX) {
+        this.atomX = atomX;
+    }
+
+    public int getAtomY() {
+        return atomY;
+    }
+
+    public void setAtomY(int atomY) {
+        this.atomY = atomY;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
     public double getAngle() {
         return angle;
     }
@@ -55,61 +82,11 @@ public class ElectronModel implements Serializable, Persistable
         this.angle = angle;
     }
 
-    public int getAtomId() {
-        return atomId;
+    public int getDocumentId() {
+        return documentId;
     }
 
-    public void setAtomId(int atomId) {
-        this.atomId = atomId;
-    }
-    
-    public int getIndex()
-    {
-        return index;
-    }
-    
-    public void setIndex(int index)
-    {
-        this.index = index;
-    }
-
-    @Override
-    public void save(Session session, int documentId)
-    {
-        // If id is -1, we're saving for the first time, set docId
-        if (id == -1 || documentId == -1)
-        {
-            id = -1;
-            session.beginTransaction();
-            session.save(this);
-            session.getTransaction().commit();
-        }
-        else
-        {
-            // Otherwise, pull from database and refresh
-            Query query = session.createQuery("from ElectronModel e where e.id = " + id);
-            Object obj = query.list().get(0);
-            
-            ElectronModel persEl = (ElectronModel)obj;
-            persEl.angle = angle;
-            
-            session.beginTransaction();
-            session.saveOrUpdate(persEl);
-            session.getTransaction().commit();
-        }
-    }
-
-    @Override
-    public void delete(Session session) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void saveAs(Session session, int documentId)
-    {
-        id = -1;
-        session.beginTransaction();
-        session.save(this);
-        session.getTransaction().commit();
+    public void setDocumentId(int documentId) {
+        this.documentId = documentId;
     }
 }

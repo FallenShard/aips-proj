@@ -268,6 +268,16 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable, 
         return electrons;
     }
     
+    public ElectronFigure getElectron(int index)
+    {
+        if (index < 0 || index >= m_electrons.size())
+            return null;
+        
+        ElectronFigure eFig = (ElectronFigure)m_electrons.get(index);
+        
+        return eFig;
+    }
+    
     public void setElectrons(Vector<Figure> electrons)
     {    
         super.removeAll(m_electrons);
@@ -299,7 +309,7 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable, 
     {
         getModel();
 
-        m_model.save(session, documentId);
+        //m_model.save(session, documentId);
         
         for (Figure electron : m_electrons)
         {
@@ -312,7 +322,7 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable, 
     {
         getModel();
 
-        m_model.saveAs(session, documentId);
+        //m_model.saveAs(session, documentId);
         
         for (Figure electron : m_electrons)
         {
@@ -333,17 +343,23 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable, 
         {
             getModel();
             packedJson.append(mapper.writeValueAsString(m_model));
+            packedJson.append("@A@");
             
             for (Figure electron : m_electrons)
             {
                 ((PersistableFigure)electron).appendJson(packedJson, mapper);
             }
             
-            packedJson.append("$");
+            //packedJson.append("$");
         } 
         catch (JsonProcessingException ex)
         {
             Logger.getLogger(AtomFigure.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    public String toString()
+    {
+        return "Type: " + m_model.getType() + " COORDS: " + m_model.getX() + ", " + m_model.getY();
     }
 }

@@ -14,12 +14,15 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import org.hibernate.Session;
 import org.zeromq.ZMQ;
 import protocol.MessageType;
 import protocol.Ports;
 import task.CheckEditorTask;
 import task.GetDocsTask;
+import task.LoadDocTask;
 import task.LoadDocumentTask;
+import task.SaveDocumentAsTask;
 import task.SaveDocumentTask;
 import task.Task;
 
@@ -52,6 +55,8 @@ public class Broker
         
         m_publishingQueue = new LinkedBlockingQueue<>();
         
+        Session ses = HibernateUtil.getSessionFactory().openSession();
+        ses.close();
         
     }
     
@@ -152,7 +157,7 @@ public class Broker
                 
                 editorConnected(address, docId);
                 
-                return new LoadDocumentTask(docId);
+                return new LoadDocTask(docId);
             }
 
             case LOAD_DOC_VIEWER:
@@ -167,6 +172,11 @@ public class Broker
             case SAVE_DOC:
             {
                 return new SaveDocumentTask(messageBody);
+            }
+            
+            case SAVE_DOC_AS:
+            {
+                return new SaveDocumentAsTask(messageBody);
             }
             
             case SAVE_ATOMS:

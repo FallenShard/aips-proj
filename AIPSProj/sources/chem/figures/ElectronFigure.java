@@ -84,6 +84,11 @@ public class ElectronFigure extends EllipseFigure implements Animatable, Persist
     {
         return m_covalentBond;
     }
+    
+    public int getIndex()
+    {
+        return m_index;
+    }
 
     @Override
     public void animationStep(float timeDelta)
@@ -100,8 +105,9 @@ public class ElectronFigure extends EllipseFigure implements Animatable, Persist
     @Override
     public ElectronModel getModel()
     {
-        m_model.setAngle((Double)getAttribute("Angle"));
-        m_model.setAtomId(m_parent.getModel().getId());
+        m_model.setAngle((double)getAttribute("Angle"));
+        m_model.setAtomX(m_parent.displayBox().x);
+        m_model.setAtomY(m_parent.displayBox().y);
         m_model.setIndex(m_index);
 
         return m_model;
@@ -119,7 +125,7 @@ public class ElectronFigure extends EllipseFigure implements Animatable, Persist
     {
         getModel();
 
-        m_model.save(session, documentId);
+        //m_model.save(session, documentId);
     }
     
     @Override
@@ -127,7 +133,7 @@ public class ElectronFigure extends EllipseFigure implements Animatable, Persist
     {
         getModel();
 
-        m_model.saveAs(session, documentId);
+        //m_model.saveAs(session, documentId);
     }
     
     @Override
@@ -142,8 +148,8 @@ public class ElectronFigure extends EllipseFigure implements Animatable, Persist
         try 
         {
             getModel();
-            packedJson.append("@");
             packedJson.append(mapper.writeValueAsString(m_model));
+            packedJson.append("@E@");
         } 
         catch (JsonProcessingException ex)
         {

@@ -17,14 +17,18 @@ import org.hibernate.Session;
 public class ElectronModel implements Serializable, Persistable
 {
     private int id = -1;
-    private double angle;
-    private int atomId;
+    
+    private int atomX;
+    private int atomY;
     private int index;
+    
+    private double angle;
+    
+    private int documentId;
     
     public ElectronModel()
     {
         angle = 0.0;
-        atomId = -1;
         index = -1;
     }
     
@@ -33,10 +37,11 @@ public class ElectronModel implements Serializable, Persistable
         this.angle = angle;
     }
     
-    public ElectronModel(double angle, int atomId)
+    public ElectronModel(double angle, int atomX, int atomY)
     {
         this.angle = angle;
-        this.atomId = atomId;
+        this.atomX = atomX;
+        this.atomY = atomY;
     }
 
     public int getId() {
@@ -47,6 +52,30 @@ public class ElectronModel implements Serializable, Persistable
         this.id = id;
     }
 
+    public int getAtomX() {
+        return atomX;
+    }
+
+    public void setAtomX(int atomX) {
+        this.atomX = atomX;
+    }
+
+    public int getAtomY() {
+        return atomY;
+    }
+
+    public void setAtomY(int atomY) {
+        this.atomY = atomY;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
     public double getAngle() {
         return angle;
     }
@@ -55,34 +84,19 @@ public class ElectronModel implements Serializable, Persistable
         this.angle = angle;
     }
 
-    public int getAtomId() {
-        return atomId;
+    public int getDocumentId() {
+        return documentId;
     }
 
-    public void setAtomId(int atomId) {
-        this.atomId = atomId;
-    }
-    
-    public int getIndex()
-    {
-        return index;
-    }
-    
-    public void setIndex(int index)
-    {
-        this.index = index;
-    }
-
-    public String toString()
-    {
-        return "Index : " + index + " Angle: " + angle;
+    public void setDocumentId(int documentId) {
+        this.documentId = documentId;
     }
 
     @Override
     public void save(Session session, int documentId)
     {
         // If id is -1, we're saving for the first time, set docId
-        if (id == -1 || documentId == -1)
+        if (id == -1)
         {
             saveAs(session, documentId);
         }
@@ -93,7 +107,9 @@ public class ElectronModel implements Serializable, Persistable
             Object obj = query.list().get(0);
             
             ElectronModel persEl = (ElectronModel)obj;
-            persEl.angle = angle;
+            persEl.angle = this.angle;
+            persEl.atomX = this.atomX;
+            persEl.atomY = this.atomY;
             
             session.beginTransaction();
             session.saveOrUpdate(persEl);
@@ -104,7 +120,8 @@ public class ElectronModel implements Serializable, Persistable
     @Override
     public void saveAs(Session session, int documentId)
     {
-        id = -1;
+        this.id = -1;
+        this.documentId = documentId;
         session.beginTransaction();
         session.save(this);
         session.getTransaction().commit();

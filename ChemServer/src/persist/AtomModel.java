@@ -18,9 +18,9 @@ public class AtomModel implements Serializable, Persistable
 {
     private int id = -1;
     
+    private String type;
     private int x;
     private int y;
-    private String type;
     
     private int documentId;
     
@@ -107,9 +107,9 @@ public class AtomModel implements Serializable, Persistable
             Object obj = query.list().get(0);
             
             AtomModel persAtom = (AtomModel)obj;
-            persAtom.x = x;
-            persAtom.y = y;
-            persAtom.type = type;
+            persAtom.x = this.x;
+            persAtom.y = this.y;
+            persAtom.type = this.type;
             
             session.beginTransaction();
             session.saveOrUpdate(persAtom);

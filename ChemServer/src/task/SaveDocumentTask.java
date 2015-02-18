@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import org.hibernate.Session;
 import persist.AtomModel;
-import persist.ChemicalBondModel;
+import persist.BondModel;
 import persist.ElectronModel;
 
 /**
@@ -60,7 +60,7 @@ public class SaveDocumentTask implements Task
                 for (int i = 1; i < individualAtomData.length; i++)
                 {
                     ElectronModel elModel = mapper.readValue(individualAtomData[i], ElectronModel.class);
-                    elModel.setAtomId(atomModel.getId());
+                    //elModel.setAtomId(atomModel.getId());
                     elModel.save(session, docId);
                 }
             }
@@ -70,7 +70,7 @@ public class SaveDocumentTask implements Task
                 String[] bondData = firstSplit[2].split("\\$");
                 for (String bond : bondData)
                 {
-                   ChemicalBondModel bondModel = mapper.readValue(bond, ChemicalBondModel.class);
+                   BondModel bondModel = mapper.readValue(bond, BondModel.class);
                    bondModel.save(session, docId);
                 }
             }
@@ -78,7 +78,7 @@ public class SaveDocumentTask implements Task
             session.close();
             
             
-            Task task = new LoadDocumentTask(docId);
+            Task task = new LoadDocTask(docId);
             task.run();
 
             m_result = task.getResult();

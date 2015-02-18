@@ -13,7 +13,10 @@ import CH.ifa.draw.application.DrawApplication;
 import static CH.ifa.draw.application.DrawApplication.IMAGES;
 import CH.ifa.draw.figures.GroupCommand;
 import CH.ifa.draw.figures.UngroupCommand;
+import CH.ifa.draw.framework.Connector;
 import CH.ifa.draw.framework.Drawing;
+import CH.ifa.draw.framework.Figure;
+import CH.ifa.draw.framework.FigureEnumeration;
 import CH.ifa.draw.framework.Tool;
 import CH.ifa.draw.standard.AlignCommand;
 import CH.ifa.draw.standard.BringToFrontCommand;
@@ -32,6 +35,9 @@ import chem.UI.SaveDialog;
 import chem.anim.Animatable;
 import chem.db.DrawingLoader;
 import chem.db.JsonLoader;
+import chem.db.NewJsonLoader;
+import chem.figures.AtomFigure;
+import chem.figures.ElectronFigure;
 import chem.util.AtomFactory;
 import chem.figures.persist.PersistableFigure;
 import chem.network.NetworkHandler;
@@ -49,6 +55,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.JOptionPane;
 import org.zeromq.ZMQ;
+
 
 /**
  *
@@ -98,6 +105,7 @@ public class ChemApp extends DrawApplication
         super.open();
         
         m_networkHandler = new NetworkHandler();
+        
         startAnimation();
     }
     
@@ -232,7 +240,7 @@ public class ChemApp extends DrawApplication
             
             System.out.println(response.length());
             
-            DrawingLoader loader = new JsonLoader(response);
+            DrawingLoader loader = new NewJsonLoader(response);
             
             Drawing drawing = loader.createDrawing();
             setDrawing(drawing);
@@ -333,23 +341,23 @@ public class ChemApp extends DrawApplication
             String dataToSend = packedJson.toString();
             System.out.println(dataToSend.length() + " Time: " + (System.currentTimeMillis() - start));            
 
-            ZMQ.Socket docSaver = m_networkHandler.createSocket(ZMQ.REQ);
-            docSaver.connect("tcp://localhost:" + 8888);
-            docSaver.sendMore("SAVE_DOC");
-            docSaver.send(dataToSend);
-            
-            String response = docSaver.recvStr();
-            docSaver.close();
-            
-            if (!response.equalsIgnoreCase("Failed"))
-            {
-                showStatus("Document saved successfully");
-                DrawingLoader loader = new JsonLoader(response);
-                Drawing drawing = loader.createDrawing();
-                setDrawing(drawing);
-            }
-            else
-                showStatus("Failed to save document");
+//            ZMQ.Socket docSaver = m_networkHandler.createSocket(ZMQ.REQ);
+//            docSaver.connect("tcp://localhost:" + 8888);
+//            docSaver.sendMore("SAVE_DOC");
+//            docSaver.send(dataToSend);
+//            
+//            String response = docSaver.recvStr();
+//            docSaver.close();
+//            
+//            if (!response.equalsIgnoreCase("Failed"))
+//            {
+//                showStatus("Document saved successfully");
+//                DrawingLoader loader = new JsonLoader(response);
+//                Drawing drawing = loader.createDrawing();
+//                setDrawing(drawing);
+//            }
+//            else
+//                showStatus("Failed to save document");
         }
         catch(Exception ex)
         {
@@ -364,6 +372,68 @@ public class ChemApp extends DrawApplication
         
         try
         {
+            long start = System.currentTimeMillis();
+            
+            PersistableFigure doc = (PersistableFigure)(drawing());
+            
+            StringBuilder packedJson = new StringBuilder();
+            ObjectMapper mapper = new ObjectMapper();
+            doc.appendJson(packedJson, mapper);
+            
+            String dataToSend = packedJson.toString();
+            System.out.println(dataToSend.length() + " Time: " + (System.currentTimeMillis() - start));
+            
+            ZMQ.Socket saveSocket = m_networkHandler.createSocket(ZMQ.REQ);
+            saveSocket.connect("tcp://localhost:" + 8888);
+            saveSocket.sendMore("SAVE_DOC_AS");
+            saveSocket.send(dataToSend);
+            
+            String response = saveSocket.recvStr();
+            saveSocket.close();
+            
+            if (!response.equalsIgnoreCase("Failed"))
+            {
+                showStatus("Document saved successfully");
+                //DrawingLoader loader = new JsonLoader(response);
+                //Drawing drawing = loader.createDrawing();
+                //setDrawing(drawing);
+            }
+            else
+                showStatus("Failed to save document");
+            
+//            String[] data = dataToSend.split("@");
+//            for (String s : data)
+//                System.out.println(s);
+//            
+//            AtomFigure f1 = (AtomFigure)drawing().findFigure(150, 150);
+//            System.out.println(f1);
+//            
+//            AtomFigure f2 = (AtomFigure)drawing().findFigure(10, 10);
+//            System.out.println(f2);
+//            
+//            ChemicalBond bond = new ChemicalBond();
+//            Connector startCon = null;
+//            Connector endCon = null;
+//            
+//            Figure el1 = f1.getElectron(0);
+//            startCon = el1.connectorAt(el1.center().x, el1.center().y);
+//            bond.startPoint(el1.center().x, el1.center().y);
+//            bond.endPoint(el1.center().x + 20, el1.center().y + 20);
+//            
+//            Figure el2 = f2.getElectron(0);
+//            endCon = el2.connectorAt(el2.center().x, el2.center().y);
+//            
+//            
+//            bond.connectStart(startCon);
+//            bond.connectEnd(endCon);
+//            bond.updateConnection();
+//            //bond.setModel(bondModel);
+//            drawing().add(bond);
+//            
+//            FigureEnumeration k = drawing().figures();
+//            while (k.hasMoreElements())
+//                System.out.println(k.nextElement());
+            
 //            Session session = HibernateUtil.getSessionFactory().openSession();
 //            
 //            PersistableFigure doc = (PersistableFigure)(drawing());

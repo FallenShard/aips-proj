@@ -8,7 +8,7 @@ package chem.figures;
 
 import CH.ifa.draw.figures.LineConnection;
 import CH.ifa.draw.framework.Figure;
-import chem.figures.persist.ChemicalBondModel;
+import chem.figures.persist.BondModel;
 import chem.figures.persist.Persistable;
 import chem.figures.persist.PersistableFigure;
 import chem.tools.ChangeBondEndHandle;
@@ -26,7 +26,7 @@ import org.hibernate.Session;
  */
 public class ChemicalBond extends LineConnection implements PersistableFigure
 {
-    private ChemicalBondModel m_model = new ChemicalBondModel();
+    private BondModel m_model = new BondModel();
     
     private ElectronFigure m_start = null;
     private ElectronFigure m_end = null;
@@ -74,8 +74,7 @@ public class ChemicalBond extends LineConnection implements PersistableFigure
             m_start.setCovalentBond(this, end);
             m_end.setCovalentBond(this, start);
             
-            m_model.setStartElectronId(m_start.getModel().getId());
-            m_model.setEndElectronId(m_end.getModel().getId());
+            getModel();
         }
     }
     
@@ -96,19 +95,28 @@ public class ChemicalBond extends LineConnection implements PersistableFigure
     
 
     @Override
-    public ChemicalBondModel getModel()
+    public BondModel getModel()
     {
         if (m_start != null)
-            m_model.setStartElectronId(m_start.getModel().getId());
+        {
+            m_model.setStartAtomX(m_start.getParent().displayBox().x);
+            m_model.setStartAtomY(m_start.getParent().displayBox().y);
+            m_model.setStartElectronIndex(m_start.getIndex());
+        }
         if (m_end != null)
-            m_model.setEndElectronId(m_end.getModel().getId());
+        {
+            m_model.setEndAtomX(m_end.getParent().displayBox().x);
+            m_model.setEndAtomY(m_end.getParent().displayBox().y);
+            m_model.setEndElectronIndex(m_end.getIndex());
+        }
+        
         return m_model;
     }
 
     @Override
     public void setModel(Persistable model)
     {
-        m_model = (ChemicalBondModel)model;
+        m_model = (BondModel)model;
     }
 
     @Override
@@ -116,7 +124,7 @@ public class ChemicalBond extends LineConnection implements PersistableFigure
     {
         getModel();
         
-        m_model.save(session, documentId);
+        //m_model.save(session, documentId);
     }
     
     @Override
@@ -124,7 +132,7 @@ public class ChemicalBond extends LineConnection implements PersistableFigure
     {
         getModel();
         
-        m_model.saveAs(session, documentId);
+        //m_model.saveAs(session, documentId);
     }
     
     @Override
@@ -140,7 +148,7 @@ public class ChemicalBond extends LineConnection implements PersistableFigure
         {
             getModel();
             packedJson.append(mapper.writeValueAsString(m_model));
-            packedJson.append("$");
+            packedJson.append("@B@");
         } 
         catch (JsonProcessingException ex)
         {

@@ -6,27 +6,27 @@
 
 package task;
 
-import persist.AtomModel;
-import persist.BondModel;
-import persist.DocumentModel;
-import persist.ElectronModel;
 import chemserver.HibernateUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import persist.AtomModel;
+import persist.BondModel;
+import persist.DocumentModel;
+import persist.ElectronModel;
 
 /**
  *
  * @author FallenShard
  */
-public class LoadDocumentTask implements Task
+public class LoadDocTask implements Task
 {
     private int m_docId = -1;
     private String m_result = "";
     
-    public LoadDocumentTask(int docId)
+    public LoadDocTask(int docId)
     {
         m_docId = docId;
     }
@@ -44,34 +44,33 @@ public class LoadDocumentTask implements Task
             DocumentModel docModel = (DocumentModel)query.list().get(0);
             
             docContent.append(mapper.writeValueAsString(docModel));
-            docContent.append("*");
+            docContent.append("@D@");
             
             query = session.createQuery("from AtomModel a where a.documentId = " + m_docId);
             List<AtomModel> atomList = query.list();
-            for (AtomModel am : atomList)
+            for (AtomModel atomModel : atomList)
             {
-                String json = mapper.writeValueAsString(am);
+                String json = mapper.writeValueAsString(atomModel);
                 docContent.append(json);
+                docContent.append("@A@");
                 
-                query = session.createQuery("from ElectronModel e where e.atomId = " + am.getId() + " ORDER BY e.index ASC");
+                query = session.createQuery("from ElectronModel e where e.atomX = " + atomModel.getX() + " and e.atomY = " + atomModel.getY()
+                        + "and e.documentId = " + m_docId  + " ORDER BY e.index ASC");
                 List<ElectronModel> electronList = query.list();
                 
                 for (ElectronModel em : electronList)
                 {
-                    docContent.append("@");
                     docContent.append(mapper.writeValueAsString(em));
+                    docContent.append("@E@");
                 }
-                
-                docContent.append("$");
             }
-            docContent.append("*");
             
-            query = session.createQuery("from BondModel cb where cb.documentId = " + m_docId);
+            query = session.createQuery("from BondModel bond where bond.documentId = " + m_docId);
             List<BondModel> bondList = query.list();
             for (BondModel bm : bondList)
             {
                 docContent.append(mapper.writeValueAsString(bm));
-                docContent.append("$");
+                docContent.append("@B@");
             }
             
             m_result = docContent.toString();
