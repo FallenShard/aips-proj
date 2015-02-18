@@ -6,11 +6,17 @@
 
 package chemserver;
 
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import org.zeromq.ZMQ;
 import protocol.MessageType;
+import protocol.Ports;
 import task.CheckEditorTask;
 import task.GetDocsTask;
 import task.LoadDocumentTask;
@@ -23,27 +29,45 @@ import task.Task;
  */
 public class Broker
 {
-    public static final int MAIN_PORT = 8888;
+    public static final int NBR_WORKERS = 4;
     
     ZMQ.Context m_context = null;
-    ZMQ.Socket m_routerSocket = null;
+    
+    ZMQ.Socket m_frontEnd = null;
+    ZMQ.Socket m_backEnd = null;
         
     Map<Integer, String> m_editors = null;
     Map<Integer, PublisherThread> m_publishers = null;
+    
+    BlockingQueue<Integer> m_publishingQueue = null;
+    
+    Queue<byte[]> m_availableWorkers = null;
     
     public Broker()
     {
         m_editors = new ConcurrentHashMap<>();
         m_publishers = new ConcurrentHashMap<>();
+        
+        m_availableWorkers = new LinkedList<>();
+        
+        m_publishingQueue = new LinkedBlockingQueue<>();
+        
+        
     }
     
     public void initialize()
     {
         m_context = ZMQ.context(1);
-        m_routerSocket = m_context.socket(ZMQ.ROUTER);
+
+        System.out.println("Binding frontend socket on localhost. Port: " + Ports.MAIN_PORT);
+        m_frontEnd = m_context.socket(ZMQ.ROUTER);
+        m_backEnd = m_context.socket(ZMQ.ROUTER);
         
-        m_routerSocket.bind("tcp://*:" + MAIN_PORT);
-        System.out.println("Binding a ROUTER socket on localhost. Port: " + MAIN_PORT);
+        m_frontEnd.bind("tcp://*:" + Ports.MAIN_PORT);
+        m_backEnd.bind("ipc://backend.chem");
+        
+        for (int workerNbr = 0; workerNbr < NBR_WORKERS; workerNbr++)
+            new WorkerThread(m_context, this).start();
     }
     
     public void run()
@@ -52,28 +76,57 @@ public class Broker
         {
             System.out.println("Ready to receive commands...");
             
-            byte[] address = m_routerSocket.recv();
-            String empty = m_routerSocket.recvStr();
-            String header = m_routerSocket.recvStr();
-            String content = m_routerSocket.recvStr();
-            String result = "Default message";
+            ZMQ.Poller polledSockets = new ZMQ.Poller(2);
             
-            Task task = createTask(address, header, content);
-            if (task != null)
+            polledSockets.register(m_backEnd, ZMQ.Poller.POLLIN);
+            
+            // Poll front-end only if we have free workers to do the job
+            if (m_availableWorkers.size() > 0)
+                polledSockets.register(m_frontEnd, ZMQ.Poller.POLLIN);
+            
+            if (polledSockets.poll() < 0)
+                break;
+            
+            if (polledSockets.pollin(0))
             {
-                task.run();
-                result = task.getResult();
+                m_availableWorkers.add(m_backEnd.recv());
+                
+                String empty = m_backEnd.recvStr();
+                byte[] clientAddress = m_backEnd.recv();
+                
+                String clientAddrStr = new String(clientAddress, ZMQ.CHARSET);
+                
+                if (!clientAddrStr.equals("READY"))
+                {
+                    empty = m_backEnd.recvStr();
+                    String reply = m_backEnd.recvStr();
+                    
+                    m_frontEnd.sendMore(clientAddress);
+                    m_frontEnd.sendMore(empty);
+                    m_frontEnd.send(reply);
+                }
             }
-
-            m_routerSocket.sendMore(address);
-            m_routerSocket.sendMore(empty);
-            m_routerSocket.send(result);
             
-            System.out.println("Sent: " + result);
-            System.out.println("Length: " + result.length() + " bytes");
+            if (polledSockets.pollin(1))
+            {
+                byte[] clientAddress = m_frontEnd.recv();
+                String empty = m_frontEnd.recvStr();
+                String header = m_frontEnd.recvStr();
+                String content = m_frontEnd.recvStr();
+                
+                byte[] workerAddress = m_availableWorkers.poll();
+                
+                m_backEnd.sendMore(workerAddress);
+                m_backEnd.sendMore(empty);
+                m_backEnd.sendMore(clientAddress);
+                m_backEnd.sendMore(empty);
+                m_backEnd.sendMore(header);
+                m_backEnd.send(content);
+            }
         }
         
-        m_routerSocket.close();
+        m_frontEnd.close();
+        m_backEnd.close();
         m_context.term();
         System.out.println("Shutting down...");
     }
@@ -158,9 +211,9 @@ public class Broker
     {
         m_editors.put(docId, new String(address, ZMQ.CHARSET));
 
-        PublisherThread pb = new PublisherThread(m_context, docId);
-        m_publishers.put(docId, pb);
-        pb.start();
+        //PublisherThread pb = new PublisherThread(m_context, docId);
+        //m_publishers.put(docId, pb);
+        //pb.start();
     }
     
     public synchronized void viewerConnected(byte[] address, int docId)
@@ -182,9 +235,9 @@ public class Broker
     {
         m_editors.remove(docId);
         
-        PublisherThread pub = m_publishers.get(docId);
-        pub.end();
-        m_publishers.remove(docId);
+        //PublisherThread pub = m_publishers.get(docId);
+        //pub.end();
+        //m_publishers.remove(docId);
     }
     
     public synchronized void viewerDisconnected(int docId)
