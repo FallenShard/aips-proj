@@ -75,7 +75,6 @@ public class SaveThread extends Thread
                     else
                         System.out.println("Disabling real-time saving!");
                 }
-                    
 
                 if (m_isSaving)
                 {
@@ -114,7 +113,7 @@ public class SaveThread extends Thread
                     //System.out.println("Saved document! " + System.currentTimeMillis() % 1000);
                 }
                 
-                sleep(33);
+                sleep(20);
             }
             catch (InterruptedException ex)
             {

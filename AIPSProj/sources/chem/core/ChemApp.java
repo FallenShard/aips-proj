@@ -61,6 +61,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import org.zeromq.ZMQ;
 import protocol.MessageType;
@@ -87,6 +89,10 @@ public class ChemApp extends DrawApplication
     private UserStatus m_userStatus = new UserStatus();
     
     private List<MenuItem> m_saveMenuItems = new LinkedList<>();
+    
+    private MenuItem m_realtimeMenuItem = null;
+    private boolean m_isRealtime = false;
+    private AtomSelectionTool m_selTool = null;
     
     private BlockingQueue<Boolean> m_updateQueue = new LinkedBlockingQueue<>();
     
@@ -185,7 +191,8 @@ public class ChemApp extends DrawApplication
     @Override
     protected Tool createSelectionTool()
     {
-        return new AtomSelectionTool(view(), m_updateQueue);
+        m_selTool = new AtomSelectionTool(view(), null);
+        return m_selTool;
     }
     
     @Override
@@ -277,8 +284,6 @@ public class ChemApp extends DrawApplication
             
             this.add("West", m_palette);
             
-            m_updateQueue.clear();
-            m_updateQueue.put(true);
             m_saveThread = new SaveThread(m_networkHandler.getContext(), this, m_updateQueue);
             m_saveThread.start();
             
@@ -430,6 +435,34 @@ public class ChemApp extends DrawApplication
         }
     }
     
+    protected void enableRealtime()
+    {
+        m_realtimeMenuItem.setLabel("Disable real-time");
+        m_selTool.setUpdateQueue(m_updateQueue);
+        m_updateQueue.clear();
+        try {
+            m_updateQueue.put(true);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+        
+        m_isRealtime = true;
+    }
+    
+    protected void disableRealtime()
+    {
+        m_realtimeMenuItem.setLabel("Enable real-time");
+        m_selTool.setUpdateQueue(null);
+        m_updateQueue.clear();
+        try {
+            m_updateQueue.put(false);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
+        
+        m_isRealtime = false;
+    }
+    
     /**
      * Creates the standard menus. Clients override this
      * method to add additional menus.
@@ -501,6 +534,25 @@ public class ChemApp extends DrawApplication
 		menu.add(mi);
 		menu.addSeparator();
         m_saveMenuItems.add(mi);
+        
+        mi = new MenuItem("Enable Real-time", new MenuShortcut('r'));
+		mi.addActionListener(
+		    new ActionListener() {
+		        public void actionPerformed(ActionEvent event) {
+		            if (!m_isRealtime)
+                    {
+                        enableRealtime();
+                    }
+                    else
+                    {
+                        disableRealtime();
+                    }
+		        }
+		    }
+		);
+		menu.add(mi);
+		menu.addSeparator();
+        m_realtimeMenuItem = mi;
         
 		mi = new MenuItem("Print...", new MenuShortcut('p'));
 		mi.addActionListener(

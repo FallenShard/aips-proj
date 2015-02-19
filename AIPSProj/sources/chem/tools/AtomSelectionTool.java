@@ -163,4 +163,9 @@ public class AtomSelectionTool extends SelectionTool
                         ((Figure)f).setAttribute("FrameColor", Const.IDLE_BORDER);
         view().clearSelection();
     }
+    
+    public void setUpdateQueue(BlockingQueue<Boolean> queue)
+    {
+        m_updateQueue = queue;
+    }
 }
