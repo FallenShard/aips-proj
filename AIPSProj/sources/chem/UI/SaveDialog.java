@@ -23,6 +23,7 @@ public class SaveDialog extends javax.swing.JDialog {
         initComponents();
         m_parent = (ChemApp)parent;
         setLocationRelativeTo(parent);
+        setTitle("Save Project");
     }
     
     private final ChemApp m_parent;

@@ -44,6 +44,7 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
         
         m_parent = (ChemApp)parent;
         
+        setTitle("Load Project");
         setLocationRelativeTo(parent);
         
         tableEditableDocs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
