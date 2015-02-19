@@ -92,24 +92,29 @@ public class SaveThread extends Thread
 
                     if (response.equalsIgnoreCase("UpdateOnly"))
                     {
+                        //System.out.println("Updated document!");
                     }
                     else if (response.equalsIgnoreCase("Failed"))
-                        m_app.showStatus("Failed to save document");
+                    {
+                        //m_app.showStatus("Failed to save document");
+                    }
                     else
                     {
-                        m_app.showStatus("Document saved successfully");
+                        //m_app.showStatus("Document saved successfully");
                         DrawingLoader loader = new JsonLoader(response);
                         Drawing drawing = loader.createDrawing();
                         m_app.view().freezeView();
                         m_app.setDrawing(drawing);
                         m_app.view().checkDamage();
                         m_app.view().unfreezeView();
-
-                        System.out.println("Saved stuff!");
+                        
+                        //System.out.println("Saved document and loaded!");
                     }
+                    
+                    //System.out.println("Saved document! " + System.currentTimeMillis() % 1000);
                 }
                 
-                sleep(16);
+                sleep(33);
             }
             catch (InterruptedException ex)
             {

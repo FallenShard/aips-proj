@@ -47,6 +47,7 @@ import chem.network.SaveThread;
 import chem.network.ViewerThread;
 import chem.tools.AtomSelectionTool;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Menu;
 import java.awt.MenuBar;
@@ -115,6 +116,8 @@ public class ChemApp extends DrawApplication
     {
         super.open();
         
+        view().setBackground(new Color(96, 128, 96, 255));
+        
         m_networkHandler = new NetworkHandler();
         
         startAnimation();
@@ -182,7 +185,7 @@ public class ChemApp extends DrawApplication
     @Override
     protected Tool createSelectionTool()
     {
-        return new AtomSelectionTool(view(), null);
+        return new AtomSelectionTool(view(), m_updateQueue);
     }
     
     @Override
@@ -274,8 +277,10 @@ public class ChemApp extends DrawApplication
             
             this.add("West", m_palette);
             
-            //m_saveThread = new SaveThread(m_networkHandler.getContext(), this, m_updateQueue);
-            //m_saveThread.start();
+            m_updateQueue.clear();
+            m_updateQueue.put(true);
+            m_saveThread = new SaveThread(m_networkHandler.getContext(), this, m_updateQueue);
+            m_saveThread.start();
             
             m_saveMenuItems.stream().forEach((item) -> {
                 item.setEnabled(true);
