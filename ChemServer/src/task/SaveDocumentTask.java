@@ -7,13 +7,13 @@
 package task;
 
 import chemserver.HibernateUtil;
-import persist.DocumentModel;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.util.concurrent.BlockingQueue;
+import org.hibernate.Query;
 import org.hibernate.Session;
-import persist.AtomModel;
-import persist.BondModel;
-import persist.ElectronModel;
+import persist.JsonModelFactory;
+import persist.ModelFactory;
+import persist.Persistable;
 
 /**
  *
@@ -22,11 +22,16 @@ import persist.ElectronModel;
 public class SaveDocumentTask implements Task
 {
     private final String m_jsonDoc;
-    private String m_result;
+    private BlockingQueue<Integer> m_pubQueue;
     
-    public SaveDocumentTask(String jsonDoc)
+    private String m_result;
+    private boolean m_shouldReload;
+    
+    public SaveDocumentTask(String jsonDoc, BlockingQueue<Integer> pubQueue)
     {
         m_jsonDoc = jsonDoc;
+        m_pubQueue = pubQueue;
+        m_shouldReload = false;
     }
 
     @Override
@@ -35,56 +40,65 @@ public class SaveDocumentTask implements Task
         try 
         {
             // Mapper can generate objects from strings and vice-versa
-            ObjectMapper mapper = new ObjectMapper();
+            ModelFactory modelFactory = new JsonModelFactory();
             Session session = HibernateUtil.getSessionFactory().openSession();
             
-            // First of all, split on per-class basis
-            String[] firstSplit = m_jsonDoc.split("\\*");
+            // The incoming string will be half delete data and half json
+            String[] deleteSaveData = m_jsonDoc.split("%%%");
+            
+            // Get the individual delete entries
+            if (!deleteSaveData[0].equals(""))
+            {
+                String[] deleteData = deleteSaveData[0].split("~");
+                for (String entry : deleteData)
+                {
+                    String[] deleteEntry = entry.split("\\|");
+                    int id = Integer.parseInt(deleteEntry[0]);
+                    String elHql = "DELETE FROM " + deleteEntry[1] + " WHERE id = " + id;
+                    Query query = session.createQuery(elHql);
+                    int rows = query.executeUpdate();
+                    System.out.println("Rows affected by " + deleteEntry[1] + " delete: " + rows);
+                }
+                
+                m_shouldReload = true;
+            }
+            
+            // First of all, split everything in the form of json on even index + class initial on odd index
+            String[] splitData = deleteSaveData[1].split("@");
             
             // Deserialize document and save it to database
-            DocumentModel docModel = mapper.readValue(firstSplit[0], DocumentModel.class);
+            Persistable docModel = modelFactory.unpackModel(splitData[0], splitData[1]);
             docModel.save(session, docModel.getId());
             int docId = docModel.getId();
             
-            // This split will contain atom and electron data on per-atom basis
-            String[] atomData = firstSplit[1].split("\\$");
-            
-            
-            for (String atomJson : atomData)
+            for (int i = 2; i < splitData.length; i += 2)
             {
-                String[] individualAtomData = atomJson.split("@");
+                Persistable model = modelFactory.unpackModel(splitData[i], splitData[i + 1]);
+                if (model.getId() == -1)
+                    m_shouldReload = true;
                 
-                AtomModel atomModel = mapper.readValue(individualAtomData[0], AtomModel.class);
-                atomModel.save(session, docId);
-                
-                for (int i = 1; i < individualAtomData.length; i++)
-                {
-                    ElectronModel elModel = mapper.readValue(individualAtomData[i], ElectronModel.class);
-                    //elModel.setAtomId(atomModel.getId());
-                    elModel.save(session, docId);
-                }
-            }
-            
-            if (firstSplit.length > 2)
-            {
-                String[] bondData = firstSplit[2].split("\\$");
-                for (String bond : bondData)
-                {
-                   BondModel bondModel = mapper.readValue(bond, BondModel.class);
-                   bondModel.save(session, docId);
-                }
+                model.save(session, docId);
             }
             
             session.close();
             
+            m_pubQueue.put(docId);
             
-            Task task = new LoadDocTask(docId);
-            task.run();
+            if (m_shouldReload)
+            {
+                Task task = new LoadDocumentTask(docId);
+                task.run();
 
-            m_result = task.getResult();
+                m_result = task.getResult();
+            }
+            else
+            {
+                m_result = "UpdateOnly";
+            }
+            
             return;
-        } 
-        catch (IOException ex) 
+        }
+        catch (IOException | InterruptedException ex)
         {
             ex.printStackTrace();
         }

@@ -12,7 +12,10 @@ import chem.db.DrawingLoader;
 import chem.db.JsonLoader;
 import chem.figures.persist.PersistableFigure;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.concurrent.BlockingQueue;
 import org.zeromq.ZMQ;
+import protocol.MessageType;
+import protocol.Ports;
 
 /**
  *
@@ -22,14 +25,18 @@ public class SaveThread extends Thread
 {
     private ZMQ.Socket m_socket = null;
     private DrawApplication m_app = null;
+    private BlockingQueue<Boolean> m_updateQueue = null;
     
     private volatile boolean m_isRunning = false;
+    private volatile boolean m_isSaving = false;
     
-    public SaveThread(ZMQ.Context context, DrawApplication app)
+    public SaveThread(ZMQ.Context context, DrawApplication app, BlockingQueue<Boolean> updateQueue)
     {
         m_app = app;
         
         m_socket = context.socket(ZMQ.REQ);
+        
+        m_updateQueue = updateQueue;
     }
     
     @Override
@@ -37,7 +44,7 @@ public class SaveThread extends Thread
     {
         if (!m_isRunning)
         {
-            m_socket.connect("tcp://localhost:8888");
+            m_socket.connect("tcp://localhost:" + Ports.MAIN_PORT);
             
             super.start();
             m_isRunning = true;
@@ -58,37 +65,51 @@ public class SaveThread extends Thread
         {
             try
             {
-                //            long start = System.currentTimeMillis();
+                Boolean shouldSave = m_updateQueue.poll();
                 
-                PersistableFigure doc = (PersistableFigure)(m_app.drawing());
-                
-                StringBuilder packedJson = new StringBuilder();
-                
-                doc.appendJson(packedJson, mapper);
-                
-                String dataToSend = packedJson.toString();
-//            System.out.println(dataToSend.length() + " Time: " + (System.currentTimeMillis() - start));
-                m_socket.sendMore("SAVE_DOC");
-                m_socket.send(dataToSend);
-                
-                String response = m_socket.recvStr();
-                
-                if (!response.equalsIgnoreCase("Failed"))
+                if (shouldSave != null)
                 {
-                    m_app.showStatus("Document saved successfully");
-                    DrawingLoader loader = new JsonLoader(response);
-                    Drawing drawing = loader.createDrawing();
-                    m_app.view().freezeView();
-                    m_app.setDrawing(drawing);
-                    m_app.view().checkDamage();
-                    m_app.view().unfreezeView();
-                    
-                    System.out.println("Saved stuff!");
+                    m_isSaving = shouldSave;
+                    if (m_isSaving)
+                        System.out.println("Starting real-time saving!");
+                    else
+                        System.out.println("Disabling real-time saving!");
                 }
-                else
-                    m_app.showStatus("Failed to save document");
+                    
+
+                if (m_isSaving)
+                {
+                    PersistableFigure doc = (PersistableFigure)(m_app.drawing());
+
+                    StringBuilder packedJson = new StringBuilder();
+                    doc.appendJson(packedJson, mapper);
+
+                    String dataToSend = packedJson.toString();
+                    m_socket.sendMore(MessageType.SAVE_DOC.getType());
+                    m_socket.send(dataToSend);
+
+                    String response = m_socket.recvStr();
+
+                    if (response.equalsIgnoreCase("UpdateOnly"))
+                    {
+                    }
+                    else if (response.equalsIgnoreCase("Failed"))
+                        m_app.showStatus("Failed to save document");
+                    else
+                    {
+                        m_app.showStatus("Document saved successfully");
+                        DrawingLoader loader = new JsonLoader(response);
+                        Drawing drawing = loader.createDrawing();
+                        m_app.view().freezeView();
+                        m_app.setDrawing(drawing);
+                        m_app.view().checkDamage();
+                        m_app.view().unfreezeView();
+
+                        System.out.println("Saved stuff!");
+                    }
+                }
                 
-                sleep(33);
+                sleep(16);
             }
             catch (InterruptedException ex)
             {

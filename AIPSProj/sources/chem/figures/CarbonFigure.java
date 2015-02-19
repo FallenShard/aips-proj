@@ -47,7 +47,7 @@ public class CarbonFigure extends AtomFigure
             int dY = (int)((Dim.ATOM_RADIUS - Dim.ELECTRON_RADIUS) * s + Dim.ATOM_RADIUS);
 
             Figure el = new ElectronFigure(new Point(dX, dY), Dim.ELECTRON_RADIUS, this, i);
-            el.setAttribute("Angle", angle * i);
+            el.setAttribute("Angle", (int)(angle * i * 180 / Math.PI));
             m_electrons.add(el);
         }
 

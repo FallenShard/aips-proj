@@ -14,6 +14,7 @@ import CH.ifa.draw.standard.HandleTracker;
 import CH.ifa.draw.standard.SelectionTool;
 import chem.util.Const;
 import java.awt.event.MouseEvent;
+import java.util.concurrent.BlockingQueue;
 
 /**
  *
@@ -22,10 +23,14 @@ import java.awt.event.MouseEvent;
 public class AtomSelectionTool extends SelectionTool
 {
     private Tool m_currentTool = null;
+    
+    private BlockingQueue<Boolean> m_updateQueue = null;
 
-    public AtomSelectionTool(DrawingView view)
+    public AtomSelectionTool(DrawingView view, BlockingQueue<Boolean> updateQueue)
     {
         super(view);
+        
+        m_updateQueue = updateQueue;
     }
 
     /**
@@ -118,8 +123,40 @@ public class AtomSelectionTool extends SelectionTool
     }
     
     @Override
+    public void activate()
+    {
+        super.activate();
+        
+        try
+        {
+            if (m_updateQueue != null)
+            {
+                m_updateQueue.clear();
+                m_updateQueue.put(true);
+            }
+        } 
+        catch (InterruptedException ex)
+        {
+            ex.printStackTrace();
+        }
+    }
+    
+    @Override
     public void deactivate()
     {
+        try
+        {
+            if (m_updateQueue != null)
+            {
+                m_updateQueue.clear();
+                m_updateQueue.put(false);
+            }
+        } 
+        catch (InterruptedException ex)
+        {
+            ex.printStackTrace();
+        }
+                
         super.deactivate();
         
         for (Object f : view().selection())

@@ -8,6 +8,7 @@ package chemserver;
 
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -19,8 +20,9 @@ import org.zeromq.ZMQ;
 import protocol.MessageType;
 import protocol.Ports;
 import task.CheckEditorTask;
+import task.DeleteDocumentTask;
 import task.GetDocsTask;
-import task.LoadDocTask;
+import task.LoadDocumentTask;
 import task.LoadDocumentTask;
 import task.SaveDocumentAsTask;
 import task.SaveDocumentTask;
@@ -44,6 +46,8 @@ public class Broker
     
     BlockingQueue<Integer> m_publishingQueue = null;
     
+    PubThread m_pubThread = null;
+    
     Queue<byte[]> m_availableWorkers = null;
     
     public Broker()
@@ -57,7 +61,6 @@ public class Broker
         
         Session ses = HibernateUtil.getSessionFactory().openSession();
         ses.close();
-        
     }
     
     public void initialize()
@@ -73,6 +76,9 @@ public class Broker
         
         for (int workerNbr = 0; workerNbr < NBR_WORKERS; workerNbr++)
             new WorkerThread(m_context, this).start();
+        
+        m_pubThread = new PubThread(m_context, m_publishingQueue);
+        m_pubThread.start();
     }
     
     public void run()
@@ -148,6 +154,9 @@ public class Broker
             
             case CHECK_EDITOR:
             {
+                for (Entry<Integer, String> e : m_editors.entrySet())
+                    System.out.println(e.getKey());
+                
                 return new CheckEditorTask(messageBody, m_editors);
             }
             
@@ -157,7 +166,7 @@ public class Broker
                 
                 editorConnected(address, docId);
                 
-                return new LoadDocTask(docId);
+                return new LoadDocumentTask(docId);
             }
 
             case LOAD_DOC_VIEWER:
@@ -168,28 +177,22 @@ public class Broker
                 
                 return new LoadDocumentTask(docId);
             }
+            
+            case DELETE_DOC:
+            {
+                int docId = Integer.parseInt(messageBody);
+                
+                return new DeleteDocumentTask(docId);
+            }
 
             case SAVE_DOC:
             {
-                return new SaveDocumentTask(messageBody);
+                return new SaveDocumentTask(messageBody, m_publishingQueue);
             }
             
             case SAVE_DOC_AS:
             {
-                return new SaveDocumentAsTask(messageBody);
-            }
-            
-            case SAVE_ATOMS:
-            {
-                
-                
-                return null;
-            }
-            
-            case SAVE_BONDS:
-            {
-                
-                return null;
+                return new SaveDocumentAsTask(messageBody, address, m_editors);
             }
             
             case DISC_EDITOR:
@@ -220,34 +223,15 @@ public class Broker
     public synchronized void editorConnected(byte[] address, int docId)
     {
         m_editors.put(docId, new String(address, ZMQ.CHARSET));
-
-        //PublisherThread pb = new PublisherThread(m_context, docId);
-        //m_publishers.put(docId, pb);
-        //pb.start();
     }
     
     public synchronized void viewerConnected(byte[] address, int docId)
     {
-//        if (m_viewers.containsKey(docId))
-//        {
-//            List<byte[]> addresses = m_viewers.get(docId);
-//            addresses.add(address);
-//        }
-//        else
-//        {
-//            List<byte[]> list = new ArrayList<>();
-//            list.add(address);
-//            m_viewers.put(docId, list);
-//        }
     }
     
     public synchronized void editorDisconnected(int docId)
     {
         m_editors.remove(docId);
-        
-        //PublisherThread pub = m_publishers.get(docId);
-        //pub.end();
-        //m_publishers.remove(docId);
     }
     
     public synchronized void viewerDisconnected(int docId)

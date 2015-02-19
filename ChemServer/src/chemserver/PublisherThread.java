@@ -7,6 +7,7 @@
 package chemserver;
 
 import org.zeromq.ZMQ;
+import protocol.Ports;
 import task.LoadDocumentTask;
 import task.Task;
 
@@ -31,8 +32,7 @@ public class PublisherThread extends Thread
     {
         if (!m_isRunning)
         {
-            m_publisher.bind("tcp://*:5556");
-            
+            m_publisher.bind("tcp://*:" + Ports.PUBSUB_PORT);
             
             super.start();
             m_isRunning = true;

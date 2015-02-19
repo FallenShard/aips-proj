@@ -53,7 +53,7 @@ public class AngularHandle extends LocatorHandle
         
         owner().displayBox(origin, corner);
         
-        owner().setAttribute("Angle", angle);
+        owner().setAttribute("Angle", (int)(-angle * 180 / Math.PI));
     }
     
     @Override

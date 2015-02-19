@@ -12,7 +12,6 @@ import chem.network.DocumentReceiver;
 import chem.network.NetworkHandler;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.DefaultListModel;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -30,8 +29,8 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
     ConnectThread m_conThread = null;
     private final ChemApp m_parent;
     
-    List<DocumentModel> m_freeDocModels = new ArrayList<>();
-    List<DocumentModel> m_openedDocModels = new ArrayList<>();
+    List<DocumentModel> m_editableDocsModels = new ArrayList<>();
+    List<DocumentModel> m_viewableDocsModels = new ArrayList<>();
     
     DocumentModel m_selectedDoc = null;
 
@@ -45,13 +44,33 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
         
         m_parent = (ChemApp)parent;
         
-        listEditableDocs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        setLocationRelativeTo(parent);
+        
+        tableEditableDocs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tableViewableDocs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
+        tableEditableDocs.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> 
+        {
+            int index = tableEditableDocs.getSelectedRow();
+            if (index >= 0 && index <= m_editableDocsModels.size() - 1)
+            {
+                m_selectedDoc = m_editableDocsModels.get(index);
+                lbl_SelectedDoc.setText(m_selectedDoc.getName() + " " + m_selectedDoc.getId() + "Status: Editable");
+            
+                tableViewableDocs.clearSelection();
+            }
+        });
         
         tableViewableDocs.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> 
         {
-            m_selectedDoc = m_openedDocModels.get(tableViewableDocs.getSelectedRow());
-            lbl_SelectedDoc.setText(m_selectedDoc.getName() + " " + m_selectedDoc.getId());
+            int index = tableViewableDocs.getSelectedRow();
+            if (index >= 0 && index <= m_viewableDocsModels.size() - 1)
+            {
+                m_selectedDoc = m_viewableDocsModels.get(index);
+                lbl_SelectedDoc.setText(m_selectedDoc.getName() + " " + m_selectedDoc.getId() + "Status: Viewable");
+
+                tableEditableDocs.clearSelection();
+            }
         });
         
         m_networkHandler = networkHandler;
@@ -66,17 +85,12 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
     
     //Helper method for loadProjects()
     public synchronized void displayResult()
-    {
-        DefaultListModel model = new DefaultListModel();
-        for (DocumentModel dm : m_freeDocModels)
-        {
-            DocumentListItem dli = new DocumentListItem(dm);
-            model.addElement(dli);
-        }
-        listEditableDocs.setModel(model);
+    {   
+        TableModel editableDocsModel = new DocTableModel(m_editableDocsModels);
+        tableEditableDocs.setModel(editableDocsModel);
         
-        TableModel tableModel = new DocTableModel(m_openedDocModels);
-        tableViewableDocs.setModel(tableModel);
+        TableModel viewableDocsModel = new DocTableModel(m_viewableDocsModels);
+        tableViewableDocs.setModel(viewableDocsModel);
     }
     
     public boolean checkEditorAvailability()
@@ -101,6 +115,19 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
 
         return false;
     }
+    
+    public void refreshData()
+    {
+        tableEditableDocs.clearSelection();
+        tableViewableDocs.clearSelection();
+        if (m_conThread != null && !m_conThread.isAlive())
+        {
+            m_conThread = new ConnectThread(m_networkHandler.getContext(), this);
+            m_conThread.start();
+            m_selectedDoc = null;
+            lbl_SelectedDoc.setText("Nothing selected.");
+        }
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -114,15 +141,16 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
         jLabel1 = new javax.swing.JLabel();
         btn_cancel = new javax.swing.JButton();
         btn_Load = new javax.swing.JButton();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        listEditableDocs = new javax.swing.JList();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         btnJoin = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tableViewableDocs = new javax.swing.JTable();
+        tableEditableDocs = new javax.swing.JTable();
         lbl_SelectedDoc = new javax.swing.JLabel();
         btn_Refresh = new javax.swing.JButton();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tableViewableDocs = new javax.swing.JTable();
+        btn_Delete = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -142,18 +170,6 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
             }
         });
 
-        listEditableDocs.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
-        });
-        listEditableDocs.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
-            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
-                listEditableDocsValueChanged(evt);
-            }
-        });
-        jScrollPane3.setViewportView(listEditableDocs);
-
         jLabel2.setText("Editable Documents:");
 
         jLabel3.setText("Viewable Documents:");
@@ -165,7 +181,7 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
             }
         });
 
-        tableViewableDocs.setModel(new javax.swing.table.DefaultTableModel(
+        tableEditableDocs.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -173,7 +189,7 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
 
             }
         ));
-        jScrollPane1.setViewportView(tableViewableDocs);
+        jScrollPane1.setViewportView(tableEditableDocs);
 
         lbl_SelectedDoc.setText("jLabel4");
 
@@ -184,6 +200,23 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
             }
         });
 
+        tableViewableDocs.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+
+            }
+        ));
+        jScrollPane2.setViewportView(tableViewableDocs);
+
+        btn_Delete.setText("Delete");
+        btn_Delete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btn_DeleteActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -191,20 +224,23 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE)
-                        .addComponent(jScrollPane3))
-                    .addComponent(lbl_SelectedDoc)
-                    .addComponent(jLabel3)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addGap(18, 18, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(lbl_SelectedDoc)
+                            .addComponent(jLabel3)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(btn_Load, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
                     .addComponent(btn_cancel, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
                     .addComponent(btnJoin, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE)
-                    .addComponent(btn_Refresh, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(btn_Refresh, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btn_Delete, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -218,15 +254,18 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btn_Load)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(btn_Load)
+                        .addGap(18, 18, 18)
+                        .addComponent(btn_Delete))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnJoin))
-                .addGap(5, 5, 5)
+                    .addComponent(btnJoin)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btn_cancel)
                     .addComponent(lbl_SelectedDoc))
@@ -247,7 +286,9 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
                 dispose();
             }
             else
+            {
                 JOptionPane.showMessageDialog(this, "That document is already being edited. Please refresh to display up-to-date information.");
+            }
         }
         else
             JOptionPane.showMessageDialog(this, "Please select a document first.");
@@ -259,23 +300,8 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
         dispose();
     }//GEN-LAST:event_btn_cancelActionPerformed
 
-    private void listEditableDocsValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_listEditableDocsValueChanged
-        // TODO add your handling code here:
-        if (listEditableDocs.getSelectedIndex() != -1 && !m_conThread.isAlive())
-        {
-            m_selectedDoc = m_freeDocModels.get(listEditableDocs.getSelectedIndex());
-            lbl_SelectedDoc.setText(m_selectedDoc.getName() + " " + m_selectedDoc.getId());
-        }
-    }//GEN-LAST:event_listEditableDocsValueChanged
-
     private void btn_RefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_RefreshActionPerformed
-        if (m_conThread != null && !m_conThread.isAlive())
-        {
-            m_conThread = new ConnectThread(m_networkHandler.getContext(), this);
-            m_conThread.start();
-            m_selectedDoc = null;
-            lbl_SelectedDoc.setText("Nothing selected.");
-        }
+        refreshData();
     }//GEN-LAST:event_btn_RefreshActionPerformed
 
     private void btnJoinActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnJoinActionPerformed
@@ -289,9 +315,25 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
             JOptionPane.showMessageDialog(this, "Please select a document first.");
     }//GEN-LAST:event_btnJoinActionPerformed
 
+    private void btn_DeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn_DeleteActionPerformed
+        // TODO add your handling code here:
+        if (m_selectedDoc != null && m_editableDocsModels.contains(m_selectedDoc))
+        {
+            if (checkEditorAvailability())
+            {
+                m_networkHandler.deleteDocument(m_selectedDoc.getId());
+            }
+            else
+            {
+                JOptionPane.showMessageDialog(this, "That document is already being edited. Please refresh to display up-to-date information.");
+            }
+        }
+    }//GEN-LAST:event_btn_DeleteActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnJoin;
+    private javax.swing.JButton btn_Delete;
     private javax.swing.JButton btn_Load;
     private javax.swing.JButton btn_Refresh;
     private javax.swing.JButton btn_cancel;
@@ -299,17 +341,17 @@ public class LoadDialog extends javax.swing.JDialog implements DocumentReceiver
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane3;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lbl_SelectedDoc;
-    private javax.swing.JList listEditableDocs;
+    private javax.swing.JTable tableEditableDocs;
     private javax.swing.JTable tableViewableDocs;
     // End of variables declaration//GEN-END:variables
 
 
     @Override
     public void setDocumentModelList(List<DocumentModel> freeDocs, List<DocumentModel> openedDocs) {
-        m_freeDocModels = freeDocs;
-        m_openedDocModels = openedDocs;
+        m_editableDocsModels = freeDocs;
+        m_viewableDocsModels = openedDocs;
         
         displayResult();
     }

@@ -50,7 +50,6 @@ public class PubThread extends Thread
     @Override
     public void run()
     {
-        Calendar now = Calendar.getInstance();
         while (m_isRunning)
         {
             try 

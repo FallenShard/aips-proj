@@ -46,114 +46,109 @@ public class JsonLoader implements DrawingLoader
             // Mapper can generate objects from strings and vice-versa
             ObjectMapper mapper = new ObjectMapper();
             
-            // First of all, split on per-class basis
-            String[] firstSplit = m_packedJsons.split("\\*");
+            // First of all, split everything, document is first, atoms will be next with their electrons, and then bonds
+            String[] splitData = m_packedJsons.split("@");
             
             // Create the drawing with the model
-            DocumentModel docModel = mapper.readValue(firstSplit[0], DocumentModel.class);
+            DocumentModel docModel = mapper.readValue(splitData[0], DocumentModel.class);
             Drawing drawing = new AnimatedDrawing(docModel);
-            
-            // This split will contain atom and electron data on per-atom basis
-            String[] atomData = firstSplit[1].split("\\$");
             
             // Use atom factory to generate atoms
             AtomFactory af = new AtomFactory();
             
-            for (String atomJson : atomData)
+            int i = 2;
+            
+            while (i < splitData.length && splitData[i + 1].equals("A"))
             {
-                // Split the atomData[i] to receive atom and its electrons
-                String[] individualData = atomJson.split("@");
-                // Read json atom model, and create a figure from it
-                AtomModel atomModel = mapper.readValue(individualData[0], AtomModel.class);
+                String json = splitData[i];
+                
+                AtomModel atomModel = mapper.readValue(json, AtomModel.class);
                 AtomFigure atom = af.createAtom(atomModel.getType());
                 atom.setModel(atomModel);
-                // Time to get all those electron figures
+                
+                // Advance from AtomModel, electrons are next
+                i += 2;
+                
                 Vector<Figure> electronFigures = new Vector<>();
-                for (int j = 1; j < individualData.length; j++)
+                while (i < splitData.length && splitData[i + 1].equals("E"))
                 {
-                    ElectronModel electronModel = mapper.readValue(individualData[j], ElectronModel.class);
-                    double c = Math.cos(electronModel.getAngle());
-                    double s = Math.sin(electronModel.getAngle());
+                    json = splitData[i];
+                    
+                    ElectronModel electronModel = mapper.readValue(json, ElectronModel.class);
+                    double c = Math.cos((double)(electronModel.getAngle() / 180.0 * Math.PI));
+                    double s = -Math.sin((double)(electronModel.getAngle() / 180.0 * Math.PI));
                     int dX = (int)((Dim.ATOM_RADIUS - Dim.ELECTRON_RADIUS) * c + Dim.ATOM_RADIUS);
                     int dY = (int)((Dim.ATOM_RADIUS - Dim.ELECTRON_RADIUS) * s + Dim.ATOM_RADIUS);
                     
-                    // Create a new electron figure
                     ElectronFigure electron = new ElectronFigure(new Point(dX, dY), Dim.ELECTRON_RADIUS, atom, electronModel.getIndex());
                     electron.setModel(electronModel);
                     electronFigures.add(electron);
+                    
+                    i += 2;
                 }
+                
                 atom.setElectrons(electronFigures);
                 atom.moveBy(atomModel.getX(), atomModel.getY());
                 drawing.add(atom);
             }
             
-            // Now let's add the bonds as well
-            String[] bondData = firstSplit[2].split("\\$");
-            
-            // Add later as a vector, because it will contain all valid bonds
-            Vector<Figure> bondFigures = new Vector<>();
-            
-            for (int i = 0; i < bondData.length; i++)
+            // Now only the bonds are left
+            while (i < splitData.length && splitData[i + 1].equals("B"))
             {
-                BondModel bondModel = mapper.readValue(bondData[i], BondModel.class);
+                String json = splitData[i];
                 
-                // Create a new bond with null connectors initially
+                BondModel bondModel = mapper.readValue(json, BondModel.class);
+                
                 ChemicalBond bond = new ChemicalBond();
                 Connector startCon = null;
                 Connector endCon = null;
                 
-                // Query all the atoms for their electron bonds
-                FigureEnumeration figures = drawing.figures();
+                // This is bad, because figures can overlap, the case above fails ONLY if figures overlap totally
+                //AtomFigure startAtom = (AtomFigure)drawing.findFigure(bondModel.getStartAtomX(), bondModel.getStartAtomY());
+                //AtomFigure endAtom = (AtomFigure)drawing.findFigure(bondModel.getEndAtomX(), bondModel.getEndAtomY());
                 
+                AtomFigure startAtom = null;
+                AtomFigure endAtom = null;
+                
+                FigureEnumeration figures = drawing.figures();
+
                 while (figures.hasMoreElements())
                 {
-                    Figure figure = figures.nextFigure();
+                    Figure fig = figures.nextFigure();
                     
-                    // Check for safety reasons
-                    if (figure instanceof AtomFigure)
+                    if (fig instanceof AtomFigure)
                     {
-                        // This figure is definitely an atom
-                        AtomFigure atom = (AtomFigure)figure;
-                        Vector<ElectronFigure> electrons = atom.getElectrons();
-                        
-                        for (ElectronFigure electron : electrons)
-                        {
-                            int electronId = electron.getModel().getId();
-                            
-                            // If currently inspected electron has id equal to startId, mark it as startConnector
-//                            if (electronId == bondModel.getStartElectronId())
-//                            {
-//                                startCon = electron.connectorAt(electron.center().x, electron.center().y);
-//                                bond.startPoint(electron.center().x, electron.center().y);
-//                                bond.endPoint(electron.center().x + 20, electron.center().y + 20);
-//                            }
-//                            
-//                            // If currently inspected electron has id equal to endId, mark it as endConnector
-//                            if (electronId == bondModel.getEndElectronId())
-//                            {
-//                                endCon = electron.connectorAt(electron.center().x, electron.center().y);
-//                            }
-                        }
-                    }
+                        AtomFigure atomFig = (AtomFigure)fig;
                     
-                    if (startCon != null && endCon != null)
-                        break;
+                        if (atomFig.displayBox().x == bondModel.getStartAtomX()
+                                && atomFig.displayBox().y == bondModel.getStartAtomY())
+                            startAtom = atomFig;
+
+                        if (atomFig.displayBox().x == bondModel.getEndAtomX()
+                                && atomFig.displayBox().y == bondModel.getEndAtomY())
+                            endAtom = atomFig;
+                    }
                 }
                 
-                // In the end, if both connectors are found (and they should be!)
-                if (startCon != null && endCon != null)
+                if (startAtom != null && endAtom != null && startAtom != endAtom)
                 {
-                    // Update the connection
+                    Figure startElectron = startAtom.getElectron(bondModel.getStartElectronIndex());
+                    startCon = startElectron.connectorAt(startElectron.center().x, startElectron.center().y);
+                    bond.startPoint(startElectron.center().x, startElectron.center().y);
+                    bond.endPoint(startElectron.center().x + 20, startElectron.center().y + 20);
+
+                    Figure endElectron = endAtom.getElectron(bondModel.getEndElectronIndex());
+                    endCon = endElectron.connectorAt(endElectron.center().x, endElectron.center().y);
+
                     bond.connectStart(startCon);
                     bond.connectEnd(endCon);
                     bond.updateConnection();
                     bond.setModel(bondModel);
-                    bondFigures.add(bond);
+                    drawing.add(bond);
                 }
+                
+                i += 2;
             }
-            
-            // Add all the bond figures to the drawing
-            drawing.addAll(bondFigures);
             
             return drawing;
         }
@@ -164,4 +159,5 @@ public class JsonLoader implements DrawingLoader
         
         return new AnimatedDrawing(-1);
     }
+
 }

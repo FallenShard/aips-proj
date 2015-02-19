@@ -22,22 +22,22 @@ public class ElectronModel implements Serializable, Persistable
     private int atomY;
     private int index;
     
-    private double angle;
+    private int angle;
     
     private int documentId;
     
     public ElectronModel()
     {
-        angle = 0.0;
+        angle = 0;
         index = -1;
     }
     
-    public ElectronModel(double angle)
+    public ElectronModel(int angle)
     {
         this.angle = angle;
     }
     
-    public ElectronModel(double angle, int atomX, int atomY)
+    public ElectronModel(int angle, int atomX, int atomY)
     {
         this.angle = angle;
         this.atomX = atomX;
@@ -76,11 +76,11 @@ public class ElectronModel implements Serializable, Persistable
         this.index = index;
     }
 
-    public double getAngle() {
+    public int getAngle() {
         return angle;
     }
 
-    public void setAngle(double angle) {
+    public void setAngle(int angle) {
         this.angle = angle;
     }
 

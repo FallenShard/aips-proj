@@ -17,10 +17,12 @@ public class SaveDialog extends javax.swing.JDialog {
     /**
      * Creates new form SaveDialog
      */
-    public SaveDialog(java.awt.Frame parent, boolean modal) {
+    public SaveDialog(java.awt.Frame parent, boolean modal)
+    {
         super(parent, modal);
         initComponents();
         m_parent = (ChemApp)parent;
+        setLocationRelativeTo(parent);
     }
     
     private final ChemApp m_parent;

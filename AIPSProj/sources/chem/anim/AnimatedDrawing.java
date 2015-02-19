@@ -45,7 +45,7 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable, Pers
     
     DocumentModel m_model = new DocumentModel();
     
-    Map<Integer, String> m_deleteCache = new HashMap<>();
+    Map<String, PersistableFigure> m_deleteCache = new HashMap<>();
    
     public AnimatedDrawing(int documentId)
     {
@@ -71,41 +71,33 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable, Pers
         {
             elements.add((Animatable)figure);
         }
+        if (figure instanceof PersistableFigure)
+        {
+            
+        }
+        
         return super.add(figure);
     }
 
     @Override
     public synchronized Figure remove(Figure figure) {
-        Figure f = super.remove(figure);
-        if (f instanceof PersistableFigure)
+        if (figure instanceof PersistableFigure)
         {
-            //elements.remove((AnimationDecorator)f);
-            //return ((AnimationDecorator) f).peelDecoration();
-            PersistableFigure persf = (PersistableFigure)f;
+            PersistableFigure persFig = (PersistableFigure)figure;
+            Persistable model = persFig.getModel();
             
-            String className = "";
-
-            int i = persf.getModel().getClass().toString().lastIndexOf('.');
-            if (i > 0)
+            int i = model.getClass().toString().lastIndexOf('.');
+            
+            if (i > 0 && model.getId() != -1)
             {
-                className = persf.getModel().getClass().toString().substring(i+1);
+                String className = model.getClass().toString().substring(i + 1);
+                m_deleteCache.put(className + "|" + model.getId(), persFig);
             }
-            m_deleteCache.put(persf.getModel().getId(), className);
         }
+        
+        Figure f = super.remove(figure);
             
         return f;
-    }
-
-    @Override
-    public synchronized void replace(Figure figure, Figure replacement) {
-        if (replacement instanceof AtomFigure)
-        {
-            //replacement = new AnimationDecorator(replacement);
-            //elements.remove((AnimationDecorator)figure);
-            //elements.add((AnimationDecorator)replacement);
-        }
-            
-        super.replace(figure, replacement);
     }
     
     @Override
@@ -145,9 +137,9 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable, Pers
     {
         //m_model.save(session, documentId);
         
-        for (Entry<Integer, String> entry : m_deleteCache.entrySet())
+        for (Entry<String, PersistableFigure> entry : m_deleteCache.entrySet())
         {
-            if (entry.getValue().equalsIgnoreCase("AtomModel"))
+            if (entry.getValue() instanceof AtomFigure)
             {
                 String elHql = "DELETE FROM ElectronModel WHERE atomId = " + entry.getKey();
                 Query query = session.createQuery(elHql);
@@ -199,8 +191,16 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable, Pers
     @Override
     public void appendJson(StringBuilder packedJson, ObjectMapper mapper)
     {
-        try 
+        try
         {
+            
+            for (Entry<String, PersistableFigure> entry : m_deleteCache.entrySet())
+            {
+                entry.getValue().toDeleteString(packedJson);
+            }
+
+            packedJson.append("%%%");
+            
             packedJson.append(mapper.writeValueAsString(m_model));
             packedJson.append("@D@");
             
@@ -216,29 +216,19 @@ public class AnimatedDrawing extends StandardDrawing implements Animatable, Pers
                     persFig.appendJson(packedJson, mapper);
                 }
             }
-            
-//            List<PersistableFigure> bonds = new ArrayList<>();
-//            
-//            while (k.hasMoreElements())
-//            {
-//                Figure f = k.nextFigure();
-//                
-//                if (f instanceof AtomFigure)
-//                    ((PersistableFigure)f).appendJson(packedJson, mapper);
-//                else
-//                    bonds.add((PersistableFigure)f);
-//            }
-//            
-//            packedJson.append("*");
-//            
-//            for (PersistableFigure bond : bonds)
-//            {
-//                bond.appendJson(packedJson, mapper);
-//            }
         } 
         catch (JsonProcessingException ex)
         {
             Logger.getLogger(AtomFigure.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    @Override
+    public void toDeleteString(StringBuilder deleteBuilder)
+    {
+        deleteBuilder.append(m_model.getId());
+        deleteBuilder.append("|");
+        deleteBuilder.append("DocumentModel");
+        deleteBuilder.append("~");
     }
 }

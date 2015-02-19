@@ -22,4 +22,5 @@ public interface PersistableFigure
     void deleteFromDatabase(Session session);
     
     void appendJson(StringBuilder packedJson, ObjectMapper mapper);
+    void toDeleteString(StringBuilder deleteBuilder);
 }

@@ -105,7 +105,7 @@ public class ElectronFigure extends EllipseFigure implements Animatable, Persist
     @Override
     public ElectronModel getModel()
     {
-        m_model.setAngle((double)getAttribute("Angle"));
+        m_model.setAngle((int)getAttribute("Angle"));
         m_model.setAtomX(m_parent.displayBox().x);
         m_model.setAtomY(m_parent.displayBox().y);
         m_model.setIndex(m_index);
@@ -155,5 +155,14 @@ public class ElectronFigure extends EllipseFigure implements Animatable, Persist
         {
             Logger.getLogger(AtomFigure.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+    
+    @Override
+    public void toDeleteString(StringBuilder deleteBuilder)
+    {
+        deleteBuilder.append(m_model.getId());
+        deleteBuilder.append("|");
+        deleteBuilder.append("ElectronModel");
+        deleteBuilder.append("~");
     }
 }

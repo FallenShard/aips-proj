@@ -7,6 +7,8 @@
 package chem.network;
 
 import org.zeromq.ZMQ;
+import protocol.MessageType;
+import protocol.Ports;
 
 /**
  *
@@ -36,5 +38,58 @@ public class NetworkHandler
     public ZMQ.Socket createSocket(int type)
     {
         return m_context.socket(type);
+    }
+    
+    public String saveDocument(String docData, boolean saveAs)
+    {
+        ZMQ.Socket saveSocket = createSocket(ZMQ.REQ);
+        saveSocket.connect("tcp://localhost:" + Ports.MAIN_PORT);
+        
+        if (saveAs)
+            saveSocket.sendMore(MessageType.SAVE_DOC_AS.getType());
+        else
+            saveSocket.sendMore(MessageType.SAVE_DOC.getType());
+        
+        saveSocket.send(docData);
+
+        String response = saveSocket.recvStr();
+        saveSocket.close();
+            
+        return response;
+    }
+    
+    public String loadDocument(int docId, MessageType messageType)
+    {
+        ZMQ.Socket loadSocket = createSocket(ZMQ.REQ);
+        loadSocket.connect("tcp://localhost:" + Ports.MAIN_PORT);
+        loadSocket.sendMore(messageType.getType());
+        loadSocket.send("" + docId);
+
+        String response = loadSocket.recvStr();
+        loadSocket.close();
+        
+        return response;
+    }
+    
+    public void deleteDocument(int docId)
+    {
+        ZMQ.Socket delSocket = createSocket(ZMQ.REQ);
+        delSocket.connect("tcp://localhost:" + Ports.MAIN_PORT);
+        delSocket.sendMore(MessageType.DELETE_DOC.getType());
+        delSocket.send("" + docId);
+
+        delSocket.recvStr();
+        delSocket.close();
+    }
+    
+    public void disconnect(int docId, MessageType messageType)
+    {
+        ZMQ.Socket discSocket = createSocket(ZMQ.REQ);
+        discSocket.connect("tcp://localhost:" + Ports.MAIN_PORT);
+        discSocket.sendMore(messageType.getType());
+        discSocket.send("" + docId);
+
+        discSocket.recvStr(ZMQ.DONTWAIT);
+        discSocket.close();
     }
 }

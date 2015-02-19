@@ -76,15 +76,18 @@ public class ConnectThread extends Thread
                 List<DocumentModel> freeDocsList = new ArrayList<>();
                 List<DocumentModel> openedDocsList = new ArrayList<>();
                 
-                for (int i = 0; i < jsons.length; i += 2)
+                if (!jsons[0].equals(""))
                 {
-                    DocumentModel dm = om.readValue(jsons[i], DocumentModel.class);
-                    if (jsons[i + 1].equalsIgnoreCase("E"))                
-                        openedDocsList.add(dm);
-                    else if (jsons[i + 1].equalsIgnoreCase("F"))
-                        freeDocsList.add(dm);
-                    
-                    System.out.println("Received " + dm.getName() + " ID: " + dm.getId() + " Status: " + jsons[i + 1]);
+                    for (int i = 0; i < jsons.length; i += 2)
+                    {
+                        DocumentModel dm = om.readValue(jsons[i], DocumentModel.class);
+                        if (jsons[i + 1].equalsIgnoreCase("E"))                
+                            openedDocsList.add(dm);
+                        else if (jsons[i + 1].equalsIgnoreCase("F"))
+                            freeDocsList.add(dm);
+
+                        System.out.println("Received " + dm.getName() + " ID: " + dm.getId() + " Status: " + jsons[i + 1]);
+                    }
                 }
 
                 m_receiver.setDocumentModelList(freeDocsList, openedDocsList);

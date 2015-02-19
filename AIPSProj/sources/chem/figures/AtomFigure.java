@@ -32,6 +32,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -361,5 +362,24 @@ public abstract class AtomFigure extends CompositeFigure implements Animatable, 
     public String toString()
     {
         return "Type: " + m_model.getType() + " COORDS: " + m_model.getX() + ", " + m_model.getY();
+    }
+    
+    @Override
+    public void toDeleteString(StringBuilder deleteBuilder)
+    {
+        deleteBuilder.append(m_model.getId());
+        deleteBuilder.append("|");
+        deleteBuilder.append("AtomModel");
+        deleteBuilder.append("~");
+        
+        for (Figure electron : m_electrons)
+        {
+            ((PersistableFigure)electron).toDeleteString(deleteBuilder);
+        }
+        
+        for (Entry<ChemicalBond, AtomFigure> entry : m_bonds.entrySet())
+        {
+            entry.getKey().toDeleteString(deleteBuilder);
+        }
     }
 }

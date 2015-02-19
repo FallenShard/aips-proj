@@ -27,6 +27,7 @@ import CH.ifa.draw.standard.DeleteCommand;
 import CH.ifa.draw.standard.DuplicateCommand;
 import CH.ifa.draw.standard.PasteCommand;
 import CH.ifa.draw.standard.SendToBackCommand;
+import CH.ifa.draw.standard.StandardDrawingView;
 import CH.ifa.draw.standard.ToggleGridCommand;
 import CH.ifa.draw.standard.ToolButton;
 import CH.ifa.draw.util.CommandMenu;
@@ -35,9 +36,10 @@ import chem.UI.SaveDialog;
 import chem.anim.Animatable;
 import chem.db.DrawingLoader;
 import chem.db.JsonLoader;
-import chem.db.NewJsonLoader;
+import chem.db.JsonLoader;
 import chem.figures.AtomFigure;
 import chem.figures.ElectronFigure;
+import chem.figures.persist.DocumentModel;
 import chem.util.AtomFactory;
 import chem.figures.persist.PersistableFigure;
 import chem.network.NetworkHandler;
@@ -45,6 +47,7 @@ import chem.network.SaveThread;
 import chem.network.ViewerThread;
 import chem.tools.AtomSelectionTool;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.awt.Dimension;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
@@ -53,8 +56,14 @@ import java.awt.Panel;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import javax.swing.JOptionPane;
 import org.zeromq.ZMQ;
+import protocol.MessageType;
+import protocol.Ports;
 
 
 /**
@@ -74,11 +83,11 @@ public class ChemApp extends DrawApplication
     private ViewerThread m_viewerThread = null;
     private SaveThread m_saveThread = null;
     
-    private static final int CH4_NONE = 0;
-    private static final int CH4_EDITOR = 1;
-    private static final int CH4_VIEWER = 2;
+    private UserStatus m_userStatus = new UserStatus();
     
-    private static int m_userStatus = CH4_NONE;
+    private List<MenuItem> m_saveMenuItems = new LinkedList<>();
+    
+    private BlockingQueue<Boolean> m_updateQueue = new LinkedBlockingQueue<>();
     
     ChemApp(String title)
     {
@@ -90,9 +99,11 @@ public class ChemApp extends DrawApplication
             public void windowClosing(java.awt.event.WindowEvent windowEvent)
             {
                 if (JOptionPane.showConfirmDialog(ChemApp.this, 
-                    "Are you sure to close this window?", "Really Closing?", 
+                    "Are you sure you want to close this window?", "CH4mistry", 
                     JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION){
+                    JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+                {
+                    disconnectPrevious();
                     System.exit(0);
                 }
             }
@@ -171,13 +182,20 @@ public class ChemApp extends DrawApplication
     @Override
     protected Tool createSelectionTool()
     {
-        return new AtomSelectionTool(view());
+        return new AtomSelectionTool(view(), null);
     }
     
     @Override
     protected Drawing createDrawing()
     {
         return new AnimatedDrawing(-1);
+    }
+    
+    @Override
+    protected StandardDrawingView createDrawingView()
+    {
+        Dimension d = getDrawingViewSize();
+        return new CustomDrawingView(this, m_userStatus, d.width, d.height);
     }
     
     public void startAnimation() {
@@ -222,30 +240,46 @@ public class ChemApp extends DrawApplication
             saveDocument();
     }
     
+    public void promptClose()
+    {
+        System.out.println("Closing!");
+        
+        disconnectPrevious();
+        
+        Drawing drawing = createDrawing();
+        setDrawing(drawing);
+        toolDone();
+    }
+    
     public void loadDocument(int docId)
     {
         toolDone();
         
         try
         {
+            // Disconnect any previous document the user was on
             disconnectPrevious();
-            m_userStatus = CH4_EDITOR;
-            ZMQ.Socket docLoader = m_networkHandler.createSocket(ZMQ.REQ);
-            docLoader.connect("tcp://localhost:" + 8888);
-            docLoader.sendMore("LOAD_DOC_EDITOR");
-            docLoader.send("" + docId);
             
-            String response = docLoader.recvStr();
-            docLoader.close();
+            // Initiate new document
+            m_userStatus.setUserStatus(UserStatus.CH4_EDITOR);
+            String response = m_networkHandler.loadDocument(docId, MessageType.LOAD_DOC_EDITOR);
             
-            System.out.println(response.length());
-            
-            DrawingLoader loader = new NewJsonLoader(response);
+            DrawingLoader loader = new JsonLoader(response);
             
             Drawing drawing = loader.createDrawing();
             setDrawing(drawing);
             
+            setSize(getSize());
+            setVisible(true);
+            
             this.add("West", m_palette);
+            
+            //m_saveThread = new SaveThread(m_networkHandler.getContext(), this, m_updateQueue);
+            //m_saveThread.start();
+            
+            m_saveMenuItems.stream().forEach((item) -> {
+                item.setEnabled(true);
+            });
         }
         catch(Exception ex)
         {
@@ -255,31 +289,30 @@ public class ChemApp extends DrawApplication
     
     public void viewDocument(int docId)
     {
-       toolDone();
+        toolDone();
         
         try
         {
+            // Disconnect any previous document the user was on
             disconnectPrevious();
-            m_userStatus = CH4_VIEWER;
-            ZMQ.Socket docLoader = m_networkHandler.createSocket(ZMQ.REQ);
-            docLoader.connect("tcp://localhost:" + 8888);
-            docLoader.sendMore("LOAD_DOC_VIEWER");
-            docLoader.send("" + docId);
             
-            String response = docLoader.recvStr();
-            docLoader.close();
-            
-            System.out.println(response.length());
+            m_userStatus.setUserStatus(UserStatus.CH4_VIEWER);
+            String response = m_networkHandler.loadDocument(docId, MessageType.LOAD_DOC_VIEWER);
             
             DrawingLoader loader = new JsonLoader(response);
             Drawing drawing = loader.createDrawing();
             setDrawing(drawing);
             
             remove(m_palette);
+            setSize(getSize());
+            setVisible(true);
             
             m_viewerThread = new ViewerThread(m_networkHandler.getContext(), this, docId);
             m_viewerThread.start();
             
+            m_saveMenuItems.stream().forEach((item) -> {
+                item.setEnabled(false);
+            });
         }
         catch(Exception ex)
         {
@@ -294,28 +327,26 @@ public class ChemApp extends DrawApplication
         {
             int docId = doc.getModel().getId();
             
-            if (m_userStatus == CH4_EDITOR)
+            if (m_userStatus.getUserStatus() == UserStatus.CH4_VIEWER)
+                m_networkHandler.disconnect(docId, MessageType.DISC_VIEWER);
+            else if (m_userStatus.getUserStatus() == UserStatus.CH4_EDITOR)
+                m_networkHandler.disconnect(docId, MessageType.DISC_EDITOR);
+            
+            if (m_userStatus.getUserStatus() == UserStatus.CH4_VIEWER && m_viewerThread != null)
             {
-                ZMQ.Socket docLoader = m_networkHandler.createSocket(ZMQ.REQ);
-                docLoader.connect("tcp://localhost:" + 8888);
-                docLoader.sendMore("DISC_EDITOR");
-                docLoader.send("" + docId);
-
-                docLoader.recvStr();
-                docLoader.close();
-            }
-            else if (m_userStatus == CH4_VIEWER)
-            {
-                ZMQ.Socket docLoader = m_networkHandler.createSocket(ZMQ.REQ);
-                docLoader.connect("tcp://localhost:" + 8888);
-                docLoader.sendMore("DISC_VIEWER");
-                docLoader.send("" + docId);
-
-                docLoader.recvStr();
-                docLoader.close();
+                m_viewerThread.end();
+                m_viewerThread = null;
             }
             
-            m_userStatus = CH4_NONE;
+            if (m_userStatus.getUserStatus() == UserStatus.CH4_EDITOR && m_saveThread != null)
+            {
+                m_saveThread.end();
+                m_saveThread = null;
+            }
+            
+            m_userStatus.setUserStatus(UserStatus.CH4_NONE);
+            for (MenuItem item : m_saveMenuItems)
+                item.setEnabled(true);
         }
     }
     
@@ -325,13 +356,6 @@ public class ChemApp extends DrawApplication
         
         try
         {
-//            if (m_saveThread == null && m_userStatus == CH4_EDITOR)
-//            {
-//                m_saveThread = new SaveThread(m_networkHandler.getContext(), this);
-//                m_saveThread.start();
-//            }
-            long start = System.currentTimeMillis();
-            
             PersistableFigure doc = (PersistableFigure)(drawing());
             
             StringBuilder packedJson = new StringBuilder();
@@ -339,25 +363,23 @@ public class ChemApp extends DrawApplication
             doc.appendJson(packedJson, mapper);
             
             String dataToSend = packedJson.toString();
-            System.out.println(dataToSend.length() + " Time: " + (System.currentTimeMillis() - start));            
-
-//            ZMQ.Socket docSaver = m_networkHandler.createSocket(ZMQ.REQ);
-//            docSaver.connect("tcp://localhost:" + 8888);
-//            docSaver.sendMore("SAVE_DOC");
-//            docSaver.send(dataToSend);
-//            
-//            String response = docSaver.recvStr();
-//            docSaver.close();
-//            
-//            if (!response.equalsIgnoreCase("Failed"))
-//            {
-//                showStatus("Document saved successfully");
-//                DrawingLoader loader = new JsonLoader(response);
-//                Drawing drawing = loader.createDrawing();
-//                setDrawing(drawing);
-//            }
-//            else
-//                showStatus("Failed to save document");
+            String response = m_networkHandler.saveDocument(dataToSend, false);
+            
+            if (response.equals("UpdateOnly"))
+            {
+                showStatus("Document saved successfully");
+            }
+            else if (response.equalsIgnoreCase("Failed"))
+            {
+                showStatus("Failed to save document");
+            }
+            else
+            {
+                showStatus("Document saved successfully");
+                DrawingLoader loader = new JsonLoader(response);
+                Drawing drawing = loader.createDrawing();
+                setDrawing(drawing);
+            }
         }
         catch(Exception ex)
         {
@@ -372,77 +394,29 @@ public class ChemApp extends DrawApplication
         
         try
         {
-            long start = System.currentTimeMillis();
-            
+            disconnectPrevious();
+
             PersistableFigure doc = (PersistableFigure)(drawing());
+            DocumentModel docModel = (DocumentModel)doc.getModel();
+            docModel.setName(name);
             
             StringBuilder packedJson = new StringBuilder();
             ObjectMapper mapper = new ObjectMapper();
             doc.appendJson(packedJson, mapper);
             
             String dataToSend = packedJson.toString();
-            System.out.println(dataToSend.length() + " Time: " + (System.currentTimeMillis() - start));
             
-            ZMQ.Socket saveSocket = m_networkHandler.createSocket(ZMQ.REQ);
-            saveSocket.connect("tcp://localhost:" + 8888);
-            saveSocket.sendMore("SAVE_DOC_AS");
-            saveSocket.send(dataToSend);
-            
-            String response = saveSocket.recvStr();
-            saveSocket.close();
+            String response = m_networkHandler.saveDocument(dataToSend, true);
             
             if (!response.equalsIgnoreCase("Failed"))
             {
                 showStatus("Document saved successfully");
-                //DrawingLoader loader = new JsonLoader(response);
-                //Drawing drawing = loader.createDrawing();
-                //setDrawing(drawing);
+                DrawingLoader loader = new JsonLoader(response);
+                Drawing drawing = loader.createDrawing();
+                setDrawing(drawing);
             }
             else
                 showStatus("Failed to save document");
-            
-//            String[] data = dataToSend.split("@");
-//            for (String s : data)
-//                System.out.println(s);
-//            
-//            AtomFigure f1 = (AtomFigure)drawing().findFigure(150, 150);
-//            System.out.println(f1);
-//            
-//            AtomFigure f2 = (AtomFigure)drawing().findFigure(10, 10);
-//            System.out.println(f2);
-//            
-//            ChemicalBond bond = new ChemicalBond();
-//            Connector startCon = null;
-//            Connector endCon = null;
-//            
-//            Figure el1 = f1.getElectron(0);
-//            startCon = el1.connectorAt(el1.center().x, el1.center().y);
-//            bond.startPoint(el1.center().x, el1.center().y);
-//            bond.endPoint(el1.center().x + 20, el1.center().y + 20);
-//            
-//            Figure el2 = f2.getElectron(0);
-//            endCon = el2.connectorAt(el2.center().x, el2.center().y);
-//            
-//            
-//            bond.connectStart(startCon);
-//            bond.connectEnd(endCon);
-//            bond.updateConnection();
-//            //bond.setModel(bondModel);
-//            drawing().add(bond);
-//            
-//            FigureEnumeration k = drawing().figures();
-//            while (k.hasMoreElements())
-//                System.out.println(k.nextElement());
-            
-//            Session session = HibernateUtil.getSessionFactory().openSession();
-//            
-//            PersistableFigure doc = (PersistableFigure)(drawing());
-//            AnimatedDrawing dr = (AnimatedDrawing)drawing();
-//            dr.setDocumentName(name);
-//            
-//            doc.saveToDatabaseAs(session, -1);
-//
-//            session.close();
         }
         catch(Exception ex)
         {
@@ -489,6 +463,17 @@ public class ChemApp extends DrawApplication
 		);
 		menu.add(mi);
         
+        mi = new MenuItem("Close...", new MenuShortcut('c'));
+		mi.addActionListener(
+		    new ActionListener() {
+		        public void actionPerformed(ActionEvent event) {
+		            promptClose();
+		        }
+		    }
+		);
+		menu.add(mi);
+        menu.addSeparator();
+        
         mi = new MenuItem("Save...");
 		mi.addActionListener(
 		    new ActionListener() {
@@ -498,6 +483,7 @@ public class ChemApp extends DrawApplication
 		    }
 		);
 		menu.add(mi);
+        m_saveMenuItems.add(mi);
 
 		mi = new MenuItem("Save As...", new MenuShortcut('s'));
 		mi.addActionListener(
@@ -509,6 +495,7 @@ public class ChemApp extends DrawApplication
 		);
 		menu.add(mi);
 		menu.addSeparator();
+        m_saveMenuItems.add(mi);
         
 		mi = new MenuItem("Print...", new MenuShortcut('p'));
 		mi.addActionListener(

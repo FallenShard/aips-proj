@@ -155,4 +155,13 @@ public class ChemicalBond extends LineConnection implements PersistableFigure
             Logger.getLogger(AtomFigure.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    @Override
+    public void toDeleteString(StringBuilder deleteBuilder)
+    {
+        deleteBuilder.append(m_model.getId());
+        deleteBuilder.append("|");
+        deleteBuilder.append("BondModel");
+        deleteBuilder.append("~");
+    }
 }

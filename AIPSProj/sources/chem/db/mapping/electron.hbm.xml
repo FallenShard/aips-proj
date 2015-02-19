@@ -11,7 +11,7 @@
       <property name="atomY" column="ATOM_Y" type="integer"></property>
       <property name="index" column="INDEX" type="integer"></property>
       
-      <property name="angle" column="ANGLE" type="double" ></property>
+      <property name="angle" column="ANGLE" type="integer" ></property>
       
       <property name="documentId" column="DOCUMENT_ID" type="integer" ></property>
       
