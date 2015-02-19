@@ -13,10 +13,7 @@ import CH.ifa.draw.application.DrawApplication;
 import static CH.ifa.draw.application.DrawApplication.IMAGES;
 import CH.ifa.draw.figures.GroupCommand;
 import CH.ifa.draw.figures.UngroupCommand;
-import CH.ifa.draw.framework.Connector;
 import CH.ifa.draw.framework.Drawing;
-import CH.ifa.draw.framework.Figure;
-import CH.ifa.draw.framework.FigureEnumeration;
 import CH.ifa.draw.framework.Tool;
 import CH.ifa.draw.standard.AlignCommand;
 import CH.ifa.draw.standard.BringToFrontCommand;
@@ -36,9 +33,6 @@ import chem.UI.SaveDialog;
 import chem.anim.Animatable;
 import chem.db.DrawingLoader;
 import chem.db.JsonLoader;
-import chem.db.JsonLoader;
-import chem.figures.AtomFigure;
-import chem.figures.ElectronFigure;
 import chem.figures.persist.DocumentModel;
 import chem.util.AtomFactory;
 import chem.figures.persist.PersistableFigure;
@@ -61,12 +55,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import org.zeromq.ZMQ;
 import protocol.MessageType;
-import protocol.Ports;
 
 
 /**
@@ -105,14 +95,8 @@ public class ChemApp extends DrawApplication
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent)
             {
-                if (JOptionPane.showConfirmDialog(ChemApp.this, 
-                    "Are you sure you want to close this window?", "CH4mistry", 
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
-                {
-                    disconnectPrevious();
-                    System.exit(0);
-                }
+                disconnectPrevious();
+                System.exit(0);
             }
         });
     }
